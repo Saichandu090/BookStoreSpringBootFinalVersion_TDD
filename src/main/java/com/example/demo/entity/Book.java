@@ -17,10 +17,10 @@ public class Book
     @Id
     private Long bookId;
     private String bookName;
-    private String author;
-    private String description;
-    private Double price;
+    private String bookAuthor;
+    private String bookDescription;
+    private Double bookPrice;
     private String bookLogo;
-    private Integer quantity;
+    private Integer bookQuantity;
     private Integer cartBookQuantity;
 }

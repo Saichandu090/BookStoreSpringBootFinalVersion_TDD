@@ -22,10 +22,10 @@ public class BookRepositoryTests
         Book book= Book.builder()
                 .bookId(1L)
                 .bookName("Atom")
-                .price(199.9)
-                .author("James")
-                .description("Self")
-                .quantity(78)
+                .bookPrice(199.9)
+                .bookAuthor("James")
+                .bookDescription("Self")
+                .bookQuantity(78)
                 .bookLogo("Url").build();
 
         Book savedBook=bookRepository.save(book);
@@ -43,10 +43,10 @@ public class BookRepositoryTests
         Book book= Book.builder()
                 .bookId(1L)
                 .bookName("Atom")
-                .price(199.9)
-                .author("James")
-                .description("Self")
-                .quantity(78)
+                .bookPrice(199.9)
+                .bookAuthor("James")
+                .bookDescription("Self")
+                .bookQuantity(78)
                 .bookLogo("Url").build();
 
         Book savedBook=bookRepository.save(book);
