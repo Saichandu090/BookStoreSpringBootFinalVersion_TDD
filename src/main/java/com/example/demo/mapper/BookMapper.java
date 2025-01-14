@@ -1,17 +1,16 @@
 package com.example.demo.mapper;
 
 import com.example.demo.entity.Book;
-import com.example.demo.requestdto.BookRequestDTO;
-import com.example.demo.responsedto.BookResponseDTO;
+import com.example.demo.requestdto.BookRequestDto;
+import com.example.demo.responsedto.BookResponseDto;
 import com.example.demo.util.ResponseStructure;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
-import java.util.Optional;
 
 public class BookMapper
 {
-    public ResponseStructure<BookResponseDTO> noAuthority()
+    public ResponseStructure<BookResponseDto> noAuthority()
     {
         return new ResponseStructure<>(HttpStatus.UNAUTHORIZED.value(), "No Authority to access", null);
     }
@@ -21,13 +20,13 @@ public class BookMapper
         return new ResponseStructure<>(HttpStatus.UNAUTHORIZED.value(), "No Authority to access", message);
     }
 
-    public ResponseStructure<List<BookResponseDTO>> noAuthorityForUser()
+    public ResponseStructure<List<BookResponseDto>> noAuthorityForUser()
     {
         return new ResponseStructure<>(HttpStatus.UNAUTHORIZED.value(), "No Authority to access", null);
     }
 
 
-    public Book addBook(BookRequestDTO requestDTO)
+    public Book addBook(BookRequestDto requestDTO)
     {
         return Book.builder()
                 .bookId(requestDTO.getBookId())
@@ -40,9 +39,9 @@ public class BookMapper
                 .cartBookQuantity(0).build();
     }
 
-    public BookResponseDTO mapBookToBookResponse(Book savedBook)
+    public BookResponseDto mapBookToBookResponse(Book savedBook)
     {
-        return BookResponseDTO.builder()
+        return BookResponseDto.builder()
                 .bookId(savedBook.getBookId())
                 .bookName(savedBook.getBookName())
                 .bookDescription(savedBook.getBookDescription())
@@ -52,7 +51,7 @@ public class BookMapper
 
     }
 
-    public Book updateCurrentBook(Long bookId, BookRequestDTO requestDTO,int cartQuantity)
+    public Book updateCurrentBook(Long bookId, BookRequestDto requestDTO, int cartQuantity)
     {
         return Book.builder()
                 .bookId(bookId)

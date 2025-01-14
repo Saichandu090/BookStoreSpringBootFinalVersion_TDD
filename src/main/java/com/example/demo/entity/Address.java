@@ -24,8 +24,8 @@ public class Address
     private String state;
     private int pinCode;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @ManyToOne
+    private User user;
 
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JsonIgnore

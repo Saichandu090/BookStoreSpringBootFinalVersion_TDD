@@ -5,15 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class JsonResponseDTO
+public class AddressResponseDto
 {
-    private boolean result;
-    private String message;
-    private List<?> data;
+    private Long addressId;
+    private String streetName;
+    private String city;
+    private String state;
+    private int pinCode;
 }

@@ -3,8 +3,8 @@ package com.example.demo.service;
 import com.example.demo.entity.Book;
 import com.example.demo.mapper.BookMapper;
 import com.example.demo.repository.BookRepository;
-import com.example.demo.requestdto.BookRequestDTO;
-import com.example.demo.responsedto.BookResponseDTO;
+import com.example.demo.requestdto.BookRequestDto;
+import com.example.demo.responsedto.BookResponseDto;
 import com.example.demo.serviceimpl.BookServiceImpl;
 import com.example.demo.util.ResponseStructure;
 import org.assertj.core.api.Assertions;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.*;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -40,13 +40,13 @@ class BookServiceTest
     private BookMapper bookMapper;
 
     private Book book;
-    private BookRequestDTO bookRequestDTO;
-    private BookResponseDTO bookResponseDTO;
+    private BookRequestDto bookRequestDTO;
+    private BookResponseDto bookResponseDTO;
 
     @BeforeEach
     public void init()
     {
-        bookRequestDTO=BookRequestDTO.builder()
+        bookRequestDTO= BookRequestDto.builder()
                 .bookId((long)789654123)
                 .bookName("Jenes")
                 .bookPrice(789.0)
@@ -65,7 +65,7 @@ class BookServiceTest
                 .cartBookQuantity(0)
                 .build();
 
-        bookResponseDTO=BookResponseDTO.builder()
+        bookResponseDTO= BookResponseDto.builder()
                 .bookId(bookRequestDTO.getBookId())
                 .bookLogo(bookRequestDTO.getBookLogo())
                 .bookName(bookRequestDTO.getBookName())
@@ -80,7 +80,7 @@ class BookServiceTest
     {
         when(bookRepository.save(Mockito.any(Book.class))).thenReturn(book);
 
-        ResponseEntity<ResponseStructure<BookResponseDTO>> response=bookService.addBook(bookRequestDTO);
+        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.addBook(bookRequestDTO);
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookResponseDTO.getBookId());
@@ -101,7 +101,7 @@ class BookServiceTest
     {
         when(bookRepository.findByBookName(Mockito.anyString())).thenReturn(Optional.of(book));
 
-        ResponseEntity<ResponseStructure<BookResponseDTO>> response=bookService.getBookByName(bookRequestDTO.getBookName());
+        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.getBookByName(bookRequestDTO.getBookName());
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookResponseDTO.getBookId());
@@ -114,7 +114,7 @@ class BookServiceTest
     {
         when(bookRepository.findByBookName(Mockito.anyString())).thenReturn(Optional.empty());
 
-        ResponseEntity<ResponseStructure<BookResponseDTO>> response=bookService.getBookByName(bookRequestDTO.getBookName());
+        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.getBookByName(bookRequestDTO.getBookName());
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
@@ -127,7 +127,7 @@ class BookServiceTest
     {
         when(bookRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(book));
 
-        ResponseEntity<ResponseStructure<BookResponseDTO>> response=bookService.getBookById(bookRequestDTO.getBookId());
+        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.getBookById(bookRequestDTO.getBookId());
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookResponseDTO.getBookId());
@@ -140,7 +140,7 @@ class BookServiceTest
     {
         when(bookRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
-        ResponseEntity<ResponseStructure<BookResponseDTO>> response=bookService.getBookById(bookRequestDTO.getBookId());
+        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.getBookById(bookRequestDTO.getBookId());
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
@@ -153,7 +153,7 @@ class BookServiceTest
     {
         when(bookRepository.findAll()).thenReturn(List.of(book));
 
-        ResponseEntity<ResponseStructure<List<BookResponseDTO>>> response=bookService.getAllBooks();
+        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.getAllBooks();
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
@@ -166,7 +166,7 @@ class BookServiceTest
     {
         when(bookRepository.findAll()).thenReturn(List.of());
 
-        ResponseEntity<ResponseStructure<List<BookResponseDTO>>> response=bookService.getAllBooks();
+        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.getAllBooks();
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         Assertions.assertThat(Objects.requireNonNull(response.getBody()).getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
@@ -180,7 +180,7 @@ class BookServiceTest
         when(bookRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(book));
         when(bookRepository.save(Mockito.any(Book.class))).thenReturn(book);
 
-        ResponseEntity<ResponseStructure<BookResponseDTO>> response=bookService.updateBook(bookRequestDTO.getBookId(),bookRequestDTO);
+        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.updateBook(bookRequestDTO.getBookId(),bookRequestDTO);
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
@@ -193,7 +193,7 @@ class BookServiceTest
     {
         when(bookRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
-        ResponseEntity<ResponseStructure<BookResponseDTO>> response=bookService.updateBook(bookRequestDTO.getBookId(),bookRequestDTO);
+        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.updateBook(bookRequestDTO.getBookId(),bookRequestDTO);
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
@@ -252,7 +252,7 @@ class BookServiceTest
 
         when(bookRepository.findAll()).thenReturn(books);
 
-        ResponseEntity<ResponseStructure<List<BookResponseDTO>>> response=bookService.sortByBookName();
+        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.sortByBookName();
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(Objects.requireNonNull(response.getBody()).getStatus()).isEqualTo(HttpStatus.OK.value());
@@ -267,7 +267,7 @@ class BookServiceTest
     {
         when(bookRepository.findAll()).thenReturn(List.of());
 
-        ResponseEntity<ResponseStructure<List<BookResponseDTO>>> response=bookService.sortByBookName();
+        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.sortByBookName();
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         Assertions.assertThat(Objects.requireNonNull(response.getBody()).getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
@@ -305,7 +305,7 @@ class BookServiceTest
 
         when(bookRepository.findAll()).thenReturn(books);
 
-        ResponseEntity<ResponseStructure<List<BookResponseDTO>>> response=bookService.sortByBookPrice();
+        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.sortByBookPrice();
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(Objects.requireNonNull(response.getBody()).getStatus()).isEqualTo(HttpStatus.OK.value());
@@ -323,7 +323,7 @@ class BookServiceTest
     {
         when(bookRepository.findAll()).thenReturn(List.of());
 
-        ResponseEntity<ResponseStructure<List<BookResponseDTO>>> response=bookService.sortByBookPrice();
+        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.sortByBookPrice();
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         Assertions.assertThat(Objects.requireNonNull(response.getBody()).getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());

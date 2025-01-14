@@ -2,9 +2,9 @@ package com.example.demo.serviceimpl;
 
 import com.example.demo.entity.Book;
 import com.example.demo.mapper.BookMapper;
-import com.example.demo.requestdto.BookRequestDTO;
+import com.example.demo.requestdto.BookRequestDto;
 import com.example.demo.repository.BookRepository;
-import com.example.demo.responsedto.BookResponseDTO;
+import com.example.demo.responsedto.BookResponseDto;
 import com.example.demo.service.BookService;
 import com.example.demo.util.ResponseStructure;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class BookServiceImpl implements BookService
     private final BookMapper bookMapper=new BookMapper();
 
     @Override
-    public ResponseEntity<ResponseStructure<BookResponseDTO>> addBook(BookRequestDTO bookRequestDTO)
+    public ResponseEntity<ResponseStructure<BookResponseDto>> addBook(BookRequestDto bookRequestDTO)
     {
         if(bookRequestDTO==null)
         {
@@ -36,7 +36,7 @@ public class BookServiceImpl implements BookService
 
         Book savedBook=bookRepository.save(book);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<BookResponseDTO>().
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<BookResponseDto>().
                 setStatus(HttpStatus.CREATED.value())
                 .setMessage("Book with name "+savedBook.getBookName()+" added successfully")
                 .setData(bookMapper.mapBookToBookResponse(savedBook)));
@@ -45,17 +45,17 @@ public class BookServiceImpl implements BookService
     //============================================================//
 
     @Override
-    public ResponseEntity<ResponseStructure<BookResponseDTO>> getBookByName(String bookName)
+    public ResponseEntity<ResponseStructure<BookResponseDto>> getBookByName(String bookName)
     {
         Optional<Book> book=bookRepository.findByBookName(bookName);
 
         if(book.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<BookResponseDTO>()
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<BookResponseDto>()
                     .setStatus(HttpStatus.NOT_FOUND.value())
                     .setData(null)
                     .setMessage("Book not Found"));
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponseDTO>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponseDto>()
                 .setStatus(HttpStatus.OK.value())
                 .setMessage("Book fetched successfully")
                 .setData(bookMapper.mapBookToBookResponse(book.get())));
@@ -66,17 +66,17 @@ public class BookServiceImpl implements BookService
 
 
     @Override
-    public ResponseEntity<ResponseStructure<BookResponseDTO>> getBookById(Long bookId)
+    public ResponseEntity<ResponseStructure<BookResponseDto>> getBookById(Long bookId)
     {
         Optional<Book> book=bookRepository.findById(bookId);
 
         if(book.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<BookResponseDTO>()
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<BookResponseDto>()
                     .setStatus(HttpStatus.NOT_FOUND.value())
                     .setData(null)
                     .setMessage("Book not Found"));
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponseDTO>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponseDto>()
                 .setStatus(HttpStatus.OK.value())
                 .setMessage("Book fetched successfully")
                 .setData(bookMapper.mapBookToBookResponse(book.get())));
@@ -85,34 +85,34 @@ public class BookServiceImpl implements BookService
     //============================================================//
 
     @Override
-    public ResponseEntity<ResponseStructure<List<BookResponseDTO>>> getAllBooks()
+    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> getAllBooks()
     {
         List<Book> books=bookRepository.findAll();
 
         if(books.isEmpty())
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDTO>>()
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDto>>()
                     .setStatus(HttpStatus.NO_CONTENT.value())
                     .setMessage("Books are empty")
                     .setData(null));
 
-        List<BookResponseDTO> bookResponseDTOS=books.stream().map(bookMapper::mapBookToBookResponse).toList();
+        List<BookResponseDto> bookResponseDtos =books.stream().map(bookMapper::mapBookToBookResponse).toList();
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<BookResponseDTO>>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<BookResponseDto>>()
                 .setStatus(HttpStatus.OK.value())
                 .setMessage("Books fetched successfully")
-                .setData(bookResponseDTOS));
+                .setData(bookResponseDtos));
     }
 
 
     //============================================================//
 
     @Override
-    public ResponseEntity<ResponseStructure<BookResponseDTO>> updateBook(Long bookId, BookRequestDTO bookRequestDTO)
+    public ResponseEntity<ResponseStructure<BookResponseDto>> updateBook(Long bookId, BookRequestDto bookRequestDTO)
     {
         Optional<Book> book=bookRepository.findById(bookId);
 
         if(book.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<BookResponseDTO>()
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<BookResponseDto>()
                     .setStatus(HttpStatus.NOT_FOUND.value())
                     .setData(null)
                     .setMessage("Book not Found"));
@@ -120,7 +120,7 @@ public class BookServiceImpl implements BookService
         Book updatedBook=bookMapper.updateCurrentBook(bookId,bookRequestDTO,book.get().getCartBookQuantity());
         Book saveUpdatedBook=bookRepository.save(updatedBook);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponseDTO>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponseDto>()
                 .setStatus(HttpStatus.OK.value())
                 .setMessage("Book Updated successfully")
                 .setData(bookMapper.mapBookToBookResponse(saveUpdatedBook)));
@@ -148,42 +148,42 @@ public class BookServiceImpl implements BookService
     }
 
     @Override
-    public ResponseEntity<ResponseStructure<List<BookResponseDTO>>> sortByBookName()
+    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> sortByBookName()
     {
         List<Book> books=bookRepository.findAll();
 
         if(books.isEmpty())
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDTO>>()
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDto>>()
                     .setStatus(HttpStatus.NO_CONTENT.value())
                     .setMessage("Books are empty")
                     .setData(null));
 
         List<Book> sortedBooks=books.stream().sorted(Comparator.comparing(Book::getBookName)).toList();
-        List<BookResponseDTO> responseDTOs=
-                sortedBooks.stream().map(book->new BookResponseDTO(book.getBookId(),book.getBookName(),book.getBookAuthor(),book.getBookDescription(),book.getBookPrice(),book.getBookLogo())).toList();
+        List<BookResponseDto> responseDTOs=
+                sortedBooks.stream().map(book->new BookResponseDto(book.getBookId(),book.getBookName(),book.getBookAuthor(),book.getBookDescription(),book.getBookPrice(),book.getBookLogo())).toList();
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<BookResponseDTO>>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<BookResponseDto>>()
                 .setStatus(HttpStatus.OK.value())
                 .setMessage("Books sorted successfully")
                 .setData(responseDTOs));
     }
 
     @Override
-    public ResponseEntity<ResponseStructure<List<BookResponseDTO>>> sortByBookPrice()
+    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> sortByBookPrice()
     {
         List<Book> books=bookRepository.findAll();
 
         if(books.isEmpty())
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDTO>>()
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDto>>()
                     .setStatus(HttpStatus.NO_CONTENT.value())
                     .setMessage("Books are empty")
                     .setData(null));
 
         List<Book> sortedBooks=books.stream().sorted(Comparator.comparing(Book::getBookPrice)).toList();
-        List<BookResponseDTO> responseDTOs=
-                sortedBooks.stream().map(book->new BookResponseDTO(book.getBookId(),book.getBookName(),book.getBookAuthor(),book.getBookDescription(),book.getBookPrice(),book.getBookLogo())).toList();
+        List<BookResponseDto> responseDTOs=
+                sortedBooks.stream().map(book->new BookResponseDto(book.getBookId(),book.getBookName(),book.getBookAuthor(),book.getBookDescription(),book.getBookPrice(),book.getBookLogo())).toList();
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<BookResponseDTO>>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<BookResponseDto>>()
                 .setStatus(HttpStatus.OK.value())
                 .setMessage("Books sorted successfully")
                 .setData(responseDTOs));

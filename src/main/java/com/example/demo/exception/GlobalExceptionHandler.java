@@ -17,4 +17,22 @@ public class GlobalExceptionHandler
                 .setData("Failure")
                 .setStatus(HttpStatus.BAD_REQUEST.value()));
     }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ResponseStructure<String>> userNotFound(UserNotFoundException exception)
+    {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
+                .setMessage(exception.getMessage())
+                .setData("Failure")
+                .setStatus(HttpStatus.NOT_FOUND.value()));
+    }
+
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ResponseEntity<ResponseStructure<String>> addressNotFound(AddressNotFoundException exception)
+    {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
+                .setMessage(exception.getMessage())
+                .setData("Failure")
+                .setStatus(HttpStatus.NOT_FOUND.value()));
+    }
 }

@@ -3,9 +3,8 @@ package com.example.demo.controller;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.BookMapper;
 import com.example.demo.mapper.UserMapper;
-import com.example.demo.requestdto.BookRequestDTO;
-import com.example.demo.entity.Book;
-import com.example.demo.responsedto.BookResponseDTO;
+import com.example.demo.requestdto.BookRequestDto;
+import com.example.demo.responsedto.BookResponseDto;
 import com.example.demo.service.BookService;
 import com.example.demo.util.ResponseStructure;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +30,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -64,8 +62,8 @@ public class BookControllerTests
     private User admin;
     private UserDetails adminDetails;
     private UserDetails userDetails;
-    private BookRequestDTO bookRequestDTO;
-    private BookResponseDTO bookResponseDTO;
+    private BookRequestDto bookRequestDTO;
+    private BookResponseDto bookResponseDTO;
 
     @BeforeEach
     public void init()
@@ -126,7 +124,7 @@ public class BookControllerTests
             }
         };
 
-        bookRequestDTO=BookRequestDTO.builder()
+        bookRequestDTO= BookRequestDto.builder()
                 .bookId((long)789654123)
                 .bookName("ABCD")
                 .bookPrice(789.0)
@@ -135,7 +133,7 @@ public class BookControllerTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        bookResponseDTO=BookResponseDTO.builder()
+        bookResponseDTO= BookResponseDto.builder()
                 .bookId(bookRequestDTO.getBookId())
                 .bookLogo(bookRequestDTO.getBookLogo())
                 .bookName(bookRequestDTO.getBookName())
@@ -149,8 +147,8 @@ public class BookControllerTests
     public void bookController_AddBookTest_MustReturnCreatedStatusCode() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<BookResponseDTO> responseStructure=new ResponseStructure<>(HttpStatus.CREATED.value(),"Book added successfully",bookResponseDTO);
-        given(bookService.addBook(ArgumentMatchers.any(BookRequestDTO.class))).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.CREATED));
+        ResponseStructure<BookResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.CREATED.value(),"Book added successfully",bookResponseDTO);
+        given(bookService.addBook(ArgumentMatchers.any(BookRequestDto.class))).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.CREATED));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
         mockMvc.perform(post("/book/addBook")
@@ -188,7 +186,7 @@ public class BookControllerTests
     public void bookController_GetBookByName_MustReturnOKStatusCode() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<BookResponseDTO> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully",bookResponseDTO);
+        ResponseStructure<BookResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully",bookResponseDTO);
         given(bookService.getBookByName(ArgumentMatchers.anyString())).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
@@ -225,7 +223,7 @@ public class BookControllerTests
     public void bookController_GetBookById_MustReturnOKStatusCode() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<BookResponseDTO> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully",bookResponseDTO);
+        ResponseStructure<BookResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully",bookResponseDTO);
         given(bookService.getBookById(ArgumentMatchers.anyLong())).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
@@ -260,7 +258,7 @@ public class BookControllerTests
     public void bookController_GetAllBooks_MustReturnOKStatusCode() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<List<BookResponseDTO>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully",List.of(bookResponseDTO));
+        ResponseStructure<List<BookResponseDto>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully",List.of(bookResponseDTO));
         given(bookService.getAllBooks()).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
@@ -294,8 +292,8 @@ public class BookControllerTests
     public void bookController_UpdateBook_MustReturnOKStatusCode() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<BookResponseDTO> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book Updated successfully",bookResponseDTO);
-        given(bookService.updateBook(ArgumentMatchers.anyLong(),ArgumentMatchers.any(BookRequestDTO.class))).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        ResponseStructure<BookResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book Updated successfully",bookResponseDTO);
+        given(bookService.updateBook(ArgumentMatchers.anyLong(),ArgumentMatchers.any(BookRequestDto.class))).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
         mockMvc.perform(put("/book/updateBook/{bookId}",bookRequestDTO.getBookId())
@@ -369,7 +367,7 @@ public class BookControllerTests
     public void bookController_SortByBookName_MustReturnOKStatus() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<List<BookResponseDTO>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Books sorted successfully",List.of(bookResponseDTO));
+        ResponseStructure<List<BookResponseDto>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Books sorted successfully",List.of(bookResponseDTO));
         given(bookService.sortByBookName()).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
@@ -404,7 +402,7 @@ public class BookControllerTests
     public void bookController_SortByBookPrice_MustReturnOKStatus() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<List<BookResponseDTO>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Books sorted successfully",List.of(bookResponseDTO));
+        ResponseStructure<List<BookResponseDto>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Books sorted successfully",List.of(bookResponseDTO));
         given(bookService.sortByBookPrice()).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 

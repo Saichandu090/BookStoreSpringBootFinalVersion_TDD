@@ -6,6 +6,7 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.List;
 
+@Table(name = "`users`")
 @Builder
 @Entity
 @Getter
@@ -36,8 +37,7 @@ public class User
     @JsonIgnore
     private List<Order> order;
 
-    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id",referencedColumnName = "userId")
+    @OneToMany(mappedBy = "user",fetch = FetchType.EAGER)
     private List<Address> addresses;
 
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
