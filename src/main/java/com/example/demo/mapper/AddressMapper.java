@@ -7,15 +7,42 @@ import com.example.demo.responsedto.AddressResponseDto;
 import com.example.demo.util.ResponseStructure;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
+
 public class AddressMapper
 {
     public ResponseStructure<AddressResponseDto> noAuthority()
     {
         return new ResponseStructure<AddressResponseDto>()
-                .setMessage("No Authority for ADMIN")
+                .setMessage("No Authority")
+                .setStatus(HttpStatus.FORBIDDEN.value())
+                .setData(null);
+    }
+
+    public ResponseStructure<List<AddressResponseDto>> headerErrorForAllAddress()
+    {
+        return new ResponseStructure<List<AddressResponseDto>>()
+                .setMessage("Token Error")
                 .setStatus(HttpStatus.UNAUTHORIZED.value())
                 .setData(null);
     }
+
+    public ResponseStructure<List<AddressResponseDto>> noAuthorityForAllAddress()
+    {
+        return new ResponseStructure<List<AddressResponseDto>>()
+                .setMessage("No Authority")
+                .setStatus(HttpStatus.FORBIDDEN.value())
+                .setData(null);
+    }
+
+    public ResponseStructure<AddressResponseDto> headerError()
+    {
+        return new ResponseStructure<AddressResponseDto>()
+                .setMessage("Token Error")
+                .setStatus(HttpStatus.UNAUTHORIZED.value())
+                .setData(null);
+    }
+
 
     public Address mapAddressRequestToAddress(User user, AddressRequestDto addressRequestDto)
     {

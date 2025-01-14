@@ -5,9 +5,15 @@ import com.example.demo.responsedto.AddressResponseDto;
 import com.example.demo.util.ResponseStructure;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 public interface AddressService
 {
     ResponseEntity<ResponseStructure<AddressResponseDto>> addAddress(String email, AddressRequestDto addressRequestDto);
 
     ResponseEntity<ResponseStructure<AddressResponseDto>> updateAddress(String email,Long addressId,AddressRequestDto addressRequestDto);
+
+    ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(Long addressId);
+
+    ResponseEntity<ResponseStructure<List<AddressResponseDto>>> getAllAddress(String email);
 }

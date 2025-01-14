@@ -31,11 +31,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(controllers = AddressController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -155,19 +156,34 @@ class AddressControllerTest
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.addressId").value(addressResponseDto.getAddressId()));
     }
 
+
     @Test
-    public void addressController_AddAddress_MustReturnUnauthorizedStatusCode() throws Exception
+    public void addressController_addAddress_IfUserHasNoAuthority_MustReturnForbiddenStatusCode() throws Exception
     {
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
 
         mockMvc.perform(post("/address/addAddress")
-                        .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
-                        .header("Authorization",token)
-                        .content(objectMapper.writeValueAsString(addressRequestDto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addressRequestDto))
+                        .header("Authorization",token))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.FORBIDDEN.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("No Authority"));
+    }
+
+    @Test
+    public void addressController_addAddress_MissingAuthHeader_ShouldReturnUnauthorized() throws Exception
+    {
+        mockMvc.perform(post("/address/addAddress")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addressRequestDto))
+                        .characterEncoding(StandardCharsets.UTF_8))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Token Error"));
     }
 
     //============================================//
@@ -192,17 +208,120 @@ class AddressControllerTest
     }
 
     @Test
-    public void addressController_EditAddress_MustReturnUnauthorizedStatusCode() throws Exception
+    public void addressController_editAddress_IfUserHasNoAuthority_MustReturnForbiddenStatusCode() throws Exception
     {
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
 
         mockMvc.perform(put("/address/editAddress/{id}",1)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
-                        .header("Authorization",token)
-                        .content(objectMapper.writeValueAsString(addressRequestDto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addressRequestDto))
+                        .header("Authorization",token))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.FORBIDDEN.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("No Authority"));
+    }
+
+    @Test
+    public void addressController_editAddressBy_MissingAuthHeader_ShouldReturnUnauthorized() throws Exception
+    {
+        mockMvc.perform(put("/address/editAddress/{id}",1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addressRequestDto))
+                        .characterEncoding(StandardCharsets.UTF_8))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Token Error"));
+    }
+
+
+    //===========================================//
+
+    @Test
+    public void addressController_GetAddressById_MustReturnOkStatusCode() throws Exception
+    {
+        ResponseStructure<AddressResponseDto> response=new ResponseStructure<>(HttpStatus.OK.value(),"Address fetched successfully",addressResponseDto);
+        given(addressService.getAddressById(ArgumentMatchers.anyLong())).willReturn(new ResponseEntity<>(response,HttpStatus.OK));
+        given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(userDetails);
+
+        mockMvc.perform(get("/address/getAddress/{id}",1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.addressId").value(addressResponseDto.getAddressId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data").value(addressResponseDto));
+    }
+
+    @Test
+    public void addressController_GetAddressById_IfUserHasNoAuthority_MustReturnForbiddenStatusCode() throws Exception
+    {
+        given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
+
+        mockMvc.perform(get("/address/getAddress/{id}",1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.FORBIDDEN.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("No Authority"));
+    }
+
+    @Test
+    public void addressController_GetAddressById_MissingAuthHeader_ShouldReturnUnauthorized() throws Exception
+    {
+        mockMvc.perform(get("/address/getAddress/{id}",1)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Token Error"));
+    }
+
+    //===========================================//
+
+    @Test
+    public void addressController_GetAllAddress_MustReturnOkStatusCode() throws Exception
+    {
+        ResponseStructure<List<AddressResponseDto>> response=new ResponseStructure<>(HttpStatus.OK.value(),"Address fetched successfully",List.of(addressResponseDto));
+        given(addressService.getAllAddress(anyString())).willReturn(new ResponseEntity<>(response,HttpStatus.OK));
+        given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(userDetails);
+
+        mockMvc.perform(get("/address/getAllAddress")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].addressId").value(addressResponseDto.getAddressId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0]").value(addressResponseDto));
+    }
+
+    @Test
+    public void addressController_GetAllAddress_IfUserHasNoAuthority_MustReturnForbiddenStatusCode() throws Exception
+    {
+        given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
+
+        mockMvc.perform(get("/address/getAllAddress")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.FORBIDDEN.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("No Authority"));
+    }
+
+    @Test
+    public void addressController_GetAllAddress_MissingAuthHeader_ShouldReturnUnauthorized() throws Exception
+    {
+        mockMvc.perform(get("/address/getAllAddress")
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Token Error"));
     }
 }

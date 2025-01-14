@@ -50,7 +50,6 @@ class AddressServiceTest
     private User user;
     private Address address;
     private AddressRequestDto addressRequestDto;
-    private AddressResponseDto addressResponseDto;
 
     @BeforeEach
     void init()
@@ -68,14 +67,6 @@ class AddressServiceTest
                 .pinCode(addressRequestDto.getPinCode())
                 .streetName(addressRequestDto.getStreetName())
                 .user(user).build();
-
-        addressResponseDto=AddressResponseDto.builder()
-                .state(address.getState())
-                .addressId(address.getAddressId())
-                .streetName(address.getStreetName())
-                .city(address.getCity())
-                .pinCode(address.getPinCode()).build();
-
 
         List<Address> addresses=new ArrayList<>();
         addresses.add(address);
@@ -163,20 +154,60 @@ class AddressServiceTest
         verify(userRepository,times(1)).findByEmail(anyString());
         verify(addressRepository,times(1)).findById(anyLong());
     }
+    //=================================================//
 
     @Test
-    public void addressService_UpdateAddress_MustReturnNotFoundStatusCodeIfUserNotHaveTheAddress()
+    public void addressService_GetAddressById_MustReturnOkStatusCode()
     {
-        User user1=User.builder().addresses(List.of(new Address())).build();
-        when(userRepository.findByEmail("chandu@gmail.com")).thenReturn(Optional.of(user1));
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
 
-        assertThrows(AddressNotFoundException.class,()->addressService.updateAddress("chandu@gmail.com",1L,addressRequestDto),"If user don't have the address");
-        verify(userRepository,times(1)).findByEmail(anyString());
+        ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.getAddressById(1L);
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(200,response.getBody().getStatus());
+        assertEquals(address.getAddressId(),response.getBody().getData().getAddressId());
+        assertEquals(address.getPinCode(),response.getBody().getData().getPinCode());
+    }
+
+
+    @Test
+    public void addressService_GetAddressById_MustThrowException()
+    {
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(AddressNotFoundException.class,()->addressService.getAddressById(1L));
+
         verify(addressRepository,times(1)).findById(anyLong());
     }
 
-    //=================================================//
+    //================================================//
+
+    @Test
+    public void addressService_GetAllAddress_MustReturnOkStatusCode()
+    {
+        when(addressRepository.findByUser(any(User.class))).thenReturn(List.of(address));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+
+        ResponseEntity<ResponseStructure<List<AddressResponseDto>>> response=addressService.getAllAddress(user.getEmail());
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(200,response.getBody().getStatus());
+        assertEquals(address.getAddressId(),response.getBody().getData().getFirst().getAddressId());
+        assertEquals("User AddressList fetched successfully",response.getBody().getMessage());
+        assertEquals(address.getPinCode(),response.getBody().getData().getFirst().getPinCode());
+    }
+
+    @Test
+    public void addressService_GetAllAddress_MustThrowException()
+    {
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(AddressNotFoundException.class,()->addressService.getAddressById(1L));
+
+        verify(addressRepository,times(1)).findById(anyLong());
+    }
+
+    //================================================//
 
 
 }

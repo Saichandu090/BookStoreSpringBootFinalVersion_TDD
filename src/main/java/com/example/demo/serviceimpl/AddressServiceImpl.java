@@ -11,7 +11,6 @@ import com.example.demo.requestdto.AddressRequestDto;
 import com.example.demo.responsedto.AddressResponseDto;
 import com.example.demo.service.AddressService;
 import com.example.demo.util.ResponseStructure;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +27,8 @@ public class AddressServiceImpl implements AddressService
     private AddressRepository addressRepository;
     private UserRepository userRepository;
     private final AddressMapper addressMapper=new AddressMapper();
+
+
 
     @Override
     public ResponseEntity<ResponseStructure<AddressResponseDto>> addAddress(String email, AddressRequestDto addressRequestDto)
@@ -53,6 +54,8 @@ public class AddressServiceImpl implements AddressService
                 .setData(addressMapper.mapAddressToAddressResponse(savedAddress)));
     }
 
+
+
     @Override
     public ResponseEntity<ResponseStructure<AddressResponseDto>> updateAddress(String email, Long addressId, AddressRequestDto addressRequestDto)
     {
@@ -66,7 +69,6 @@ public class AddressServiceImpl implements AddressService
         if(address.isEmpty())
             throw new AddressNotFoundException("Address with id "+addressId+" not found");
 
-        User realUser=user.get();
         Address realAddress=address.get();
 
         Address updatedAddress=addressMapper.mapOldAddressToNewAddress(realAddress,addressRequestDto);
@@ -76,5 +78,43 @@ public class AddressServiceImpl implements AddressService
                 .setStatus(HttpStatus.OK.value())
                 .setMessage("Address with id "+addressId+" updated successfully for the user "+email)
                 .setData(addressMapper.mapAddressToAddressResponse(saved)));
+    }
+
+
+
+    @Override
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(Long addressId)
+    {
+        Optional<Address> address=addressRepository.findById(addressId);
+
+        if(address.isEmpty())
+            throw new AddressNotFoundException("Address with id "+addressId+" is not present");
+
+        Address resultAddress=address.get();
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<AddressResponseDto>()
+                .setMessage("Address fetched successfully")
+                .setData(addressMapper.mapAddressToAddressResponse(resultAddress))
+                .setStatus(HttpStatus.OK.value()));
+    }
+
+
+    @Override
+    public ResponseEntity<ResponseStructure<List<AddressResponseDto>>> getAllAddress(String email)
+    {
+        Optional<User> user=userRepository.findByEmail(email);
+
+        if(user.isEmpty())
+            throw new UserNotFoundException("User with username "+email+" not found");
+
+        User realUser=user.get();
+        List<Address> addresses=addressRepository.findByUser(realUser);
+
+        List<AddressResponseDto> responseDtoList=addresses.stream().map(addressMapper::mapAddressToAddressResponse).toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<AddressResponseDto>>()
+            .setStatus(HttpStatus.OK.value())
+            .setData(responseDtoList)
+            .setMessage("User AddressList fetched successfully"));
     }
 }

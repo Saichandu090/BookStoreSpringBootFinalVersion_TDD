@@ -6,6 +6,7 @@ import com.example.demo.requestdto.AddressRequestDto;
 import com.example.demo.responsedto.AddressResponseDto;
 import com.example.demo.service.AddressService;
 import com.example.demo.util.ResponseStructure;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
@@ -21,8 +22,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 @SpringBootTest
+@Transactional
 public class AddressRepositoryTests
 {
     @Autowired
@@ -116,5 +117,69 @@ public class AddressRepositoryTests
 
         List<Address> addresses=addressRepository.findAll();
         assertEquals(1,addresses.size());
+    }
+
+
+    @Test
+    public void getByAddressIdTest()
+    {
+        User user = new User();
+        user.setEmail("test@example.com");
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setDob(LocalDate.of(1990, 1, 1));
+        user.setRegisteredDate(LocalDate.now());
+        user.setUpdatedDate(LocalDate.now());
+        user.setPassword("password");
+        user.setRole("USER");
+        userRepository.save(user);
+
+        AddressRequestDto addressRequestDto = new AddressRequestDto();
+        addressRequestDto.setStreetName("123 Main St");
+        addressRequestDto.setCity("Test City");
+        addressRequestDto.setState("Test State");
+        addressRequestDto.setPinCode(12345);
+
+        ResponseEntity<ResponseStructure<AddressResponseDto>> responseEntity=addressService.addAddress(user.getEmail(),addressRequestDto);
+
+        AddressResponseDto responseDto=responseEntity.getBody().getData();
+
+        ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.getAddressById(responseDto.getAddressId());
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(200,response.getBody().getStatus());
+        assertEquals(addressRequestDto.getCity(),response.getBody().getData().getCity());
+        assertEquals(addressRequestDto.getPinCode(),response.getBody().getData().getPinCode());
+    }
+
+
+    @Test
+    public void getAllAddressTest()
+    {
+        User user = new User();
+        user.setEmail("test@example.com");
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setDob(LocalDate.of(1990, 1, 1));
+        user.setRegisteredDate(LocalDate.now());
+        user.setUpdatedDate(LocalDate.now());
+        user.setPassword("password");
+        user.setRole("USER");
+        userRepository.save(user);
+
+        AddressRequestDto addressRequestDto = new AddressRequestDto();
+        addressRequestDto.setStreetName("123 Main St");
+        addressRequestDto.setCity("Test City");
+        addressRequestDto.setState("Test State");
+        addressRequestDto.setPinCode(12345);
+
+        addressService.addAddress(user.getEmail(),addressRequestDto);
+
+        ResponseEntity<ResponseStructure<List<AddressResponseDto>>> response=addressService.getAllAddress(user.getEmail());
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(200,response.getBody().getStatus());
+        assertEquals(addressRequestDto.getCity(),response.getBody().getData().getFirst().getCity());
+        assertEquals(addressRequestDto.getPinCode(),response.getBody().getData().getFirst().getPinCode());
     }
 }
