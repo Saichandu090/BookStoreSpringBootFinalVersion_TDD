@@ -362,4 +362,74 @@ public class BookControllerTests
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
                 .andDo(MockMvcResultHandlers.print());
     }
+
+    //=======================================================//
+
+    @Test
+    public void bookController_SortByBookName_MustReturnOKStatus() throws Exception
+    {
+        String token="Bearer-token";
+        ResponseStructure<List<BookResponseDTO>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Books sorted successfully",List.of(bookResponseDTO));
+        given(bookService.sortByBookName()).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+
+        mockMvc.perform(get("/book/sortByBookName")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.OK.value())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.size()",CoreMatchers.is(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].bookName",CoreMatchers.is(bookResponseDTO.getBookName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].bookPrice",CoreMatchers.is(bookResponseDTO.getBookPrice())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void bookController_SortByBookName_MustReturnUnauthorizedStatus() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
+
+        mockMvc.perform(get("/book/sortByBookName")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    //====================================================//
+
+    @Test
+    public void bookController_SortByBookPrice_MustReturnOKStatus() throws Exception
+    {
+        String token="Bearer-token";
+        ResponseStructure<List<BookResponseDTO>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Books sorted successfully",List.of(bookResponseDTO));
+        given(bookService.sortByBookPrice()).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+
+        mockMvc.perform(get("/book/sortByBookPrice")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.OK.value())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.size()",CoreMatchers.is(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].bookName",CoreMatchers.is(bookResponseDTO.getBookName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].bookPrice",CoreMatchers.is(bookResponseDTO.getBookPrice())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void bookController_SortByBookPrice_MustReturnUnauthorizedStatus() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
+
+        mockMvc.perform(get("/book/sortByBookPrice")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                .andDo(MockMvcResultHandlers.print());
+    }
 }

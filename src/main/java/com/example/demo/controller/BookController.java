@@ -72,6 +72,28 @@ public class BookController
         return new ResponseEntity<>(bookMapper.noAuthorityForUser(), HttpStatus.UNAUTHORIZED);
     }
 
+    @GetMapping("/sortByBookName")
+    public ResponseEntity<ResponseStructure<List<BookResponseDTO>>> sortBYBookName(@RequestHeader("Authorization") String authHeader)
+    {
+        UserDetails userDetails = userMapper.validateUserToken(authHeader);
+        if (userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN")))
+        {
+            return bookService.sortByBookName();
+        }
+        return new ResponseEntity<>(bookMapper.noAuthorityForUser(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @GetMapping("/sortByBookPrice")
+    public ResponseEntity<ResponseStructure<List<BookResponseDTO>>> sortBYBookPrice(@RequestHeader("Authorization") String authHeader)
+    {
+        UserDetails userDetails = userMapper.validateUserToken(authHeader);
+        if (userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN")))
+        {
+            return bookService.sortByBookPrice();
+        }
+        return new ResponseEntity<>(bookMapper.noAuthorityForUser(), HttpStatus.UNAUTHORIZED);
+    }
+
     @PutMapping("/updateBook/{bookId}")
     public ResponseEntity<ResponseStructure<BookResponseDTO>> editBook(@RequestHeader("Authorization") String authHeader,@PathVariable Long bookId, @Valid @RequestBody BookRequestDTO bookRequestDTO)
     {

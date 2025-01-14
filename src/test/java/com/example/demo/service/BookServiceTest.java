@@ -18,7 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
@@ -45,7 +48,7 @@ class BookServiceTest
     {
         bookRequestDTO=BookRequestDTO.builder()
                 .bookId((long)789654123)
-                .bookName("ABCD")
+                .bookName("Jenes")
                 .bookPrice(789.0)
                 .bookLogo("URL")
                 .bookAuthor("XYZ")
@@ -158,6 +161,17 @@ class BookServiceTest
         Assertions.assertThat(response.getBody().getData().getFirst().getBookId()).isEqualTo(book.getBookId().intValue());
     }
 
+    @Test
+    public void bookService_GetAllBooks_MustReturnNoContentStatusCode()
+    {
+        when(bookRepository.findAll()).thenReturn(List.of());
+
+        ResponseEntity<ResponseStructure<List<BookResponseDTO>>> response=bookService.getAllBooks();
+
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        Assertions.assertThat(Objects.requireNonNull(response.getBody()).getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
+    }
+
     //================================================//
 
     @Test
@@ -215,5 +229,103 @@ class BookServiceTest
         Assertions.assertThat(response.getBody().getData()).isEqualTo("Failure");
 
         Mockito.verify(bookRepository,times(0)).delete(book);
+    }
+
+    //=================================================//
+
+    @Test
+    public void bookService_SortByBookName_MustReturnOKStatusCode()
+    {
+        Book first=Book.builder()
+                        .bookId(2L)
+            .bookLogo(bookRequestDTO.getBookLogo())
+            .bookName("James man")
+            .bookAuthor(bookRequestDTO.getBookAuthor())
+            .bookDescription(bookRequestDTO.getBookDescription())
+            .bookPrice(bookRequestDTO.getBookPrice())
+            .cartBookQuantity(0)
+            .build();
+
+        List<Book> books=new ArrayList<>();
+        books.add(book);
+        books.add(first);
+
+        when(bookRepository.findAll()).thenReturn(books);
+
+        ResponseEntity<ResponseStructure<List<BookResponseDTO>>> response=bookService.sortByBookName();
+
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertThat(Objects.requireNonNull(response.getBody()).getStatus()).isEqualTo(HttpStatus.OK.value());
+        Assertions.assertThat(response.getBody().getData().size()).isEqualTo(2);
+        Assertions.assertThat(response.getBody().getData().get(1).getBookId()).isEqualTo(book.getBookId().intValue());
+        Assertions.assertThat(response.getBody().getData().getFirst().getBookName()).isEqualTo(first.getBookName());
+        Assertions.assertThat(response.getBody().getData().getFirst().getBookId()).isEqualTo(first.getBookId().intValue());
+    }
+
+    @Test
+    public void bookService_SortByBookName_MustReturnNoContentStatusCode()
+    {
+        when(bookRepository.findAll()).thenReturn(List.of());
+
+        ResponseEntity<ResponseStructure<List<BookResponseDTO>>> response=bookService.sortByBookName();
+
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        Assertions.assertThat(Objects.requireNonNull(response.getBody()).getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
+    }
+
+    //==================================================//
+
+    @Test
+    public void bookService_SortByBookPrice_MustReturnOKStatusCode()
+    {
+        Book first=Book.builder()
+                .bookId(2L)
+                .bookLogo(bookRequestDTO.getBookLogo())
+                .bookName("James man")
+                .bookAuthor(bookRequestDTO.getBookAuthor())
+                .bookDescription(bookRequestDTO.getBookDescription())
+                .bookPrice(120.56)
+                .cartBookQuantity(0)
+                .build();
+
+        Book second=Book.builder()
+                .bookId(2L)
+                .bookLogo(bookRequestDTO.getBookLogo())
+                .bookName("James man")
+                .bookAuthor(bookRequestDTO.getBookAuthor())
+                .bookDescription(bookRequestDTO.getBookDescription())
+                .bookPrice(220.56)
+                .cartBookQuantity(0)
+                .build();
+
+        List<Book> books=new ArrayList<>();
+        books.add(second);
+        books.add(book);
+        books.add(first);
+
+        when(bookRepository.findAll()).thenReturn(books);
+
+        ResponseEntity<ResponseStructure<List<BookResponseDTO>>> response=bookService.sortByBookPrice();
+
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertThat(Objects.requireNonNull(response.getBody()).getStatus()).isEqualTo(HttpStatus.OK.value());
+        Assertions.assertThat(response.getBody().getData().size()).isEqualTo(3);
+        Assertions.assertThat(response.getBody().getData().getFirst().getBookName()).isEqualTo(first.getBookName());
+        Assertions.assertThat(response.getBody().getData().getFirst().getBookId()).isEqualTo(first.getBookId().intValue());
+        Assertions.assertThat(response.getBody().getData().get(1).getBookId()).isEqualTo(second.getBookId().intValue());
+        Assertions.assertThat(response.getBody().getData().get(1).getBookName()).isEqualTo(second.getBookName());
+        Assertions.assertThat(response.getBody().getData().get(2).getBookId()).isEqualTo(book.getBookId().intValue());
+        Assertions.assertThat(response.getBody().getData().get(2).getBookName()).isEqualTo(book.getBookName());
+    }
+
+    @Test
+    public void bookService_SortByBookPrice_MustReturnNoContentStatusCode()
+    {
+        when(bookRepository.findAll()).thenReturn(List.of());
+
+        ResponseEntity<ResponseStructure<List<BookResponseDTO>>> response=bookService.sortByBookPrice();
+
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        Assertions.assertThat(Objects.requireNonNull(response.getBody()).getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
     }
 }

@@ -20,4 +20,8 @@ public interface BookService
     ResponseEntity<ResponseStructure<BookResponseDTO>> updateBook(Long bookId,BookRequestDTO bookRequestDTO);
 
     ResponseEntity<ResponseStructure<String>> deleteBook(Long bookId);
+
+    ResponseEntity<ResponseStructure<List<BookResponseDTO>>> sortByBookName();
+
+    ResponseEntity<ResponseStructure<List<BookResponseDTO>>> sortByBookPrice();
 }

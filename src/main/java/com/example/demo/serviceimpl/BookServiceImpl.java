@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,6 +88,13 @@ public class BookServiceImpl implements BookService
     public ResponseEntity<ResponseStructure<List<BookResponseDTO>>> getAllBooks()
     {
         List<Book> books=bookRepository.findAll();
+
+        if(books.isEmpty())
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDTO>>()
+                    .setStatus(HttpStatus.NO_CONTENT.value())
+                    .setMessage("Books are empty")
+                    .setData(null));
+
         List<BookResponseDTO> bookResponseDTOS=books.stream().map(bookMapper::mapBookToBookResponse).toList();
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<BookResponseDTO>>()
@@ -137,5 +145,47 @@ public class BookServiceImpl implements BookService
                 .setStatus(HttpStatus.OK.value())
                 .setMessage("Book with name "+book.get().getBookName()+" deleted successfully")
                 .setData("Success"));
+    }
+
+    @Override
+    public ResponseEntity<ResponseStructure<List<BookResponseDTO>>> sortByBookName()
+    {
+        List<Book> books=bookRepository.findAll();
+
+        if(books.isEmpty())
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDTO>>()
+                    .setStatus(HttpStatus.NO_CONTENT.value())
+                    .setMessage("Books are empty")
+                    .setData(null));
+
+        List<Book> sortedBooks=books.stream().sorted(Comparator.comparing(Book::getBookName)).toList();
+        List<BookResponseDTO> responseDTOs=
+                sortedBooks.stream().map(book->new BookResponseDTO(book.getBookId(),book.getBookName(),book.getBookAuthor(),book.getBookDescription(),book.getBookPrice(),book.getBookLogo())).toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<BookResponseDTO>>()
+                .setStatus(HttpStatus.OK.value())
+                .setMessage("Books sorted successfully")
+                .setData(responseDTOs));
+    }
+
+    @Override
+    public ResponseEntity<ResponseStructure<List<BookResponseDTO>>> sortByBookPrice()
+    {
+        List<Book> books=bookRepository.findAll();
+
+        if(books.isEmpty())
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDTO>>()
+                    .setStatus(HttpStatus.NO_CONTENT.value())
+                    .setMessage("Books are empty")
+                    .setData(null));
+
+        List<Book> sortedBooks=books.stream().sorted(Comparator.comparing(Book::getBookPrice)).toList();
+        List<BookResponseDTO> responseDTOs=
+                sortedBooks.stream().map(book->new BookResponseDTO(book.getBookId(),book.getBookName(),book.getBookAuthor(),book.getBookDescription(),book.getBookPrice(),book.getBookLogo())).toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<BookResponseDTO>>()
+                .setStatus(HttpStatus.OK.value())
+                .setMessage("Books sorted successfully")
+                .setData(responseDTOs));
     }
 }
