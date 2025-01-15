@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -89,8 +90,6 @@ public class AddressTests
                 return "";
             }
         };
-
-        when(userMapper.validateUserToken(anyString())).thenReturn(userDetails);
     }
 
     @Test

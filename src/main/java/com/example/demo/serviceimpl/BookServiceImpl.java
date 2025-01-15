@@ -1,6 +1,7 @@
 package com.example.demo.serviceimpl;
 
 import com.example.demo.entity.Book;
+import com.example.demo.exception.BookNotFoundException;
 import com.example.demo.mapper.BookMapper;
 import com.example.demo.requestdto.BookRequestDto;
 import com.example.demo.repository.BookRepository;
@@ -27,11 +28,6 @@ public class BookServiceImpl implements BookService
     @Override
     public ResponseEntity<ResponseStructure<BookResponseDto>> addBook(BookRequestDto bookRequestDTO)
     {
-        if(bookRequestDTO==null)
-        {
-            throw new IllegalArgumentException("Book Should not be empty");
-        }
-
         Book book=bookMapper.addBook(bookRequestDTO);
 
         Book savedBook=bookRepository.save(book);
@@ -42,7 +38,8 @@ public class BookServiceImpl implements BookService
                 .setData(bookMapper.mapBookToBookResponse(savedBook)));
     }
 
-    //============================================================//
+
+
 
     @Override
     public ResponseEntity<ResponseStructure<BookResponseDto>> getBookByName(String bookName)
@@ -50,10 +47,7 @@ public class BookServiceImpl implements BookService
         Optional<Book> book=bookRepository.findByBookName(bookName);
 
         if(book.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<BookResponseDto>()
-                    .setStatus(HttpStatus.NOT_FOUND.value())
-                    .setData(null)
-                    .setMessage("Book not Found"));
+            throw new BookNotFoundException("Book with name "+bookName+" not found");
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponseDto>()
                 .setStatus(HttpStatus.OK.value())
@@ -62,7 +56,6 @@ public class BookServiceImpl implements BookService
     }
 
 
-    //============================================================//
 
 
     @Override
@@ -71,10 +64,7 @@ public class BookServiceImpl implements BookService
         Optional<Book> book=bookRepository.findById(bookId);
 
         if(book.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<BookResponseDto>()
-                    .setStatus(HttpStatus.NOT_FOUND.value())
-                    .setData(null)
-                    .setMessage("Book not Found"));
+            throw new BookNotFoundException("Book with Id "+bookId+" not found");
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponseDto>()
                 .setStatus(HttpStatus.OK.value())
@@ -82,7 +72,7 @@ public class BookServiceImpl implements BookService
                 .setData(bookMapper.mapBookToBookResponse(book.get())));
     }
 
-    //============================================================//
+
 
     @Override
     public ResponseEntity<ResponseStructure<List<BookResponseDto>>> getAllBooks()
@@ -104,7 +94,7 @@ public class BookServiceImpl implements BookService
     }
 
 
-    //============================================================//
+
 
     @Override
     public ResponseEntity<ResponseStructure<BookResponseDto>> updateBook(Long bookId, BookRequestDto bookRequestDTO)
@@ -112,10 +102,7 @@ public class BookServiceImpl implements BookService
         Optional<Book> book=bookRepository.findById(bookId);
 
         if(book.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<BookResponseDto>()
-                    .setStatus(HttpStatus.NOT_FOUND.value())
-                    .setData(null)
-                    .setMessage("Book not Found"));
+            throw new BookNotFoundException("Book not found");
 
         Book updatedBook=bookMapper.updateCurrentBook(bookId,bookRequestDTO,book.get().getCartBookQuantity());
         Book saveUpdatedBook=bookRepository.save(updatedBook);
@@ -126,7 +113,8 @@ public class BookServiceImpl implements BookService
                 .setData(bookMapper.mapBookToBookResponse(saveUpdatedBook)));
     }
 
-    //============================================================//
+
+
 
     @Override
     public ResponseEntity<ResponseStructure<String>> deleteBook(Long bookId)
@@ -134,10 +122,7 @@ public class BookServiceImpl implements BookService
         Optional<Book> book=bookRepository.findById(bookId);
 
         if(book.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
-                    .setStatus(HttpStatus.NOT_FOUND.value())
-                    .setData("Failure")
-                    .setMessage("Book not Found"));
+            throw new BookNotFoundException("Book not found");
 
         bookRepository.delete(book.get());
 
@@ -153,10 +138,7 @@ public class BookServiceImpl implements BookService
         List<Book> books=bookRepository.findAll();
 
         if(books.isEmpty())
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDto>>()
-                    .setStatus(HttpStatus.NO_CONTENT.value())
-                    .setMessage("Books are empty")
-                    .setData(null));
+            throw new BookNotFoundException("Book not found");
 
         List<Book> sortedBooks=books.stream().sorted(Comparator.comparing(Book::getBookName)).toList();
         List<BookResponseDto> responseDTOs=
@@ -174,10 +156,7 @@ public class BookServiceImpl implements BookService
         List<Book> books=bookRepository.findAll();
 
         if(books.isEmpty())
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDto>>()
-                    .setStatus(HttpStatus.NO_CONTENT.value())
-                    .setMessage("Books are empty")
-                    .setData(null));
+            throw new BookNotFoundException("Book not found");
 
         List<Book> sortedBooks=books.stream().sorted(Comparator.comparing(Book::getBookPrice)).toList();
         List<BookResponseDto> responseDTOs=

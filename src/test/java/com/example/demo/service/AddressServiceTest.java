@@ -209,5 +209,41 @@ class AddressServiceTest
 
     //================================================//
 
+    @Test
+    public void addressService_DeleteAddressById_MustReturnOkStatusCode()
+    {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
 
+        ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.deleteAddress(user.getEmail(),address.getAddressId());
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(200,response.getBody().getStatus());
+        assertEquals("Address deleted successfully",response.getBody().getMessage());
+
+        verify(userRepository,times(1)).findByEmail(anyString());
+        verify(addressRepository,times(1)).findById(anyLong());
+    }
+
+    @Test
+    public void addressService_DeleteAddressById_MustThrowUserNotFoundException()
+    {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class,()->addressService.deleteAddress(user.getEmail(),address.getAddressId()));
+
+        verify(userRepository,times(1)).findByEmail(anyString());
+    }
+
+    @Test
+    public void addressService_DeleteAddressById_MustThrowAddressNotFoundException()
+    {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(AddressNotFoundException.class,()->addressService.deleteAddress(user.getEmail(),address.getAddressId()));
+
+        verify(addressRepository,times(1)).findById(anyLong());
+        verify(userRepository,times(1)).findByEmail(anyString());
+    }
 }

@@ -1,5 +1,8 @@
 package com.example.demo.entity;
 
+import com.example.demo.util.Roles;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +14,9 @@ public class UserPrinciple implements UserDetails
 {
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    private Roles role;
+
     public UserPrinciple(User user)
     {
         this.user=user;
@@ -19,7 +25,15 @@ public class UserPrinciple implements UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities()
     {
-        return Collections.singleton(new SimpleGrantedAuthority(user.getRole()));
+        if(user.getRole().equals("USER"))
+        {
+            role = Roles.USER;
+        }
+        else if (user.getRole().equals("ADMIN"))
+        {
+            role=Roles.ADMIN;
+        }
+        return Collections.singletonList(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override

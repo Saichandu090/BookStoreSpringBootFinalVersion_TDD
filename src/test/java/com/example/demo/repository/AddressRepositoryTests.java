@@ -21,6 +21,9 @@ import java.util.Objects;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @Transactional
@@ -98,7 +101,9 @@ public class AddressRepositoryTests
         ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.addAddress(user.getEmail(), addressRequestDto);
 
         AddressResponseDto responseDto=response.getBody().getData();
+
         // Updating the address
+
         AddressRequestDto addressRequestDto2 = new AddressRequestDto();
         addressRequestDto2.setStreetName("1234 Main St");
         addressRequestDto2.setCity("Test1 City");
@@ -177,9 +182,49 @@ public class AddressRepositoryTests
 
         ResponseEntity<ResponseStructure<List<AddressResponseDto>>> response=addressService.getAllAddress(user.getEmail());
 
+        User user1=userRepository.findByEmail(user.getEmail()).get();
+        Address addressResult=addressRepository.findById(response.getBody().getData().getFirst().getAddressId()).get();
+
+        Address address=user1.getAddresses().getFirst();
+        assertEquals(address,addressResult);
+
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(200,response.getBody().getStatus());
         assertEquals(addressRequestDto.getCity(),response.getBody().getData().getFirst().getCity());
         assertEquals(addressRequestDto.getPinCode(),response.getBody().getData().getFirst().getPinCode());
+    }
+
+
+    @Test
+    public void deleteAddressByIdTest()
+    {
+        User user = new User();
+        user.setEmail("test@example.com");
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setDob(LocalDate.of(1990, 1, 1));
+        user.setRegisteredDate(LocalDate.now());
+        user.setUpdatedDate(LocalDate.now());
+        user.setPassword("password");
+        user.setRole("USER");
+        userRepository.save(user);
+
+        AddressRequestDto addressRequestDto = new AddressRequestDto();
+        addressRequestDto.setStreetName("123 Main St");
+        addressRequestDto.setCity("Test City");
+        addressRequestDto.setState("Test State");
+        addressRequestDto.setPinCode(12345);
+
+        ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.addAddress(user.getEmail(),addressRequestDto);
+
+        AddressResponseDto addressResponseDto=response.getBody().getData();
+
+        ResponseEntity<ResponseStructure<AddressResponseDto>> responseEntity=addressService.deleteAddress(user.getEmail(), addressResponseDto.getAddressId());
+
+        AddressResponseDto addressResponseDto1=responseEntity.getBody().getData();
+
+        assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
+        assertEquals(200,responseEntity.getBody().getStatus());
+        assertEquals("Address deleted successfully",responseEntity.getBody().getMessage());
     }
 }

@@ -30,67 +30,59 @@ public class AddressController
     private final AddressMapper addressMapper=new AddressMapper();
 
     @PostMapping("/addAddress")
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> addAddress(@RequestHeader(value = "Authorization",required = false)String authHeader,@Valid @RequestBody AddressRequestDto addressRequestDto)
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> addAddress(@RequestHeader(value = "Authorization")String authHeader,@Valid @RequestBody AddressRequestDto addressRequestDto)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
-        if (userDetails == null)
+        if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
         {
-            return new ResponseEntity<>(addressMapper.headerError(),HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(addressMapper.noAuthority(),HttpStatus.UNAUTHORIZED);
         }
 
-        if(!userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER)))
-        {
-            return new ResponseEntity<>(addressMapper.noAuthority(),HttpStatus.FORBIDDEN);
-        }
         return addressService.addAddress(userDetails.getUsername(),addressRequestDto);
     }
 
     @PutMapping("/editAddress/{addressId}")
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> updateAddress(@RequestHeader(value = "Authorization",required = false)String authHeader,@PathVariable Long addressId,@Valid @RequestBody AddressRequestDto addressRequestDto)
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> updateAddress(@RequestHeader(value = "Authorization")String authHeader,@PathVariable Long addressId,@Valid @RequestBody AddressRequestDto addressRequestDto)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
-        if (userDetails == null)
+        if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
         {
-            return new ResponseEntity<>(addressMapper.headerError(),HttpStatus.UNAUTHORIZED);
-        }
-
-        if(!userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER)))
-        {
-            return new ResponseEntity<>(addressMapper.noAuthority(),HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(addressMapper.noAuthority(),HttpStatus.UNAUTHORIZED);
         }
         return addressService.updateAddress(userDetails.getUsername(),addressId,addressRequestDto);
     }
 
     @GetMapping("/getAddress/{addressId}")
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(@RequestHeader(value = "Authorization",required = false)String authHeader,@PathVariable Long addressId)
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(@RequestHeader(value = "Authorization")String authHeader,@PathVariable Long addressId)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
-        if (userDetails == null)
+        if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
         {
-            return new ResponseEntity<>(addressMapper.headerError(),HttpStatus.UNAUTHORIZED);
-        }
-
-        if(!userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER)))
-        {
-            return new ResponseEntity<>(addressMapper.noAuthority(),HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(addressMapper.noAuthority(),HttpStatus.UNAUTHORIZED);
         }
         return addressService.getAddressById(addressId);
     }
 
 
     @GetMapping("/getAllAddress")
-    public ResponseEntity<ResponseStructure<List<AddressResponseDto>>> getAllAddress(@RequestHeader(value = "Authorization",required = false)String authHeader)
+    public ResponseEntity<ResponseStructure<List<AddressResponseDto>>> getAllAddress(@RequestHeader(value = "Authorization")String authHeader)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
-        if (userDetails == null)
+        if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
         {
-            return new ResponseEntity<>(addressMapper.headerErrorForAllAddress(),HttpStatus.UNAUTHORIZED);
-        }
-
-        if(!userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER)))
-        {
-            return new ResponseEntity<>(addressMapper.noAuthorityForAllAddress(),HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(addressMapper.noAuthorityForAllAddress(),HttpStatus.UNAUTHORIZED);
         }
         return addressService.getAllAddress(userDetails.getUsername());
+    }
+
+    @DeleteMapping("/deleteAddress/{addressId}")
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> deleteAddressById(@RequestHeader(value = "Authorization")String authHeader,@PathVariable Long addressId)
+    {
+        UserDetails userDetails = userMapper.validateUserToken(authHeader);
+        if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
+        {
+            return new ResponseEntity<>(addressMapper.noAuthority(),HttpStatus.UNAUTHORIZED);
+        }
+        return addressService.deleteAddress(userDetails.getUsername(),addressId);
     }
 }

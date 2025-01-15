@@ -6,6 +6,7 @@ import com.example.demo.requestdto.BookRequestDto;
 import com.example.demo.responsedto.BookResponseDto;
 import com.example.demo.service.BookService;
 import com.example.demo.util.ResponseStructure;
+import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("h2")
+@Transactional
 public class BookRepositoryTests
 {
     @Autowired
@@ -35,7 +37,7 @@ public class BookRepositoryTests
     public void addBookTest()
     {
         BookRequestDto bookRequestDto=BookRequestDto.builder()
-                .bookId((long)789654123)
+                .bookId(789654L)
                 .bookName("ABCD")
                 .bookPrice(789.0)
                 .bookLogo("URL")
@@ -290,7 +292,7 @@ public class BookRepositoryTests
     public void deleteBookTest()
     {
         BookRequestDto bookRequestDto=BookRequestDto.builder()
-                .bookId((long)789654123)
+                .bookId(789654123L)
                 .bookName("ABCD")
                 .bookPrice(789.0)
                 .bookLogo("URL")
@@ -316,12 +318,9 @@ public class BookRepositoryTests
         Assertions.assertThat(deleteResponse.getStatusCode().is2xxSuccessful());
         Assertions.assertThat(deleteResponse.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
 
-        assertAll(()->bookService.deleteBook(bookRequestDto.getBookId()));
+        assertThrows(BookNotFoundException.class,()->bookService.deleteBook(bookRequestDto.getBookId()));
 
-        ResponseEntity<ResponseStructure<BookResponseDto>> findResponse=bookService.getBookById(bookRequestDto.getBookId());
-
-        Assertions.assertThat(findResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertEquals(findResponse.getBody().getStatus(),404,"Should not be in database");
+        assertThrows(BookNotFoundException.class,()->bookService.getBookById(bookRequestDto.getBookId()));
     }
 
 

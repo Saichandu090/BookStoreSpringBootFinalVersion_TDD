@@ -16,11 +16,7 @@ public class Cart
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cartId;
     private int quantity;
-    private double totalPrice;
-
-    @Column(name = "user_id")
-    private Long userId;
-
-    @Column(name = "book_id")
-    private Long bookId;
+    
+    @ManyToOne
+    private Book book;
 }

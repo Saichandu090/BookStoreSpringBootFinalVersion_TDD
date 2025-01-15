@@ -19,14 +19,6 @@ public class AddressMapper
                 .setData(null);
     }
 
-    public ResponseStructure<List<AddressResponseDto>> headerErrorForAllAddress()
-    {
-        return new ResponseStructure<List<AddressResponseDto>>()
-                .setMessage("Token Error")
-                .setStatus(HttpStatus.UNAUTHORIZED.value())
-                .setData(null);
-    }
-
     public ResponseStructure<List<AddressResponseDto>> noAuthorityForAllAddress()
     {
         return new ResponseStructure<List<AddressResponseDto>>()
@@ -34,15 +26,6 @@ public class AddressMapper
                 .setStatus(HttpStatus.FORBIDDEN.value())
                 .setData(null);
     }
-
-    public ResponseStructure<AddressResponseDto> headerError()
-    {
-        return new ResponseStructure<AddressResponseDto>()
-                .setMessage("Token Error")
-                .setStatus(HttpStatus.UNAUTHORIZED.value())
-                .setData(null);
-    }
-
 
     public Address mapAddressRequestToAddress(User user, AddressRequestDto addressRequestDto)
     {

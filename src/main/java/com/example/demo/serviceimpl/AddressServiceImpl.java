@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -116,5 +117,31 @@ public class AddressServiceImpl implements AddressService
             .setStatus(HttpStatus.OK.value())
             .setData(responseDtoList)
             .setMessage("User AddressList fetched successfully"));
+    }
+
+    @Override
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> deleteAddress(String email, Long addressId)
+    {
+        Optional<User> user=userRepository.findByEmail(email);
+
+        if (user.isEmpty())
+            throw new UserNotFoundException("User not found with username "+email);
+
+        User realUser=user.get();
+
+        Optional<Address> address=addressRepository.findById(addressId);
+
+        if(address.isEmpty())
+            throw new AddressNotFoundException("Address not found with Id "+addressId);
+
+        Address realAddress=address.get();
+
+        realUser.getAddresses().remove(realAddress);
+        addressRepository.delete(realAddress);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<AddressResponseDto>()
+                .setMessage("Address deleted successfully")
+                .setData(null)
+                .setStatus(HttpStatus.OK.value()));
     }
 }

@@ -16,4 +16,6 @@ public interface AddressService
     ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(Long addressId);
 
     ResponseEntity<ResponseStructure<List<AddressResponseDto>>> getAllAddress(String email);
+
+    ResponseEntity<ResponseStructure<AddressResponseDto>> deleteAddress(String email,Long addressId);
 }

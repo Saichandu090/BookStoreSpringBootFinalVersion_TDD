@@ -26,6 +26,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -34,8 +36,10 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(controllers = AddressController.class)
@@ -82,10 +86,10 @@ class AddressControllerTest
                 .pinCode(addressRequestDto.getPinCode()).build();
 
         user=User.builder()
-                .firstName("Sai")
+                .firstName("Test")
                 .lastName("Chandu")
-                .userId(1L)
-                .email("chandu@gmail.com")
+                .userId(12L)
+                .email("test@gmail.com")
                 .password("chandu1234")
                 .dob(LocalDate.of(2002,8,24))
                 .role("USER").build();
@@ -323,5 +327,48 @@ class AddressControllerTest
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Token Error"));
+    }
+
+    //=================================================//
+
+
+    @Test
+    public void addressController_DeleteAddressById_MustReturnOkStatusCode() throws Exception
+    {
+        ResponseStructure<AddressResponseDto> response=new ResponseStructure<>(HttpStatus.OK.value(),"Address deleted successfully",null);
+        given(addressService.deleteAddress(anyString(),anyLong())).willReturn(new ResponseEntity<>(response,HttpStatus.OK));
+        given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(userDetails);
+
+        mockMvc.perform(delete("/address/deleteAddress/{id}",1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Address deleted successfully"));
+    }
+
+    @Test
+    public void addressController_DeleteAddressById_IfUserHasNoAuthority_MustReturnForbiddenStatusCode() throws Exception
+    {
+        given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
+
+        mockMvc.perform(delete("/address/deleteAddress/{id}",1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.FORBIDDEN.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("No Authority"));
+    }
+
+    @Test
+    public void addressController_DeleteAddressById_MissingAuthHeader_ShouldReturnUnauthorized() throws Exception
+    {
+        mockMvc.perform(delete("/address/deleteAddress/{id}",1)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
     }
 }

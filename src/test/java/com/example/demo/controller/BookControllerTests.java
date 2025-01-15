@@ -28,12 +28,17 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -69,12 +74,12 @@ public class BookControllerTests
     public void init()
     {
         user=User.builder()
-                .email("sai@gmail.com")
-                .userId(1L)
-                .password("saichandu090")
-                .dob(LocalDate.of(2002,8,24))
-                .firstName("Sai")
-                .lastName("Chandu")
+                .email("test@gmail.com")
+                .userId(100L)
+                .password("test@90909")
+                .dob(LocalDate.of(1999,8,12))
+                .firstName("Mock")
+                .lastName("Testing")
                 .role("USER")
                 .registeredDate(LocalDate.now()).build();
 
@@ -164,6 +169,27 @@ public class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
+
+    @Test
+    public void bookController_AddBookTest_MustReturnFailCauseOfNotValidBody() throws Exception
+    {
+        BookRequestDto requestDto=BookRequestDto.builder().build();
+        String token="Bearer-token";
+        ResponseStructure<BookResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.CREATED.value(),"Book added successfully",bookResponseDTO);
+        given(bookService.addBook(ArgumentMatchers.any(BookRequestDto.class))).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.CREATED));
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+
+        mockMvc.perform(post("/book/addBook")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+
     @Test
     public void bookController_AddBookTest_MustReturnUnauthorizedStatusCode() throws Exception
     {
@@ -180,6 +206,20 @@ public class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
+    @Test
+    public void bookController_AddBookTest_MustReturnBadRequestForMissingHeaderStatusCode() throws Exception
+    {
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+
+        mockMvc.perform(post("/book/addBook")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookRequestDTO)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
     //=========================================================================//
 
     @Test
@@ -188,7 +228,7 @@ public class BookControllerTests
         String token="Bearer-token";
         ResponseStructure<BookResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully",bookResponseDTO);
         given(bookService.getBookByName(ArgumentMatchers.anyString())).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
-        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
         mockMvc.perform(get("/book/getBookByName/{bookName}",bookRequestDTO.getBookName())
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -203,17 +243,28 @@ public class BookControllerTests
     }
 
     @Test
-    public void bookController_GetBookByName_MustReturnUnauthorizedStatusCode() throws Exception
+    public void bookController_GetBookByName_MustReturnBadRequestWithoutHeader() throws Exception
     {
-        String token="Bearer-token";
-        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
-
         mockMvc.perform(get("/book/getBookByName/{bookName}",bookRequestDTO.getBookName())
                         .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void bookController_GetBookByName_MissingPathVariable() throws Exception
+    {
+        String token="Bearer token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
+
+        mockMvc.perform(get("/book/getBookByName")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -239,16 +290,28 @@ public class BookControllerTests
     }
 
     @Test
-    public void bookController_GetBookById_MustReturnUnauthorizedStatusCode() throws Exception
+    public void bookController_GetBookById_TestWithoutHeader() throws Exception
+    {
+        mockMvc.perform(get("/book/getBookById/{bookId}",bookRequestDTO.getBookId())
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void bookController_GetBookById_TestWhenMissingPathVariable() throws Exception
     {
         String token="Bearer-token";
-        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
+        ResponseStructure<BookResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully",bookResponseDTO);
+        given(bookService.getBookById(ArgumentMatchers.anyLong())).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
-        mockMvc.perform(get("/book/getBookById/{bookId}",bookRequestDTO.getBookId())
+        mockMvc.perform(get("/book/getBookById")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -273,16 +336,12 @@ public class BookControllerTests
     }
 
     @Test
-    public void bookController_GetAllBooks_MustReturnUnauthorizedStatusCode() throws Exception
+    public void bookController_GetAllBooks_TestWithoutHeader() throws Exception
     {
-        String token="Bearer-token";
-        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
-
         mockMvc.perform(get("/book/getBooks")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -310,7 +369,19 @@ public class BookControllerTests
     }
 
     @Test
-    public void bookController_UpdateBook_MustReturnUnauthorizedStatusCode() throws Exception
+    public void bookController_UpdateBook_TestWithoutHeader() throws Exception
+    {
+        mockMvc.perform(put("/book/updateBook/{bookId}",bookRequestDTO.getBookId())
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookRequestDTO)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void bookController_UpdateBook_TestForUserAccess() throws Exception
     {
         String token="Bearer-token";
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
@@ -322,6 +393,24 @@ public class BookControllerTests
                         .content(objectMapper.writeValueAsString(bookRequestDTO)))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+
+    @Test
+    public void bookController_UpdateBook_TestForInvalidRequestBody() throws Exception
+    {
+        BookRequestDto bookRequestDto=new BookRequestDto();
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+
+        mockMvc.perform(put("/book/updateBook/{bookId}",bookRequestDTO.getBookId())
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token)
+                        .content(objectMapper.writeValueAsString(bookRequestDto)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -347,7 +436,7 @@ public class BookControllerTests
     }
 
     @Test
-    public void bookController_DeleteBook_MustReturnUnauthorizedStatusCode() throws Exception
+    public void bookController_DeleteBook_TestWhenUserTriesToAccess() throws Exception
     {
         String token="Bearer-token";
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
@@ -358,6 +447,19 @@ public class BookControllerTests
                         .header("Authorization",token))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void bookController_DeleteBook_TestWithoutPathVariable() throws Exception
+    {
+        String token="Bearer-token";
+        mockMvc.perform(delete("/book/deleteBook")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -383,16 +485,12 @@ public class BookControllerTests
     }
 
     @Test
-    public void bookController_SortByBookName_MustReturnUnauthorizedStatus() throws Exception
+    public void bookController_SortByBookName_TestWithoutHeader() throws Exception
     {
-        String token="Bearer-token";
-        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
-
         mockMvc.perform(get("/book/sortByBookName")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -418,16 +516,12 @@ public class BookControllerTests
     }
 
     @Test
-    public void bookController_SortByBookPrice_MustReturnUnauthorizedStatus() throws Exception
+    public void bookController_SortByBookPrice_TestCaseWithoutHeader() throws Exception
     {
-        String token="Bearer-token";
-        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
-
         mockMvc.perform(get("/book/sortByBookPrice")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
 }
