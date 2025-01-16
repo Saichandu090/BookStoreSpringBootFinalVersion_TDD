@@ -220,7 +220,7 @@ public class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    //=========================================================================//
+
 
     @Test
     public void bookController_GetBookByName_MustReturnOKStatusCode() throws Exception
@@ -268,7 +268,7 @@ public class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    //===============================================================//
+
 
     @Test
     public void bookController_GetBookById_MustReturnOKStatusCode() throws Exception
@@ -315,7 +315,7 @@ public class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    //===============================================================//
+
 
     @Test
     public void bookController_GetAllBooks_MustReturnOKStatusCode() throws Exception
@@ -345,7 +345,7 @@ public class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    //=================================================//
+
 
     @Test
     public void bookController_UpdateBook_MustReturnOKStatusCode() throws Exception
@@ -414,7 +414,7 @@ public class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    //=================================================//
+
 
     @Test
     public void bookController_DeleteBook_MustReturnOKStatusCode() throws Exception
@@ -463,7 +463,7 @@ public class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    //=======================================================//
+
 
     @Test
     public void bookController_SortByBookName_MustReturnOKStatus() throws Exception
@@ -494,7 +494,7 @@ public class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
-    //====================================================//
+
 
     @Test
     public void bookController_SortByBookPrice_MustReturnOKStatus() throws Exception

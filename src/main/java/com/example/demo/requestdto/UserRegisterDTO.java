@@ -17,15 +17,22 @@ import java.time.LocalDate;
 @Builder
 public class UserRegisterDTO
 {
+    @NotNull
     @Pattern(regexp = "^[A-Z][A-Za-z .]{2,}$",message = "First Name Should start with Capital and AtLeast contain 3 characters")
     private String firstName;
+
+    @NotNull
     @Pattern(regexp = "^[A-Z][A-Za-z .]{2,}$",message = "Last Name Should start with Capital and AtLeast contain 3 characters")
     private String lastName;
 
     @Past
     private LocalDate dob;
+
+    @NotNull
     @Pattern(regexp = "^[a-zA-Z 0-9.@_-]{8,}$",message = "Password should be atleast 8 Characters")
     private String password;
+
+    @NotNull
     @Email
     private String email;
     @NotNull

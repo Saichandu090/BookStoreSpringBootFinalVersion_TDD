@@ -5,6 +5,7 @@ import com.example.demo.requestdto.BookRequestDto;
 import com.example.demo.responsedto.BookResponseDto;
 import com.example.demo.util.ResponseStructure;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -62,5 +63,53 @@ public class BookMapper
                 .bookPrice(requestDTO.getBookPrice())
                 .bookDescription(requestDTO.getBookDescription())
                 .cartBookQuantity(cartQuantity).build();
+    }
+
+    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> mapToSuccessGetAllBooks(String message,List<BookResponseDto> bookResponseDtos)
+    {
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<BookResponseDto>>()
+                .setStatus(HttpStatus.OK.value())
+                .setMessage(message)
+                .setData(bookResponseDtos));
+    }
+
+    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> noContent()
+    {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDto>>()
+                .setStatus(HttpStatus.NO_CONTENT.value())
+                .setMessage("Books are empty")
+                .setData(null));
+    }
+
+    public ResponseEntity<ResponseStructure<BookResponseDto>> mapToSuccessFetchBook(Book book)
+    {
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponseDto>()
+                .setStatus(HttpStatus.OK.value())
+                .setMessage("Book fetched successfully")
+                .setData(mapBookToBookResponse(book)));
+    }
+
+    public ResponseEntity<ResponseStructure<BookResponseDto>> mapToSuccessAddBook(Book savedBook)
+    {
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<BookResponseDto>().
+                setStatus(HttpStatus.CREATED.value())
+                .setMessage("Book with name "+savedBook.getBookName()+" added successfully")
+                .setData(mapBookToBookResponse(savedBook)));
+    }
+
+    public ResponseEntity<ResponseStructure<BookResponseDto>> mapToSuccessUpdateBook(Book saveUpdatedBook)
+    {
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponseDto>()
+                .setStatus(HttpStatus.OK.value())
+                .setMessage("Book Updated successfully")
+                .setData(mapBookToBookResponse(saveUpdatedBook)));
+    }
+
+    public ResponseEntity<ResponseStructure<String>> mapToSuccessDeleteBook(String message)
+    {
+        return  ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<String>()
+                .setStatus(HttpStatus.OK.value())
+                .setMessage(message)
+                .setData("Success"));
     }
 }

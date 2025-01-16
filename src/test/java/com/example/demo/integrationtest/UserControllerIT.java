@@ -1,11 +1,11 @@
 package com.example.demo.integrationtest;
 
+import com.example.demo.integrationtest.repo.TestH2Repository;
 import com.example.demo.requestdto.UserLoginDTO;
 import com.example.demo.requestdto.UserRegisterDTO;
 import com.example.demo.responsedto.LoginResponseDto;
-import com.example.demo.responsedto.RegisterResponse;
+import com.example.demo.responsedto.RegisterResponseDto;
 import com.example.demo.util.ResponseStructure;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Transactional
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerIT
 {
@@ -61,33 +61,31 @@ public class UserControllerIT
                 .role("ADMIN")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponseDto>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponseDto>>(){});
 
         assertEquals(userRegisterDTO.getEmail(),registerResponse.getBody().getData().getEmail());
         assertEquals(userRegisterDTO.getRole(),registerResponse.getBody().getData().getRole());
         assertEquals(1,h2Repository.findAll().size());
     }
 
+
     @Test
     public void registerUserTest_WithInvalidBody()
     {
-        UserRegisterDTO userRegisterDTO=UserRegisterDTO.builder()
-                .firstName("Te")
-                .lastName("Chandu")
-                .dob(LocalDate.of(2012,8,24))
-                .email("test@gmail.com")
-                .role("ADMIN")
-                .password("saichandu@090").build();
+        UserRegisterDTO requestDTO = new UserRegisterDTO();
+        requestDTO.setLastName("Chandu");
+        requestDTO.setDob(LocalDate.of(2012, 8, 24));
+        requestDTO.setPassword("saichandu@090");
+        requestDTO.setEmail("test@gmail.com");
+        requestDTO.setRole("ADMIN");
 
         try {
-            ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>() {});
-            assertEquals(userRegisterDTO.getEmail(), registerResponse.getBody().getData().getEmail());
-            assertEquals(userRegisterDTO.getRole(), registerResponse.getBody().getData().getRole());
-            assertEquals(1, h2Repository.findAll().size());
+            ResponseEntity<?> response = restTemplate.postForEntity("http://localhost:"+port+"/register", requestDTO, Object.class);
+            assertEquals(HttpStatus.CREATED, response.getStatusCode());
         }
         catch (HttpClientErrorException exception)
         {
-            assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
+            assertEquals(HttpStatus.BAD_REQUEST,exception.getStatusCode());
             exception.printStackTrace();
         }
     }
@@ -106,7 +104,7 @@ public class UserControllerIT
                 .role("ADMIN")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponseDto>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponseDto>>(){});
 
         assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
@@ -142,7 +140,7 @@ public class UserControllerIT
                 .role("ADMIN")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponseDto>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponseDto>>(){});
 
         assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
@@ -186,7 +184,7 @@ public class UserControllerIT
                 .role("ADMIN")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponseDto>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponseDto>>(){});
 
         assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());

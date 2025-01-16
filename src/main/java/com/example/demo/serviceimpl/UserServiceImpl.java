@@ -6,12 +6,11 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.requestdto.UserLoginDTO;
 import com.example.demo.requestdto.UserRegisterDTO;
 import com.example.demo.responsedto.LoginResponseDto;
-import com.example.demo.responsedto.RegisterResponse;
+import com.example.demo.responsedto.RegisterResponseDto;
 import com.example.demo.service.UserService;
 import com.example.demo.util.ResponseStructure;
 import com.example.demo.util.Roles;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,11 +29,12 @@ public class UserServiceImpl implements UserService
     private JWTService jwtService;
     private ApplicationContext context;
     private AuthenticationManager authenticationManager;
-    private UserMapper userMapper;
+
+    private final UserMapper userMapper=new UserMapper();
     private final BCryptPasswordEncoder encoder=new BCryptPasswordEncoder(12);
 
     @Override
-    public ResponseEntity<ResponseStructure<RegisterResponse>> registerUser(UserRegisterDTO registerDTO)
+    public ResponseEntity<ResponseStructure<RegisterResponseDto>> registerUser(UserRegisterDTO registerDTO)
     {
         boolean isUserExist=userRepository.existsByEmail(registerDTO.getEmail());
         if(isUserExist){
@@ -55,6 +55,8 @@ public class UserServiceImpl implements UserService
             Authentication authentication= authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getEmail(),loginDTO.getPassword()));
             if(authentication.isAuthenticated())
                 return sendToken(loginDTO);
+            else
+                return userMapper.badCredentials();
         }
         return userMapper.userNotExists();
     }

@@ -3,11 +3,10 @@ package com.example.demo.mapper;
 import com.example.demo.entity.User;
 import com.example.demo.requestdto.UserRegisterDTO;
 import com.example.demo.responsedto.LoginResponseDto;
-import com.example.demo.responsedto.RegisterResponse;
+import com.example.demo.responsedto.RegisterResponseDto;
 import com.example.demo.serviceimpl.JWTService;
 import com.example.demo.serviceimpl.MyUserDetailsService;
 import com.example.demo.util.ResponseStructure;
-import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -16,8 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class UserMapper
@@ -46,9 +43,9 @@ public class UserMapper
             return null;
     }
 
-    public ResponseEntity<ResponseStructure<RegisterResponse>> userAlreadyExists()
+    public ResponseEntity<ResponseStructure<RegisterResponseDto>> userAlreadyExists()
     {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseStructure<RegisterResponse>()
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseStructure<RegisterResponseDto>()
                 .setMessage("User Already Registered")
                 .setStatus(HttpStatus.CONFLICT.value())
                 .setData(null));
@@ -67,12 +64,12 @@ public class UserMapper
                 .password(registerDTO.getPassword()).build();
     }
 
-    public ResponseEntity<ResponseStructure<RegisterResponse>> convertUser(User savedUser)
+    public ResponseEntity<ResponseStructure<RegisterResponseDto>> convertUser(User savedUser)
     {
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<RegisterResponse>()
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<RegisterResponseDto>()
                 .setMessage("User "+savedUser.getEmail()+" has registered successfully")
                 .setStatus(HttpStatus.CREATED.value())
-                .setData(RegisterResponse.builder().userId(savedUser.getUserId()).email(savedUser.getEmail()).role(savedUser.getRole()).build()));
+                .setData(RegisterResponseDto.builder().userId(savedUser.getUserId()).email(savedUser.getEmail()).role(savedUser.getRole()).build()));
     }
 
     public ResponseEntity<ResponseStructure<LoginResponseDto>> loginSuccess(String token, String email, String role)
@@ -88,6 +85,14 @@ public class UserMapper
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<LoginResponseDto>()
                 .setStatus(HttpStatus.NOT_FOUND.value())
                 .setMessage("User not found")
+                .setData(null));
+    }
+
+    public ResponseEntity<ResponseStructure<LoginResponseDto>> badCredentials()
+    {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<LoginResponseDto>()
+                .setMessage("Bad Credentials")
+                .setStatus(HttpStatus.UNAUTHORIZED.value())
                 .setData(null));
     }
 }

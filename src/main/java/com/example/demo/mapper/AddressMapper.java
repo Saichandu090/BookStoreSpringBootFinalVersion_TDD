@@ -15,7 +15,7 @@ public class AddressMapper
     {
         return new ResponseStructure<AddressResponseDto>()
                 .setMessage("No Authority")
-                .setStatus(HttpStatus.FORBIDDEN.value())
+                .setStatus(HttpStatus.UNAUTHORIZED.value())
                 .setData(null);
     }
 
@@ -23,7 +23,7 @@ public class AddressMapper
     {
         return new ResponseStructure<List<AddressResponseDto>>()
                 .setMessage("No Authority")
-                .setStatus(HttpStatus.FORBIDDEN.value())
+                .setStatus(HttpStatus.UNAUTHORIZED.value())
                 .setData(null);
     }
 

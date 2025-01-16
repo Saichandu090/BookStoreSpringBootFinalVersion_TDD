@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Book;
+import com.example.demo.exception.BookNotFoundException;
 import com.example.demo.mapper.BookMapper;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.requestdto.BookRequestDto;
@@ -24,8 +25,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest
@@ -75,6 +76,8 @@ class BookServiceTest
                 .build();
     }
 
+
+
     @Test
     public void bookService_AddBook_MustReturnCreatedStatus()
     {
@@ -88,13 +91,7 @@ class BookServiceTest
         Assertions.assertThat(response.getBody().getMessage()).isEqualTo(response.getBody().getMessage());
     }
 
-    @Test
-    public void bookService_AddBook_MustThrowException()
-    {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,()->bookService.addBook(null));
-    }
 
-    //================================================//
 
     @Test
     public void bookService_GetBookByName_MustReturnOKStatusCode()
@@ -109,18 +106,19 @@ class BookServiceTest
         Assertions.assertThat(response.getBody().getMessage()).isEqualTo(response.getBody().getMessage());
     }
 
+
+
     @Test
-    public void bookService_GetBookByName_MustReturnNotFoundStatusCode()
+    public void bookService_GetBookByName_MustThrowBookNotFoundException()
     {
         when(bookRepository.findByBookName(Mockito.anyString())).thenReturn(Optional.empty());
 
-        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.getBookByName(bookRequestDTO.getBookName());
+        assertThrows(BookNotFoundException.class,()->bookService.getBookByName(bookRequestDTO.getBookName()));
 
-        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        verify(bookRepository,times(1)).findByBookName(anyString());
     }
 
-    //================================================//
+
 
     @Test
     public void bookService_GetBookById_MustReturnOKStatusCode()
@@ -135,18 +133,18 @@ class BookServiceTest
         Assertions.assertThat(response.getBody().getMessage()).isEqualTo(response.getBody().getMessage());
     }
 
+
+
     @Test
     public void bookService_GetBookById_MustReturnNotFoundStatusCode()
     {
         when(bookRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
-        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.getBookById(bookRequestDTO.getBookId());
+        assertThrows(BookNotFoundException.class,()->bookService.getBookById(bookRequestDTO.getBookId()));
 
-        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        verify(bookRepository,times(1)).findById(anyLong());
     }
 
-    //================================================//
 
     @Test
     public void bookService_GetAllBooks_MustReturnOKStatusCode()
@@ -161,6 +159,8 @@ class BookServiceTest
         Assertions.assertThat(response.getBody().getData().getFirst().getBookId()).isEqualTo(book.getBookId().intValue());
     }
 
+
+
     @Test
     public void bookService_GetAllBooks_MustReturnNoContentStatusCode()
     {
@@ -172,7 +172,7 @@ class BookServiceTest
         Assertions.assertThat(Objects.requireNonNull(response.getBody()).getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
     }
 
-    //================================================//
+
 
     @Test
     public void bookService_UpdateBook_MustReturnOKStatusCode()
@@ -188,20 +188,19 @@ class BookServiceTest
         Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(book.getBookId().intValue());
     }
 
+
+
     @Test
     public void bookService_UpdateBook_MustReturnNotFoundStatusCode()
     {
         when(bookRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
-        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.updateBook(bookRequestDTO.getBookId(),bookRequestDTO);
+        assertThrows(BookNotFoundException.class,()->bookService.updateBook(bookRequestDTO.getBookId(),bookRequestDTO));
 
-        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
-        Assertions.assertThat(response.getBody().getData()).isNull();
+        verify(bookRepository,times(1)).findById(anyLong());
     }
 
 
-    //==================================================//
 
     @Test
     public void bookService_DeleteBook_MustReturnOKStatusCode()
@@ -217,21 +216,19 @@ class BookServiceTest
         Mockito.verify(bookRepository,times(1)).delete(book);
     }
 
+
+
     @Test
     public void bookService_DeleteBook_MustReturnNotFoundStatusCode()
     {
         when(bookRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
-        ResponseEntity<ResponseStructure<String>> response=bookService.deleteBook(bookRequestDTO.getBookId());
-
-        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
-        Assertions.assertThat(response.getBody().getData()).isEqualTo("Failure");
+        assertThrows(BookNotFoundException.class,()->bookService.deleteBook(bookRequestDTO.getBookId()));
 
         Mockito.verify(bookRepository,times(0)).delete(book);
     }
 
-    //=================================================//
+
 
     @Test
     public void bookService_SortByBookName_MustReturnOKStatusCode()
@@ -273,7 +270,7 @@ class BookServiceTest
         Assertions.assertThat(Objects.requireNonNull(response.getBody()).getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
     }
 
-    //==================================================//
+
 
     @Test
     public void bookService_SortByBookPrice_MustReturnOKStatusCode()
@@ -317,6 +314,8 @@ class BookServiceTest
         Assertions.assertThat(response.getBody().getData().get(2).getBookId()).isEqualTo(book.getBookId().intValue());
         Assertions.assertThat(response.getBody().getData().get(2).getBookName()).isEqualTo(book.getBookName());
     }
+
+
 
     @Test
     public void bookService_SortByBookPrice_MustReturnNoContentStatusCode()

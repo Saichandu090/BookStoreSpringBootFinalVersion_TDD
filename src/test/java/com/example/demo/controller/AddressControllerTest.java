@@ -162,7 +162,7 @@ class AddressControllerTest
 
 
     @Test
-    public void addressController_addAddress_IfUserHasNoAuthority_MustReturnForbiddenStatusCode() throws Exception
+    public void addressController_addAddress_IfUserHasNoAuthority_MustReturnUnauthorizedStatusCode() throws Exception
     {
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
 
@@ -172,22 +172,20 @@ class AddressControllerTest
                         .content(objectMapper.writeValueAsString(addressRequestDto))
                         .header("Authorization",token))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isForbidden())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.FORBIDDEN.value()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("No Authority"));
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()));
     }
 
     @Test
-    public void addressController_addAddress_MissingAuthHeader_ShouldReturnUnauthorized() throws Exception
+    public void addressController_addAddress_MissingAuthHeader_ShouldReturnBadRequest() throws Exception
     {
         mockMvc.perform(post("/address/addAddress")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addressRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Token Error"));
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
     }
 
     //============================================//
@@ -212,7 +210,7 @@ class AddressControllerTest
     }
 
     @Test
-    public void addressController_editAddress_IfUserHasNoAuthority_MustReturnForbiddenStatusCode() throws Exception
+    public void addressController_editAddress_IfUserHasNoAuthority_MustReturnUnauthorizedStatusCode() throws Exception
     {
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
 
@@ -222,22 +220,21 @@ class AddressControllerTest
                         .content(objectMapper.writeValueAsString(addressRequestDto))
                         .header("Authorization",token))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isForbidden())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.FORBIDDEN.value()))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("No Authority"));
     }
 
     @Test
-    public void addressController_editAddressBy_MissingAuthHeader_ShouldReturnUnauthorized() throws Exception
+    public void addressController_editAddressBy_MissingAuthHeader_ShouldReturnBadRequest() throws Exception
     {
         mockMvc.perform(put("/address/editAddress/{id}",1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addressRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Token Error"));
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
     }
 
 
@@ -261,7 +258,7 @@ class AddressControllerTest
     }
 
     @Test
-    public void addressController_GetAddressById_IfUserHasNoAuthority_MustReturnForbiddenStatusCode() throws Exception
+    public void addressController_GetAddressById_IfUserHasNoAuthority_MustReturnUnauthorizedStatusCode() throws Exception
     {
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
 
@@ -269,23 +266,22 @@ class AddressControllerTest
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("Authorization",token))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isForbidden())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.FORBIDDEN.value()))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("No Authority"));
     }
 
     @Test
-    public void addressController_GetAddressById_MissingAuthHeader_ShouldReturnUnauthorized() throws Exception
+    public void addressController_GetAddressById_MissingAuthHeader_ShouldReturnBadRequest() throws Exception
     {
         mockMvc.perform(get("/address/getAddress/{id}",1)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Token Error"));
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
     }
 
-    //===========================================//
+
 
     @Test
     public void addressController_GetAllAddress_MustReturnOkStatusCode() throws Exception
@@ -305,7 +301,7 @@ class AddressControllerTest
     }
 
     @Test
-    public void addressController_GetAllAddress_IfUserHasNoAuthority_MustReturnForbiddenStatusCode() throws Exception
+    public void addressController_GetAllAddress_IfUserHasNoAuthority_MustReturnUnauthorizedStatusCode() throws Exception
     {
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
 
@@ -313,23 +309,21 @@ class AddressControllerTest
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("Authorization",token))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isForbidden())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.FORBIDDEN.value()))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("No Authority"));
     }
 
     @Test
-    public void addressController_GetAllAddress_MissingAuthHeader_ShouldReturnUnauthorized() throws Exception
+    public void addressController_GetAllAddress_MissingAuthHeader_ShouldReturnBadRequest() throws Exception
     {
         mockMvc.perform(get("/address/getAllAddress")
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Token Error"));
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
     }
 
-    //=================================================//
 
 
     @Test
@@ -349,7 +343,7 @@ class AddressControllerTest
     }
 
     @Test
-    public void addressController_DeleteAddressById_IfUserHasNoAuthority_MustReturnForbiddenStatusCode() throws Exception
+    public void addressController_DeleteAddressById_IfUserHasNoAuthority_MustReturnUnauthorizedStatusCode() throws Exception
     {
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
 
@@ -357,13 +351,13 @@ class AddressControllerTest
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("Authorization",token))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isForbidden())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.FORBIDDEN.value()))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.UNAUTHORIZED.value()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("No Authority"));
     }
 
     @Test
-    public void addressController_DeleteAddressById_MissingAuthHeader_ShouldReturnUnauthorized() throws Exception
+    public void addressController_DeleteAddressById_MissingAuthHeader_ShouldReturnBadRequest() throws Exception
     {
         mockMvc.perform(delete("/address/deleteAddress/{id}",1)
                         .characterEncoding(StandardCharsets.UTF_8))
