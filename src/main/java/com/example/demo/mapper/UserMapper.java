@@ -29,6 +29,7 @@ public class UserMapper
     {
         if(authHeader==null)
             return null;
+
         String token=null;
         String email=null;
         if(authHeader.startsWith("Bearer "))

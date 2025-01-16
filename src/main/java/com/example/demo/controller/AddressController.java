@@ -37,7 +37,6 @@ public class AddressController
         {
             return new ResponseEntity<>(addressMapper.noAuthority(),HttpStatus.UNAUTHORIZED);
         }
-
         return addressService.addAddress(userDetails.getUsername(),addressRequestDto);
     }
 

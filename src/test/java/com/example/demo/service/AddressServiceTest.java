@@ -114,7 +114,7 @@ class AddressServiceTest
     }
 
 
-    //===========================================================//
+
 
     @Test
     public void addressService_UpdateAddress_MustReturnOKStatusCode()
@@ -135,6 +135,7 @@ class AddressServiceTest
         verify(addressRepository,times(1)).save(any(Address.class));
     }
 
+
     @Test
     public void addressService_UpdateAddress_MustReturnNotFoundStatusCodeIfUserNotFound()
     {
@@ -154,7 +155,8 @@ class AddressServiceTest
         verify(userRepository,times(1)).findByEmail(anyString());
         verify(addressRepository,times(1)).findById(anyLong());
     }
-    //=================================================//
+
+
 
     @Test
     public void addressService_GetAddressById_MustReturnOkStatusCode()
@@ -180,7 +182,7 @@ class AddressServiceTest
         verify(addressRepository,times(1)).findById(anyLong());
     }
 
-    //================================================//
+
 
     @Test
     public void addressService_GetAllAddress_MustReturnOkStatusCode()
@@ -207,7 +209,7 @@ class AddressServiceTest
         verify(addressRepository,times(1)).findById(anyLong());
     }
 
-    //================================================//
+
 
     @Test
     public void addressService_DeleteAddressById_MustReturnOkStatusCode()
@@ -225,6 +227,7 @@ class AddressServiceTest
         verify(addressRepository,times(1)).findById(anyLong());
     }
 
+
     @Test
     public void addressService_DeleteAddressById_MustThrowUserNotFoundException()
     {
@@ -234,6 +237,7 @@ class AddressServiceTest
 
         verify(userRepository,times(1)).findByEmail(anyString());
     }
+
 
     @Test
     public void addressService_DeleteAddressById_MustThrowAddressNotFoundException()

@@ -1,9 +1,9 @@
 package com.example.demo.integrationtest.repo;
 
-import com.example.demo.entity.User;
+import com.example.demo.entity.Address;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface TestH2Repository extends JpaRepository<User,Long>
+public interface AddressH2Repository extends JpaRepository<Address,Long>
 {
 
 }

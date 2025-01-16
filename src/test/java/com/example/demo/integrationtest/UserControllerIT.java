@@ -1,9 +1,8 @@
 package com.example.demo.integrationtest;
 
-import com.example.demo.integrationtest.repo.TestH2Repository;
+import com.example.demo.integrationtest.repo.UserH2Repository;
 import com.example.demo.requestdto.UserLoginDTO;
 import com.example.demo.requestdto.UserRegisterDTO;
-import com.example.demo.responsedto.BookResponseDto;
 import com.example.demo.responsedto.LoginResponseDto;
 import com.example.demo.responsedto.RegisterResponseDto;
 import com.example.demo.util.ResponseStructure;
@@ -38,7 +37,7 @@ public class UserControllerIT
     private static RestTemplate restTemplate;
 
     @Autowired
-    private TestH2Repository h2Repository;
+    private UserH2Repository h2Repository;
 
     @BeforeAll
     public static void init()

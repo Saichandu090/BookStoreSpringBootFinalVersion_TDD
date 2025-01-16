@@ -1,9 +1,7 @@
 package com.example.demo.requestdto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 @Builder
 @AllArgsConstructor
@@ -11,8 +9,15 @@ import lombok.NoArgsConstructor;
 @Data
 public class AddressRequestDto
 {
+    @NotNull
     private String streetName;
+
+    @NotNull
     private String city;
+
+    @NotNull
     private String state;
-    private int pinCode;
+
+    @NotNull
+    private Integer pinCode;
 }
