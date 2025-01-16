@@ -3,6 +3,7 @@ package com.example.demo.integrationtest;
 import com.example.demo.integrationtest.repo.TestH2Repository;
 import com.example.demo.requestdto.UserLoginDTO;
 import com.example.demo.requestdto.UserRegisterDTO;
+import com.example.demo.responsedto.BookResponseDto;
 import com.example.demo.responsedto.LoginResponseDto;
 import com.example.demo.responsedto.RegisterResponseDto;
 import com.example.demo.util.ResponseStructure;
@@ -23,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -79,15 +81,11 @@ public class UserControllerIT
         requestDTO.setEmail("test@gmail.com");
         requestDTO.setRole("ADMIN");
 
-        try {
-            ResponseEntity<?> response = restTemplate.postForEntity("http://localhost:"+port+"/register", requestDTO, Object.class);
-            assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        }
-        catch (HttpClientErrorException exception)
-        {
-            assertEquals(HttpStatus.BAD_REQUEST,exception.getStatusCode());
-            exception.printStackTrace();
-        }
+        HttpEntity<Object> httpEntity=new HttpEntity<>(requestDTO);
+
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, httpEntity,
+                new ParameterizedTypeReference<ResponseStructure<RegisterResponseDto>>() {}));
+        assertEquals(HttpStatus.BAD_REQUEST,exception.getStatusCode());
     }
 
 
@@ -155,20 +153,9 @@ public class UserControllerIT
                 .email("tes@gmail.com")
                 .password("saichandu@090").build();
 
-        try {
-            ResponseEntity<ResponseStructure<LoginResponseDto>> loginResponse = restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginDTO), new ParameterizedTypeReference<ResponseStructure<LoginResponseDto>>() {
-            });
-
-            assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
-            assertEquals(HttpStatus.OK.value(), loginResponse.getBody().getStatus());
-            assertEquals("test@gmail.com",loginResponse.getBody().getData().getEmail());
-            assertEquals("ADMIN",loginResponse.getBody().getData().getRole());
-        }
-        catch (HttpClientErrorException exception)
-        {
-            assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
-            exception.printStackTrace();
-        }
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()-> restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginDTO), new ParameterizedTypeReference<ResponseStructure<LoginResponseDto>>() {
+        }));
+        assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
     }
 
 
@@ -194,24 +181,12 @@ public class UserControllerIT
 
 
         //Login test
-
         UserLoginDTO userLoginDTO=UserLoginDTO.builder()
                 .email("test@gmail.com")
                 .password("sai@090").build();
 
-        try {
-            ResponseEntity<ResponseStructure<LoginResponseDto>> loginResponse = restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginDTO), new ParameterizedTypeReference<ResponseStructure<LoginResponseDto>>() {
-            });
-
-            assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
-            assertEquals(HttpStatus.OK.value(), loginResponse.getBody().getStatus());
-            assertEquals("test@gmail.com",loginResponse.getBody().getData().getEmail());
-            assertEquals("ADMIN",loginResponse.getBody().getData().getRole());
-        }
-        catch (HttpClientErrorException exception)
-        {
-            assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
-            exception.printStackTrace();
-        }
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginDTO), new ParameterizedTypeReference<ResponseStructure<LoginResponseDto>>() {
+        }));
+        assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
     }
 }
