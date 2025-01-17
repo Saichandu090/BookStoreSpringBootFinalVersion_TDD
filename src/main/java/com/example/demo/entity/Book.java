@@ -1,9 +1,6 @@
 package com.example.demo.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Builder
@@ -22,5 +19,5 @@ public class Book
     private Double bookPrice;
     private String bookLogo;
     private Integer bookQuantity;
-    private Integer cartBookQuantity;
+    private int cartBookQuantity;
 }

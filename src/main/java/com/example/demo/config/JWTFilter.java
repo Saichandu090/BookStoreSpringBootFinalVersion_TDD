@@ -19,14 +19,6 @@ import java.io.IOException;
 
 public class JWTFilter extends OncePerRequestFilter
 {
-    private HandlerExceptionResolver handlerExceptionResolver;
-
-    @Autowired
-    public JWTFilter(HandlerExceptionResolver handlerExceptionResolver)
-    {
-        this.handlerExceptionResolver=handlerExceptionResolver;
-    }
-
     @Autowired
     private JWTService jwtService;
 
@@ -70,7 +62,8 @@ public class JWTFilter extends OncePerRequestFilter
         }
         catch(Exception exception)
         {
-            handlerExceptionResolver.resolveException(request,response,null,exception);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Unauthorized: " + exception.getMessage());
         }
     }
 }

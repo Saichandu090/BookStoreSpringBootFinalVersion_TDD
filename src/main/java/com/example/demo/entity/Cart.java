@@ -14,7 +14,6 @@ public class Cart
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cartId;
-    private Double cartPrice;
     private Integer cartQuantity;
 
     @Column(name = "book_id")

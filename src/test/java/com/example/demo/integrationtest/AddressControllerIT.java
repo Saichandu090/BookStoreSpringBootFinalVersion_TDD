@@ -121,6 +121,26 @@ public class AddressControllerIT
         assertEquals(addresses.getFirst().getAddressId(),response.getBody().getData().getAddressId());
     }
 
+    @Test
+    void addAddress_TokenInvalidTest()
+    {
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer Token");
+
+        AddressRequestDto addressRequestDto=AddressRequestDto.builder()
+                .streetName("Baner")
+                .city("Pune")
+                .pinCode(414004)
+                .state("Maharastra").build();
+
+        HttpEntity<Object> entity = new HttpEntity<>(addressRequestDto,httpHeaders);
+
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/addAddress", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {}));
+        assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
+        exception.printStackTrace();
+    }
+
 
     @Test
     public void addAddress_IfBodyIsInvalid()

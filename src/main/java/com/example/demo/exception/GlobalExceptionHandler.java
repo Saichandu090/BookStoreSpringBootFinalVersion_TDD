@@ -15,10 +15,10 @@ public class GlobalExceptionHandler
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ResponseStructure<String>> illegalArgument(IllegalArgumentException exception)
     {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseStructure<String>()
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
                 .setData(data)
-                .setStatus(HttpStatus.BAD_REQUEST.value()));
+                .setStatus(HttpStatus.UNAUTHORIZED.value()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

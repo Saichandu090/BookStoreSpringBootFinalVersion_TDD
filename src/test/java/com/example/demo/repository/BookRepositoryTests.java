@@ -10,16 +10,12 @@ import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -64,7 +60,7 @@ public class BookRepositoryTests
     public void getBookByIdTest()
     {
         BookRequestDto bookRequestDto=BookRequestDto.builder()
-                .bookId((long)789654123)
+                .bookId(789654123L)
                 .bookName("ABCD")
                 .bookPrice(789.0)
                 .bookLogo("URL")
@@ -86,7 +82,7 @@ public class BookRepositoryTests
     public void getBookByNameTest()
     {
         BookRequestDto bookRequestDto=BookRequestDto.builder()
-                .bookId((long)789654123)
+                .bookId(789654123L)
                 .bookName("ABCD")
                 .bookPrice(789.0)
                 .bookLogo("URL")
@@ -108,7 +104,7 @@ public class BookRepositoryTests
     public void getAllBooksTest()
     {
         BookRequestDto bookRequestDto=BookRequestDto.builder()
-                .bookId((long)789654123)
+                .bookId(789654123L)
                 .bookName("ABCD")
                 .bookPrice(789.0)
                 .bookLogo("URL")
@@ -117,7 +113,7 @@ public class BookRepositoryTests
                 .bookQuantity(85).build();
 
         BookRequestDto bookRequestDto2=BookRequestDto.builder()
-                .bookId((long)789654126)
+                .bookId(789654126L)
                 .bookName("ZXCFG")
                 .bookPrice(989.0)
                 .bookLogo("URL")
@@ -143,7 +139,7 @@ public class BookRepositoryTests
     public void sortByBookNameTest()
     {
         BookRequestDto bookRequestDto=BookRequestDto.builder()
-                .bookId((long)789654123)
+                .bookId(789654123L)
                 .bookName("Annabell")
                 .bookPrice(789.0)
                 .bookLogo("URL")
@@ -152,7 +148,7 @@ public class BookRepositoryTests
                 .bookQuantity(85).build();
 
         BookRequestDto bookRequestDto1=BookRequestDto.builder()
-                .bookId((long)789654121)
+                .bookId(789654121L)
                 .bookName("Chill")
                 .bookPrice(789.0)
                 .bookLogo("URL")
@@ -161,7 +157,7 @@ public class BookRepositoryTests
                 .bookQuantity(85).build();
 
         BookRequestDto bookRequestDto2=BookRequestDto.builder()
-                .bookId((long)789654126)
+                .bookId(789654126L)
                 .bookName("Zing")
                 .bookPrice(989.0)
                 .bookLogo("URL")
@@ -193,7 +189,7 @@ public class BookRepositoryTests
     public void sortByBookPriceTest()
     {
         BookRequestDto bookRequestDto=BookRequestDto.builder()
-                .bookId((long)789654123)
+                .bookId(789654123L)
                 .bookName("Annabell")
                 .bookPrice(189.0)
                 .bookLogo("URL")
@@ -202,7 +198,7 @@ public class BookRepositoryTests
                 .bookQuantity(85).build();
 
         BookRequestDto bookRequestDto1=BookRequestDto.builder()
-                .bookId((long)789654121)
+                .bookId(789654121L)
                 .bookName("Chill")
                 .bookPrice(389.0)
                 .bookLogo("URL")
@@ -211,7 +207,7 @@ public class BookRepositoryTests
                 .bookQuantity(85).build();
 
         BookRequestDto bookRequestDto2=BookRequestDto.builder()
-                .bookId((long)789654126)
+                .bookId(789654126L)
                 .bookName("Zing")
                 .bookPrice(989.0)
                 .bookLogo("URL")
@@ -247,7 +243,7 @@ public class BookRepositoryTests
     public void updateBookTest()
     {
         BookRequestDto bookRequestDto=BookRequestDto.builder()
-                .bookId((long)789654123)
+                .bookId(789654123L)
                 .bookName("ABCD")
                 .bookPrice(789.0)
                 .bookLogo("URL")
@@ -257,7 +253,6 @@ public class BookRepositoryTests
 
         ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.addBook(bookRequestDto);
 
-        Assertions.assertThat(response.getStatusCode().is2xxSuccessful());
         Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookRequestDto.getBookId());
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.CREATED.value());
 

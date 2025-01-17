@@ -21,13 +21,9 @@ import java.util.List;
 @RequestMapping("/book")
 public class BookController
 {
-    @Autowired
     private BookService bookService;
-
-    private final BookMapper bookMapper=new BookMapper();
-
-    @Autowired
     private UserMapper userMapper;
+    private final BookMapper bookMapper=new BookMapper();
 
     @PostMapping("/addBook")
     public ResponseEntity<ResponseStructure<BookResponseDto>> addBook(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody BookRequestDto bookRequestDTO)

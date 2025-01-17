@@ -7,6 +7,8 @@ import com.example.demo.responsedto.RegisterResponseDto;
 import com.example.demo.serviceimpl.JWTService;
 import com.example.demo.serviceimpl.MyUserDetailsService;
 import com.example.demo.util.ResponseStructure;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;

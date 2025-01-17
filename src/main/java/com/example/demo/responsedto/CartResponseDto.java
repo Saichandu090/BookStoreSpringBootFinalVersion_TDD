@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class CartResponseDto
 {
     private Long cartId;
-    private Double cartPrice;
+    private Long bookId;
     private Integer cartQuantity;
 }
