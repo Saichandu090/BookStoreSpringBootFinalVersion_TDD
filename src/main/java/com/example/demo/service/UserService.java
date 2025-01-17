@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 
 public interface UserService
 {
-    ResponseEntity<ResponseStructure<RegisterResponseDto>> registerUser(@Valid UserRegisterDTO registerDTO);
+    ResponseEntity<ResponseStructure<RegisterResponseDto>> registerUser(UserRegisterDTO registerDTO);
 
-    ResponseEntity<ResponseStructure<LoginResponseDto>> login(@Valid UserLoginDTO loginDTO);
+    ResponseEntity<ResponseStructure<LoginResponseDto>> login(UserLoginDTO loginDTO);
 }

@@ -8,7 +8,7 @@ import com.example.demo.service.WishListService;
 import com.example.demo.util.ResponseStructure;
 import com.example.demo.util.Roles;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,12 +17,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/wishlist")
+@AllArgsConstructor
 public class WishListController
 {
-    @Autowired
     private WishListService wishListService;
-
-    @Autowired
     private UserMapper userMapper;
     private final WishListMapper wishListMapper=new WishListMapper();
 
@@ -35,16 +33,5 @@ public class WishListController
             return new ResponseEntity<>(wishListMapper.headerError(), HttpStatus.UNAUTHORIZED);
         }
         return wishListService.addToWishList(userDetails.getUsername(),wishListRequestDto);
-    }
-
-    @DeleteMapping("/removeFromWishList/{bookId}")
-    public ResponseEntity<ResponseStructure<WishListResponseDto>> removeFromWishList(@RequestHeader(value = "Authorization")String authHeader, @PathVariable Long bookId)
-    {
-        UserDetails userDetails = userMapper.validateUserToken(authHeader);
-        if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
-        {
-            return new ResponseEntity<>(wishListMapper.headerError(), HttpStatus.UNAUTHORIZED);
-        }
-        return wishListService.removeFromWishList(userDetails.getUsername(),bookId);
     }
 }

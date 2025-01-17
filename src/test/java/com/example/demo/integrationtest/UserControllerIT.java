@@ -19,9 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
 import java.time.LocalDate;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -52,7 +50,7 @@ public class UserControllerIT
     }
 
     @Test
-    public void registerUserTest()
+    void registerUserTest()
     {
         UserRegisterDTO userRegisterDTO=UserRegisterDTO.builder()
                 .firstName("Test")

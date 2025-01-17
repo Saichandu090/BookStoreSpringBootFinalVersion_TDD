@@ -8,7 +8,7 @@ import com.example.demo.service.AddressService;
 import com.example.demo.util.ResponseStructure;
 import com.example.demo.util.Roles;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,12 +19,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/address")
+@AllArgsConstructor
 public class AddressController
 {
-    @Autowired
     private AddressService addressService;
-
-    @Autowired
     private UserMapper userMapper;
 
     private final AddressMapper addressMapper=new AddressMapper();

@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookRequestDto
 {
+    @NotNull
     private Long bookId;
 
     @NotNull

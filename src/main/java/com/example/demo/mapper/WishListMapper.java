@@ -54,4 +54,5 @@ public class WishListMapper
                 .setMessage("Book "+bookName+" has successfully removed from wishlist successfully")
                 .setData(null));
     }
+
 }

@@ -1,6 +1,5 @@
 package com.example.demo.exception;
 
-import com.example.demo.entity.Book;
 import com.example.demo.util.ResponseStructure;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +10,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler
 {
+    private static final String data="FAILURE";
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ResponseStructure<String>> illegalArgument(IllegalArgumentException exception)
     {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData("Failure")
+                .setData(data)
                 .setStatus(HttpStatus.BAD_REQUEST.value()));
     }
 
@@ -25,7 +26,7 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData("Failure")
+                .setData(data)
                 .setStatus(HttpStatus.BAD_REQUEST.value()));
     }
 
@@ -34,7 +35,7 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData("Failure")
+                .setData(data)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 
@@ -43,7 +44,7 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData("Failure")
+                .setData(data)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 
@@ -52,7 +53,16 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData("Failure")
+                .setData(data)
+                .setStatus(HttpStatus.NOT_FOUND.value()));
+    }
+
+    @ExceptionHandler(CartNotFoundException.class)
+    public ResponseEntity<ResponseStructure<String>> cartNotFound(CartNotFoundException exception)
+    {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
+                .setMessage(exception.getMessage())
+                .setData(data)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 }

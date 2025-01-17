@@ -8,6 +8,4 @@ import org.springframework.http.ResponseEntity;
 public interface WishListService
 {
     ResponseEntity<ResponseStructure<WishListResponseDto>> addToWishList(String email,WishListRequestDto wishListRequestDto);
-
-    ResponseEntity<ResponseStructure<WishListResponseDto>> removeFromWishList(String username, Long bookId);
 }

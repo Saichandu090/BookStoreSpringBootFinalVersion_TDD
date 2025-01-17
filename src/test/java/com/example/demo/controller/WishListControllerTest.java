@@ -155,14 +155,14 @@ class WishListControllerTest
     }
 
     @Test
-    public void wishListController_RemoveFromWishList_MustReturnOkStatusCode() throws Exception
+    public void wishListController_AddToWishListWishList_IfBookAlreadyPresent() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<WishListResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book removed from wishlist successfully",null);
-        given(wishListService.removeFromWishList(anyString(),anyLong())).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        given(wishListService.addToWishList(anyString(),any(WishListRequestDto.class))).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
-        mockMvc.perform(delete("/wishlist/removeFromWishList/{bookId}",1)
+        mockMvc.perform(post("/wishlist/addToWishList")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
@@ -171,34 +171,5 @@ class WishListControllerTest
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Book removed from wishlist successfully"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.OK.value()));
-    }
-
-    @Test
-    public void wishListController_RemoveFromWishList_TestForMissingHeader() throws Exception
-    {
-        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
-        mockMvc.perform(delete("/wishlist/removeFromWishList/{bookId}",1)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(wishListRequestDto)))
-                .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
-    }
-
-    @Test
-    public void wishListController_RemoveFromWishList_TestForMissingPathVariable() throws Exception
-    {
-        String token="Bearer-token";
-        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
-
-        mockMvc.perform(delete("/wishlist/removeFromWishList")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization",token)
-                        .content(objectMapper.writeValueAsString(wishListRequestDto)))
-                .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()));
     }
 }

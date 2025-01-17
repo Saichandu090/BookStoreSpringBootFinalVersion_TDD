@@ -93,7 +93,7 @@ public class AddressControllerIT
 
 
     @Test
-    public void addAddress_ValidTest()
+    void addAddress_ValidTest()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();

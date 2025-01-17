@@ -9,7 +9,6 @@ import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WishListRepository;
 import com.example.demo.requestdto.WishListRequestDto;
-import com.example.demo.responsedto.BookResponseDto;
 import com.example.demo.responsedto.WishListResponseDto;
 import com.example.demo.serviceimpl.WishListServiceImpl;
 import com.example.demo.util.ResponseStructure;
@@ -21,13 +20,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -120,45 +116,31 @@ class WishListServiceTest
     }
 
     @Test
-    public void wishListService_RemoveFromWishList_MustReturnOkStatusCode()
+    public void wishListService_AddToWishList_IfBookIsAlreadyPresent()
     {
+        WishList dummy=WishList.builder().userId(12L).bookId(book.getBookId()).id(1L).build();
         List<WishList> wishLists=new ArrayList<>();
-        wishLists.add(wishList);
+        wishLists.add(dummy);
 
         User user1=User.builder()
-                        .wishList(wishLists).build();
-        when(wishListRepository.saveAll(anyList())).thenReturn(List.of());
+                .userId(12L)
+                .email("Testing")
+                .wishList(wishLists).build();
+
+        WishListRequestDto wishListRequestDto1=WishListRequestDto.builder().bookId(book.getBookId()).build();
+
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));
         when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
+        when(wishListRepository.saveAll(anyList())).thenReturn(List.of());
 
-        ResponseEntity<ResponseStructure<WishListResponseDto>> response=wishListService.removeFromWishList(user.getEmail(),book.getBookId());
+        ResponseEntity<ResponseStructure<WishListResponseDto>> response=wishListService.addToWishList(user1.getEmail(),wishListRequestDto1);
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(200,response.getBody().getStatus());
+        assertEquals("Book "+book.getBookName()+" has successfully removed from wishlist successfully",response.getBody().getMessage());
 
         verify(wishListRepository,times(1)).saveAll(anyList());
         verify(userRepository,times(1)).findByEmail(anyString());
         verify(bookRepository,times(1)).findById(anyLong());
     }
-
-    @Test
-    public void wishListService_RemoveFromWishList_TestWhenBookIdIsWrong()
-    {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-        when(bookRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        assertThrows(BookNotFoundException.class,()->wishListService.removeFromWishList(user.getEmail(),book.getBookId()));
-
-        verify(bookRepository,times(1)).findById(anyLong());
-        verify(userRepository,times(1)).findByEmail(anyString());
-    }
-
-    @Test
-    public void wishListService_RemoveFromWishList_TestWhenUserEmailIsWrong()
-    {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        assertThrows(UserNotFoundException.class,()->wishListService.removeFromWishList(user.getEmail(),book.getBookId()));
-        verify(userRepository,times(1)).findByEmail(anyString());
-    }
-
 }

@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-public class WishListRequestDto
+@NoArgsConstructor
+@AllArgsConstructor
+public class CartRequestDto
 {
-    @NotNull(message = "Book Id must not be null")
+    @NotNull(message = "Book id should not be empty")
     private Long bookId;
 }

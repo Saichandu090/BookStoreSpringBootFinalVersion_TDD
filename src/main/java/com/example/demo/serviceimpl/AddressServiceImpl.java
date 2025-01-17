@@ -12,11 +12,8 @@ import com.example.demo.responsedto.AddressResponseDto;
 import com.example.demo.service.AddressService;
 import com.example.demo.util.ResponseStructure;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
