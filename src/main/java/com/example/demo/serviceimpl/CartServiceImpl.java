@@ -61,32 +61,42 @@ public class CartServiceImpl implements CartService
 
 
 
-
     //Helper Methods
     private ResponseEntity<ResponseStructure<CartResponseDto>> removeBookFromUserCart(Iterator<Cart> iterator,Cart cart)
     {
-        Long bookId=null;
+        Long bookId = processUserCart(iterator, cart);
+        Book book=updateBookQuantity(getBook(bookId));
+        return cartMapper.mapToSuccessRemoveFromCart(book.getBookName());
+    }
+
+    private Long processUserCart(Iterator<Cart> iterator, Cart cart) {
         while (iterator.hasNext()) {
             Cart userCart = iterator.next();
             if (userCart.getCartId().equals(cart.getCartId())) {
-                if (userCart.getCartQuantity() <= 1) {
-                    iterator.remove();
-                    bookId=userCart.getBookId();
-                    cartRepository.delete(userCart);
-                } else {
-                    userCart.setCartQuantity(userCart.getCartQuantity() - 1);
-                    cartRepository.save(userCart);
-                    bookId=userCart.getBookId();
-                }
-                break;
+                return handleCartUpdate(userCart, iterator);
             }
         }
-        Book book=getBook(bookId);
-        book.setBookQuantity(book.getBookQuantity()+1);
-        book.setCartBookQuantity(book.getCartBookQuantity()-1);
-        return cartMapper.mapToSuccessRemoveFromCart(bookRepository.save(book).getBookName());
+        throw new CartNotFoundException("Cart not found");
     }
 
+    private Long handleCartUpdate(Cart userCart, Iterator<Cart> iterator) {
+        Long bookId = userCart.getBookId();
+        if (userCart.getCartQuantity() <= 1) {
+            iterator.remove();
+            cartRepository.delete(userCart);
+        } else {
+            userCart.setCartQuantity(userCart.getCartQuantity() - 1);
+            cartRepository.save(userCart);
+        }
+        return bookId;
+    }
+
+    private Book updateBookQuantity(Book book)
+    {
+        book.setBookQuantity(book.getBookQuantity()+1);
+        book.setCartBookQuantity(book.getCartBookQuantity()-1);
+        return bookRepository.save(book);
+    }
 
 
     private ResponseEntity<ResponseStructure<CartResponseDto>> addBookToCart(User user,Long bookId)

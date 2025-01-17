@@ -8,11 +8,9 @@ import com.example.demo.integrationtest.repo.UserH2Repository;
 import com.example.demo.requestdto.CartRequestDto;
 import com.example.demo.requestdto.UserLoginDTO;
 import com.example.demo.requestdto.UserRegisterDTO;
-import com.example.demo.requestdto.WishListRequestDto;
 import com.example.demo.responsedto.CartResponseDto;
 import com.example.demo.responsedto.LoginResponseDto;
 import com.example.demo.responsedto.RegisterResponseDto;
-import com.example.demo.responsedto.WishListResponseDto;
 import com.example.demo.service.CartService;
 import com.example.demo.util.ResponseStructure;
 import org.junit.jupiter.api.BeforeAll;
@@ -25,12 +23,10 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -312,5 +308,21 @@ public class CartControllerIT
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/removeFromCart/1", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponseDto>>() {}));
         assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
+    }
+
+
+    @Test
+    void removeFromCart_IfCartNotFound()
+    {
+        addToCart_ExampleForCallingMultipleTimes();
+
+        authToken=getAuthToken();
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+authToken);
+        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/removeFromCart/2", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponseDto>>() {}));
+        assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
+        exception.printStackTrace();
     }
 }

@@ -7,6 +7,8 @@ import com.example.demo.util.ResponseStructure;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 public class WishListMapper
 {
     public ResponseStructure<WishListResponseDto> headerError()
@@ -17,12 +19,12 @@ public class WishListMapper
                 .setStatus(HttpStatus.UNAUTHORIZED.value());
     }
 
-    public ResponseStructure<WishListResponseDto> noAuthority()
+    public ResponseStructure<List<WishListResponseDto>> noAuthority()
     {
-        return new ResponseStructure<WishListResponseDto>()
-                .setStatus(HttpStatus.FORBIDDEN.value())
+        return new ResponseStructure<List<WishListResponseDto>>()
+                .setStatus(HttpStatus.UNAUTHORIZED.value())
                 .setData(null)
-                .setMessage("No Authority");
+                .setMessage("Token Error");
     }
 
     public WishListResponseDto mapWishListToResponse(WishList saved)
@@ -55,4 +57,20 @@ public class WishListMapper
                 .setData(null));
     }
 
+    public ResponseEntity<ResponseStructure<List<WishListResponseDto>>> mapToNoContentInWishList()
+    {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<WishListResponseDto>>()
+                .setStatus(HttpStatus.NO_CONTENT.value())
+                .setMessage("WishList is Empty")
+                .setData(null));
+    }
+
+    public ResponseEntity<ResponseStructure<List<WishListResponseDto>>> mapToSuccessGetWishList(List<WishList> userWishList)
+    {
+        List<WishListResponseDto> wishListResponseDto=userWishList.stream().map(wishList -> new WishListResponseDto(wishList.getId(), wishList.getBookId())).toList();
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<WishListResponseDto>>()
+                .setMessage("Wishlist fetched successfully")
+                .setData(wishListResponseDto)
+                .setStatus(HttpStatus.OK.value()));
+    }
 }

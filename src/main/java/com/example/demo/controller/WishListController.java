@@ -15,6 +15,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/wishlist")
 @AllArgsConstructor
@@ -33,5 +35,16 @@ public class WishListController
             return new ResponseEntity<>(wishListMapper.headerError(), HttpStatus.UNAUTHORIZED);
         }
         return wishListService.addToWishList(userDetails.getUsername(),wishListRequestDto);
+    }
+
+    @GetMapping("/getWishList")
+    public ResponseEntity<ResponseStructure<List<WishListResponseDto>>> getWishList(@RequestHeader(value = "Authorization")String authHeader)
+    {
+        UserDetails userDetails = userMapper.validateUserToken(authHeader);
+        if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
+        {
+            return new ResponseEntity<>(wishListMapper.noAuthority(), HttpStatus.UNAUTHORIZED);
+        }
+        return wishListService.getWishList(userDetails.getUsername());
     }
 }

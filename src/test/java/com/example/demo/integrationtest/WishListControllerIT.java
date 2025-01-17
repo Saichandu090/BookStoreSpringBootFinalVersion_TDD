@@ -190,4 +190,65 @@ public class WishListControllerIT
         assertEquals(1,wishLists3.size());
     }
 
+
+
+    @Test
+    void getWishList_ValidTest()
+    {
+        userAuthToken=getUSERAuthToken();
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+userAuthToken);
+        WishListRequestDto requestDto=WishListRequestDto.builder().bookId(1233L).build();
+
+        HttpEntity<Object> httpEntity=new HttpEntity<>(requestDto,httpHeaders);
+        ResponseEntity<ResponseStructure<WishListResponseDto>> response=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<WishListResponseDto>>() {});
+        assertEquals(HttpStatus.CREATED,response.getStatusCode());
+        assertEquals(1233,response.getBody().getData().getBookId());
+        User user1=userH2Repository.findByEmail("ganesh@gmail.com").get();
+        List<WishList> wishLists1=user1.getWishList();
+        assertEquals(1,wishLists1.size());
+
+        WishListRequestDto requestDto2=WishListRequestDto.builder().bookId(1234L).build();
+
+        HttpEntity<Object> httpEntity2=new HttpEntity<>(requestDto2,httpHeaders);
+
+        ResponseEntity<ResponseStructure<WishListResponseDto>> response2=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<WishListResponseDto>>() {});
+        assertEquals(HttpStatus.CREATED,response2.getStatusCode());
+        assertEquals(1234,response2.getBody().getData().getBookId());
+        User user2=userH2Repository.findByEmail("ganesh@gmail.com").get();
+        List<WishList> wishLists2=user2.getWishList();
+        assertEquals(2,wishLists2.size());
+
+
+        //Fetching the wishlist
+        HttpEntity<Object> httpEntity3=new HttpEntity<>(httpHeaders);
+
+        ResponseEntity<ResponseStructure<List<WishListResponseDto>>> response3=restTemplate.exchange(baseUrl + "/getWishList", HttpMethod.GET, httpEntity3, new ParameterizedTypeReference<ResponseStructure<List<WishListResponseDto>>>() {});
+        assertEquals(HttpStatus.OK,response3.getStatusCode());
+        assertEquals(2,response3.getBody().getData().size());
+
+
+        // Removing 1 from wishlist
+        WishListRequestDto requestDto4=WishListRequestDto.builder().bookId(1234L).build();
+        HttpEntity<Object> httpEntity4=new HttpEntity<>(requestDto4,httpHeaders);
+
+        ResponseEntity<ResponseStructure<WishListResponseDto>> response4=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity4, new ParameterizedTypeReference<ResponseStructure<WishListResponseDto>>() {});
+        assertEquals(HttpStatus.OK,response4.getStatusCode());
+        assertEquals(1234,response2.getBody().getData().getBookId());
+        User user4=userH2Repository.findByEmail("ganesh@gmail.com").get();
+        List<WishList> wishLists4=user4.getWishList();
+        assertEquals(1,wishLists4.size());
+
+
+        //Fetching user wishlist again to see the difference
+        HttpEntity<Object> httpEntity5=new HttpEntity<>(httpHeaders);
+
+        ResponseEntity<ResponseStructure<List<WishListResponseDto>>> response5=restTemplate.exchange(baseUrl + "/getWishList", HttpMethod.GET, httpEntity5, new ParameterizedTypeReference<ResponseStructure<List<WishListResponseDto>>>() {});
+        assertEquals(HttpStatus.OK,response5.getStatusCode());
+        assertEquals(1,response5.getBody().getData().size());
+
+        User user=userH2Repository.findByEmail("ganesh@gmail.com").get();
+        assertEquals(1,user.getWishList().size());
+    }
+
 }

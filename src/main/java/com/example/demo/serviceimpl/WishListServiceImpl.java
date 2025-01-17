@@ -41,6 +41,16 @@ public class WishListServiceImpl implements WishListService
             return removeBookFromWishList(user,book);
     }
 
+    @Override
+    public ResponseEntity<ResponseStructure<List<WishListResponseDto>>> getWishList(String email)
+    {
+        User user=getUser(email);
+        List<WishList> userWishList=user.getWishList();
+        if(userWishList.isEmpty())
+            return wishListMapper.mapToNoContentInWishList();
+        return wishListMapper.mapToSuccessGetWishList(userWishList);
+    }
+
 
     //Helper Methods
     public ResponseEntity<ResponseStructure<WishListResponseDto>> addBookToWishList(User user, Book book)
