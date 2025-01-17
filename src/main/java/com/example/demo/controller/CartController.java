@@ -15,6 +15,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/cart")
 @AllArgsConstructor
@@ -44,5 +46,16 @@ public class CartController
             return cartService.removeFromCart(userDetails.getUsername(),cartId);
         }
         return new ResponseEntity<>(cartMapper.noAuthority(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @GetMapping("/getCart")
+    public ResponseEntity<ResponseStructure<List<CartResponseDto>>> getCartItems(@RequestHeader(value = "Authorization")String authHeader)
+    {
+        UserDetails userDetails = userMapper.validateUserToken(authHeader);
+        if(userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
+        {
+            return cartService.getCartItems(userDetails.getUsername());
+        }
+        return new ResponseEntity<>(cartMapper.noAuthority("No Authority"), HttpStatus.UNAUTHORIZED);
     }
 }

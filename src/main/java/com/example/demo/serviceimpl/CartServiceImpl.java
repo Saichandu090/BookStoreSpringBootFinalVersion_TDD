@@ -59,6 +59,16 @@ public class CartServiceImpl implements CartService
         return removeBookFromUserCart(iterator,cart);
     }
 
+    @Override
+    public ResponseEntity<ResponseStructure<List<CartResponseDto>>> getCartItems(String email)
+    {
+        User user=getUser(email);
+        List<Cart> userCarts=user.getCarts();
+        if(userCarts.isEmpty())
+            return cartMapper.mapToCartIsEmpty();
+        List<CartResponseDto> cartResponseDto=userCarts.stream().map(cart -> new CartResponseDto(cart.getCartId(),cart.getBookId(),cart.getCartQuantity())).toList();
+        return cartMapper.mapToSuccessGetCart(cartResponseDto);
+    }
 
 
     //Helper Methods

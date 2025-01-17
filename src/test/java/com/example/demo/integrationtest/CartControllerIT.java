@@ -325,4 +325,65 @@ public class CartControllerIT
         assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
         exception.printStackTrace();
     }
+
+
+
+    @Test
+    void getCart_ValidTest()
+    {
+        authToken=getAuthToken();
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+authToken);
+        addToCart_ExampleForCallingMultipleTimes();
+        addToCart_ExampleForCallingMultipleTimes();
+        addToCart_ExampleForCallingMultipleTimes();
+
+        CartRequestDto cartRequestDto=CartRequestDto.builder().bookId(2L).build();
+        HttpEntity<Object> postHttpEntity=new HttpEntity<>(cartRequestDto,httpHeaders);
+
+        ResponseEntity<ResponseStructure<CartResponseDto>> response1=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, postHttpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponseDto>>() {});
+        assertEquals(HttpStatus.OK,response1.getStatusCode());
+
+
+        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+
+        ResponseEntity<ResponseStructure<List<CartResponseDto>>> response=restTemplate.exchange(baseUrl + "/getCart", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<List<CartResponseDto>>>() {});
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(3,response.getBody().getData().getFirst().getCartQuantity());
+        assertEquals(1,response.getBody().getData().getFirst().getCartId());
+        assertEquals(1,response.getBody().getData().getFirst().getBookId());
+
+        User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
+        assertEquals(2,user.getCarts().size());
+    }
+
+
+    @Test
+    void getCart_CartIsEmpty()
+    {
+        authToken=getAuthToken();
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+authToken);
+        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+
+        ResponseEntity<ResponseStructure<List<CartResponseDto>>> response=restTemplate.exchange(baseUrl + "/getCart", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<List<CartResponseDto>>>() {});
+
+        assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
+
+        User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
+        assertEquals(0,user.getCarts().size());
+    }
+
+    @Test
+    void getCart_TokenIsInvalid()
+    {
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer token");
+        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/getCart", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<List<CartResponseDto>>>() {}));
+        assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
+        exception.printStackTrace();
+    }
 }

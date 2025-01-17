@@ -33,10 +33,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -238,5 +240,48 @@ class CartControllerTest
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()));
+    }
+
+
+    @Test
+    void cartController_getCart_ValidTest() throws Exception
+    {
+        String token="Bearer-token";
+        ResponseStructure<List<CartResponseDto>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"User cart fetched successfully",List.of(cartResponseDto));
+        when(cartService.getCartItems(ArgumentMatchers.anyString())).thenReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
+
+        mockMvc.perform(get("/cart/getCart")
+                        .header("Authorization",token)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data[0].cartId").value(1))
+                .andExpect(jsonPath("$.data[0]").value(cartResponseDto));
+    }
+
+    @Test
+    void cartController_getCart_IfTokenIsMissing() throws Exception
+    {
+        mockMvc.perform(get("/cart/getCart")
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
+    }
+
+    @Test
+    void cartController_getCart_IfTokenIsInvalid() throws Exception
+    {
+        String token="jwt";
+        when(userMapper.validateUserToken(anyString())).thenReturn(null);
+
+        mockMvc.perform(get("/cart/getCart")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401));
     }
 }

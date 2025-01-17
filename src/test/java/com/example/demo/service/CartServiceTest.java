@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -144,5 +143,35 @@ class CartServiceTest
         assertThrows(CartNotFoundException.class,()->cartService.removeFromCart(user.getEmail(),cart.getCartId()));
 
         verify(cartRepository,times(1)).findById(anyLong());
+    }
+
+
+    @Test
+    void cartService_GetCart_ValidTest()
+    {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+
+        ResponseEntity<ResponseStructure<List<CartResponseDto>>> response=cartService.getCartItems(user.getEmail());
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(1,response.getBody().getData().getFirst().getCartId());
+        assertEquals(1,response.getBody().getData().getFirst().getBookId());
+        assertEquals(1,response.getBody().getData().getFirst().getCartQuantity());
+
+        verify(userRepository,times(1)).findByEmail(anyString());
+    }
+
+    @Test
+    void cartService_GetCart_IfCartIsEmpty()
+    {
+        User user1=User.builder().email("test@gmail.com").carts(new ArrayList<>()).build();
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));
+
+        ResponseEntity<ResponseStructure<List<CartResponseDto>>> response=cartService.getCartItems(user.getEmail());
+
+        assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
+        assertEquals("Cart is Empty",response.getBody().getMessage());
+
+        verify(userRepository,times(1)).findByEmail(anyString());
     }
 }

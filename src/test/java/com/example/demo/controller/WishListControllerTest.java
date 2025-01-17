@@ -32,12 +32,13 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @WebMvcTest(controllers = WishListController.class)
@@ -155,7 +156,7 @@ class WishListControllerTest
     }
 
     @Test
-    public void wishListController_AddToWishListWishList_IfBookAlreadyPresent() throws Exception
+    public void wishListController_AddToWishList_IfBookAlreadyPresent() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<WishListResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book removed from wishlist successfully",null);
@@ -171,5 +172,35 @@ class WishListControllerTest
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Book removed from wishlist successfully"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.OK.value()));
+    }
+
+
+    @Test
+    public void wishListController_GetWishList_ValidTest() throws Exception
+    {
+        String token="Bearer-token";
+        ResponseStructure<List<WishListResponseDto>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"User wishlist fetched successfully",List.of(wishListResponseDto));
+        given(wishListService.getWishList(anyString())).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
+
+        mockMvc.perform(get("/wishlist/getWishList")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("User wishlist fetched successfully"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0]").value(wishListResponseDto));
+    }
+
+
+    @Test
+    public void wishListController_GetWishList_IfTokenIsInvalidOrMissing() throws Exception
+    {
+        mockMvc.perform(get("/wishlist/getWishList")
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
     }
 }

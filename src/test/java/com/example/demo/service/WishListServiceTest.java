@@ -58,6 +58,7 @@ class WishListServiceTest
                 .password("test@90909")
                 .dob(LocalDate.of(1999,8,12))
                 .firstName("Mock")
+                .wishList(new ArrayList<>())
                 .lastName("Testing")
                 .role("USER")
                 .registeredDate(LocalDate.now()).build();
@@ -142,5 +143,45 @@ class WishListServiceTest
         verify(wishListRepository,times(1)).saveAll(anyList());
         verify(userRepository,times(1)).findByEmail(anyString());
         verify(bookRepository,times(1)).findById(anyLong());
+    }
+
+
+    @Test
+    public void wishListService_GetWishList_ValidTest()
+    {
+        WishList dummy=WishList.builder().userId(12L).bookId(book.getBookId()).id(1L).build();
+        List<WishList> wishLists=new ArrayList<>();
+        wishLists.add(dummy);
+
+        User user1=User.builder()
+                .userId(12L)
+                .email("Testing")
+                .wishList(wishLists).build();
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));
+
+        ResponseEntity<ResponseStructure<List<WishListResponseDto>>> response=wishListService.getWishList(user1.getEmail());
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(200,response.getBody().getStatus());
+        assertEquals("Wishlist fetched successfully",response.getBody().getMessage());
+        assertEquals(1,response.getBody().getData().getFirst().getBookId());
+
+        verify(userRepository,times(1)).findByEmail(anyString());
+    }
+
+
+    @Test
+    public void wishListService_GetWishList_IfWishListIsEmpty()
+    {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+
+        ResponseEntity<ResponseStructure<List<WishListResponseDto>>> response=wishListService.getWishList(user.getEmail());
+
+        assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
+        assertEquals(204,response.getBody().getStatus());
+        assertEquals("WishList is Empty",response.getBody().getMessage());
+
+        verify(userRepository,times(1)).findByEmail(anyString());
     }
 }

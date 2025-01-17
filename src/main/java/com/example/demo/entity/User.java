@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Table(name = "`users`")
@@ -30,18 +31,18 @@ public class User
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id",referencedColumnName = "userId")
     @JsonIgnore
-    private List<Cart> carts;
+    private List<Cart> carts=new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id",referencedColumnName = "userId")
     @JsonIgnore
-    private List<Order> order;
+    private List<Order> order=new ArrayList<>();
 
     @OneToMany(mappedBy = "user",fetch = FetchType.EAGER)
-    private List<Address> addresses;
+    private List<Address> addresses=new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id",referencedColumnName = "userId")
     @JsonIgnore
-    private List<WishList> wishList;
+    private List<WishList> wishList=new ArrayList<>();
 }

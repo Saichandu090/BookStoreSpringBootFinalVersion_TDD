@@ -21,10 +21,6 @@ public class Order
     private LocalDate orderDate;
     private Double orderPrice;
     private Integer orderQuantity;
-
-    @ManyToMany
-    private List<Cart> carts=new ArrayList<>();
-
     private Boolean cancelOrder;
 
     @Column(name = "address_id")
@@ -32,4 +28,7 @@ public class Order
 
     @Column(name = "user_id")
     private Long userId;
+
+    @ManyToMany
+    private List<Cart> carts=new ArrayList<>();
 }

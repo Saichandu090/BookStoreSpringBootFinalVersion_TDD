@@ -7,12 +7,22 @@ import com.example.demo.util.ResponseStructure;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 public class CartMapper
 {
     public ResponseStructure<CartResponseDto> noAuthority()
     {
         return new ResponseStructure<CartResponseDto>()
                 .setMessage("No Authority")
+                .setData(null)
+                .setStatus(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    public ResponseStructure<List<CartResponseDto>> noAuthority(String message)
+    {
+        return new ResponseStructure<List<CartResponseDto>>()
+                .setMessage(message)
                 .setData(null)
                 .setStatus(HttpStatus.UNAUTHORIZED.value());
     }
@@ -39,5 +49,21 @@ public class CartMapper
                 .setData(new CartResponseDto(cart.getCartId(), cart.getBookId(),cart.getCartQuantity()))
                 .setMessage("Book added to cart successfully")
                 .setStatus(HttpStatus.OK.value()));
+    }
+
+    public ResponseEntity<ResponseStructure<List<CartResponseDto>>> mapToCartIsEmpty()
+    {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<CartResponseDto>>()
+                .setStatus(HttpStatus.NO_CONTENT.value())
+                .setMessage("Cart is Empty")
+                .setData(null));
+    }
+
+    public ResponseEntity<ResponseStructure<List<CartResponseDto>>> mapToSuccessGetCart(List<CartResponseDto> cartResponseDto)
+    {
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<CartResponseDto>>()
+                .setMessage("User cart fetched successfully")
+                .setStatus(HttpStatus.OK.value())
+                .setData(cartResponseDto));
     }
 }
