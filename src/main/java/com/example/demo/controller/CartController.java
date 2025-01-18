@@ -48,6 +48,17 @@ public class CartController
         return new ResponseEntity<>(cartMapper.noAuthority(), HttpStatus.UNAUTHORIZED);
     }
 
+    @DeleteMapping("/clearCart")
+    public ResponseEntity<ResponseStructure<CartResponseDto>> clearCart(@RequestHeader(value = "Authorization")String authHeader)
+    {
+        UserDetails userDetails = userMapper.validateUserToken(authHeader);
+        if(userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
+        {
+            return cartService.clearCart(userDetails.getUsername());
+        }
+        return new ResponseEntity<>(cartMapper.noAuthority(), HttpStatus.UNAUTHORIZED);
+    }
+
     @GetMapping("/getCart")
     public ResponseEntity<ResponseStructure<List<CartResponseDto>>> getCartItems(@RequestHeader(value = "Authorization")String authHeader)
     {

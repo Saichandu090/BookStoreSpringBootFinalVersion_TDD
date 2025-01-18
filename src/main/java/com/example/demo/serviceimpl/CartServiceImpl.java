@@ -70,8 +70,40 @@ public class CartServiceImpl implements CartService
         return cartMapper.mapToSuccessGetCart(cartResponseDto);
     }
 
+    @Transactional
+    @Override
+    public ResponseEntity<ResponseStructure<CartResponseDto>> clearCart(String email)
+    {
+        User user=getUser(email);
+        List<Cart> userCarts=user.getCarts();
+        if(userCarts.isEmpty())
+            return cartMapper.mapToNoContentCartIsEmpty();
+        Iterator<Cart> cartIterator=userCarts.iterator();
+        while (cartIterator.hasNext()) {
+            Cart cart = cartIterator.next();
+            deleteCartAndUpdateBook(cart, cartIterator);
+        }
+        return cartMapper.mapToSuccessClearCart();
+    }
+
 
     //Helper Methods
+    private void deleteCartAndUpdateBook(Cart cart,Iterator<Cart> cartIterator)
+    {
+        while (cart.getCartQuantity() > 0) {
+            cart.setCartQuantity(cart.getCartQuantity() - 1);
+            updateBookQuantity(getBook(cart.getBookId()));
+            if (cart.getCartQuantity() == 0) {
+                cartIterator.remove();
+                cartRepository.delete(cart);
+                break;
+            } else {
+                cartRepository.save(cart);
+            }
+        }
+    }
+
+
     private ResponseEntity<ResponseStructure<CartResponseDto>> removeBookFromUserCart(Iterator<Cart> iterator,Cart cart)
     {
         Long bookId = processUserCart(iterator, cart);
@@ -118,11 +150,7 @@ public class CartServiceImpl implements CartService
                 .stream()
                 .filter(cart -> cart.getBookId().equals(bookId))
                 .findFirst()
-                .orElseGet(() -> Cart.builder()
-                        .bookId(bookId)
-                        .cartQuantity(0)
-                        .userId(user.getUserId())
-                        .build());
+                .orElseGet(() -> Cart.builder().bookId(bookId).cartQuantity(0).userId(user.getUserId()).build());
         userCart.setCartQuantity(userCart.getCartQuantity()+1);
         bookRepository.save(book);
         return cartMapper.mapToSuccessAddToCart(cartRepository.save(userCart));

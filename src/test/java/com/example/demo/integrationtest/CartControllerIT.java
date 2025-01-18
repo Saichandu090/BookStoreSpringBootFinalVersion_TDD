@@ -386,4 +386,76 @@ public class CartControllerIT
         assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
         exception.printStackTrace();
     }
+
+
+
+    @Test
+    void clearCart_ValidTest()
+    {
+        addToCart_ExampleForCallingMultipleTimes();
+        addToCart_ExampleForCallingMultipleTimes();
+
+        authToken=getAuthToken();
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+authToken);
+        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+
+        CartRequestDto cartRequestDto=CartRequestDto.builder().bookId(2L).build();
+        HttpEntity<Object> postHttpEntity=new HttpEntity<>(cartRequestDto,httpHeaders);
+
+        ResponseEntity<ResponseStructure<CartResponseDto>> response=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, postHttpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponseDto>>() {});
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+
+        Book book=bookH2Repository.findById(1L).get();
+        assertEquals(1,book.getBookQuantity());
+
+        Book second=bookH2Repository.findById(2L).get();
+        assertEquals(168,second.getBookQuantity());
+
+        User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
+        assertEquals(2,user.getCarts().size());
+
+        ResponseEntity<ResponseStructure<CartResponseDto>> response2=restTemplate.exchange(baseUrl + "/clearCart", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponseDto>>() {});
+
+        assertEquals(HttpStatus.OK,response2.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response2.getBody().getStatus());
+        assertEquals("Cart cleared successfully",response2.getBody().getMessage());
+
+        Book book2=bookH2Repository.findById(1L).get();
+        assertEquals(3,book2.getBookQuantity());
+
+        Book secondBook=bookH2Repository.findById(2L).get();
+        assertEquals(169,secondBook.getBookQuantity());
+
+        User user2=userH2Repository.findByEmail("dinesh@gmail.com").get();
+        assertEquals(0,user2.getCarts().size());
+    }
+
+
+    @Test
+    void clearCart_IfCartIsEmpty()
+    {
+        authToken=getAuthToken();
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+authToken);
+        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+
+        User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
+        assertEquals(0,user.getCarts().size());
+
+        ResponseEntity<ResponseStructure<CartResponseDto>> response2=restTemplate.exchange(baseUrl + "/clearCart", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponseDto>>() {});
+
+        assertEquals(HttpStatus.NO_CONTENT,response2.getStatusCode());
+    }
+
+    @Test
+    void clearCart_IfTokenIsInvalid()
+    {
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer token");
+        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/clearCart", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponseDto>>() {}));
+        assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
+    }
 }

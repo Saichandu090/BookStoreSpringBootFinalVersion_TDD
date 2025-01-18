@@ -284,4 +284,51 @@ class CartControllerTest
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401));
     }
+
+
+    @Test
+    void cartController_ClearCart_ValidTest() throws Exception
+    {
+        String token="Bearer-token";
+        ResponseStructure<CartResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"User cart cleared successfully",null);
+        when(cartService.clearCart(ArgumentMatchers.anyString())).thenReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
+
+        mockMvc.perform(delete("/cart/clearCart")
+                        .header("Authorization",token)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.message").value("User cart cleared successfully"));
+    }
+
+
+    @Test
+    void cartController_ClearCart_IfTokenIsMissing() throws Exception
+    {
+        mockMvc.perform(delete("/cart/clearCart")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
+    }
+
+
+    @Test
+    void cartController_ClearCart_IfTokenIsInvalid() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(null);
+
+        mockMvc.perform(delete("/cart/clearCart")
+                        .header("Authorization",token)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401));
+    }
 }

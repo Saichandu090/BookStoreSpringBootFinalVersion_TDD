@@ -53,10 +53,7 @@ public class CartMapper
 
     public ResponseEntity<ResponseStructure<List<CartResponseDto>>> mapToCartIsEmpty()
     {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<CartResponseDto>>()
-                .setStatus(HttpStatus.NO_CONTENT.value())
-                .setMessage("Cart is Empty")
-                .setData(null));
+        return ResponseEntity.noContent().build();
     }
 
     public ResponseEntity<ResponseStructure<List<CartResponseDto>>> mapToSuccessGetCart(List<CartResponseDto> cartResponseDto)
@@ -65,5 +62,18 @@ public class CartMapper
                 .setMessage("User cart fetched successfully")
                 .setStatus(HttpStatus.OK.value())
                 .setData(cartResponseDto));
+    }
+
+    public ResponseEntity<ResponseStructure<CartResponseDto>> mapToSuccessClearCart()
+    {
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<CartResponseDto>()
+                .setStatus(HttpStatus.OK.value())
+                .setMessage("Cart cleared successfully")
+                .setData(null));
+    }
+
+    public ResponseEntity<ResponseStructure<CartResponseDto>> mapToNoContentCartIsEmpty()
+    {
+        return ResponseEntity.noContent().build();
     }
 }

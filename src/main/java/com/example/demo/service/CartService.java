@@ -14,4 +14,6 @@ public interface CartService
     ResponseEntity<ResponseStructure<CartResponseDto>> removeFromCart(String email, Long cartId);
 
     ResponseEntity<ResponseStructure<List<CartResponseDto>>> getCartItems(String email);
+
+    ResponseEntity<ResponseStructure<CartResponseDto>> clearCart(String username);
 }

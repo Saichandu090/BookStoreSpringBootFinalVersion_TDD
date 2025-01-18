@@ -174,4 +174,33 @@ class CartServiceTest
 
         verify(userRepository,times(1)).findByEmail(anyString());
     }
+
+
+    @Test
+    void cartService_ClearCart_ValidTest()
+    {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(bookRepository.findByIdForUpdate(anyLong())).thenReturn(Optional.of(book));
+
+        ResponseEntity<ResponseStructure<CartResponseDto>> response=cartService.clearCart(user.getEmail());
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("Cart cleared successfully",response.getBody().getMessage());
+        verify(cartRepository,times(1)).delete(any(Cart.class));
+        verify(userRepository,times(1)).findByEmail(anyString());
+    }
+
+    @Test
+    void cartService_ClearCart_IfCartIsEmpty()
+    {
+        User user1=User.builder().email("test@gmail.com").carts(new ArrayList<>()).build();
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));
+
+        ResponseEntity<ResponseStructure<CartResponseDto>> response=cartService.clearCart(user.getEmail());
+
+        assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
+        assertEquals("Cart is Already Empty",response.getBody().getMessage());
+
+        verify(userRepository,times(1)).findByEmail(anyString());
+    }
 }
