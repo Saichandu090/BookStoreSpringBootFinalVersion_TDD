@@ -8,7 +8,6 @@ import com.example.demo.service.BookService;
 import com.example.demo.util.ResponseStructure;
 import com.example.demo.util.Roles;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,9 +23,10 @@ public class BookController
     private BookService bookService;
     private UserMapper userMapper;
     private final BookMapper bookMapper=new BookMapper();
+    private static final String HEADER="Authorization";
 
     @PostMapping("/addBook")
-    public ResponseEntity<ResponseStructure<BookResponseDto>> addBook(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody BookRequestDto bookRequestDTO)
+    public ResponseEntity<ResponseStructure<BookResponseDto>> addBook(@RequestHeader(value = HEADER) String authHeader, @Valid @RequestBody BookRequestDto bookRequestDTO)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.ADMIN.name())))
@@ -37,7 +37,7 @@ public class BookController
     }
 
     @GetMapping("/getBookByName/{bookName}")
-    public ResponseEntity<ResponseStructure<BookResponseDto>> getBookByName(@RequestHeader("Authorization") String authHeader, @PathVariable String bookName)
+    public ResponseEntity<ResponseStructure<BookResponseDto>> getBookByName(@RequestHeader(value = HEADER) String authHeader, @PathVariable String bookName)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails != null)
@@ -48,7 +48,7 @@ public class BookController
     }
 
     @GetMapping("/getBookById/{bookId}")
-    public ResponseEntity<ResponseStructure<BookResponseDto>> getBookById(@RequestHeader("Authorization") String authHeader, @PathVariable Long bookId)
+    public ResponseEntity<ResponseStructure<BookResponseDto>> getBookById(@RequestHeader(value = HEADER) String authHeader, @PathVariable Long bookId)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails != null)
@@ -59,7 +59,7 @@ public class BookController
     }
 
     @GetMapping("/getBooks")
-    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> getAllBooks(@RequestHeader("Authorization") String authHeader)
+    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> getAllBooks(@RequestHeader(value = HEADER) String authHeader)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails != null)
@@ -70,7 +70,7 @@ public class BookController
     }
 
     @GetMapping("/sortByBookName")
-    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> sortBYBookName(@RequestHeader("Authorization") String authHeader)
+    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> sortBYBookName(@RequestHeader(value = HEADER) String authHeader)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails!=null)
@@ -81,7 +81,7 @@ public class BookController
     }
 
     @GetMapping("/sortByBookPrice")
-    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> sortBYBookPrice(@RequestHeader("Authorization") String authHeader)
+    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> sortBYBookPrice(@RequestHeader(value = HEADER) String authHeader)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails != null)
@@ -92,7 +92,7 @@ public class BookController
     }
 
     @PutMapping("/updateBook/{bookId}")
-    public ResponseEntity<ResponseStructure<BookResponseDto>> editBook(@RequestHeader("Authorization") String authHeader, @PathVariable Long bookId, @Valid @RequestBody BookRequestDto bookRequestDTO)
+    public ResponseEntity<ResponseStructure<BookResponseDto>> editBook(@RequestHeader(value = HEADER) String authHeader, @PathVariable Long bookId, @Valid @RequestBody BookRequestDto bookRequestDTO)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.ADMIN.name())))
@@ -103,7 +103,7 @@ public class BookController
     }
 
     @DeleteMapping("/deleteBook/{bookId}")
-    public ResponseEntity<ResponseStructure<String>> deleteBook(@RequestHeader("Authorization") String authHeader,@PathVariable Long bookId)
+    public ResponseEntity<ResponseStructure<String>> deleteBook(@RequestHeader(value = HEADER) String authHeader,@PathVariable Long bookId)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.ADMIN.name())))

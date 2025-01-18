@@ -29,6 +29,7 @@ public class Order
     @Column(name = "user_id")
     private Long userId;
 
-    @ManyToMany
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
     private List<Cart> carts=new ArrayList<>();
 }

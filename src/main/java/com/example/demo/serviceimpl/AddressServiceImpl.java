@@ -64,7 +64,7 @@ public class AddressServiceImpl implements AddressService
         User realUser=getUser(email);
         List<Address> addresses=addressRepository.findByUser(realUser);
         List<AddressResponseDto> responseDtoList=addresses.stream().map(addressMapper::mapAddressToAddressResponse).toList();
-        return addressMapper.mapToSucessGetAllAddress(responseDtoList);
+        return addressMapper.mapToSuccessGetAllAddress(responseDtoList);
     }
 
 
@@ -75,7 +75,7 @@ public class AddressServiceImpl implements AddressService
         Address realAddress=getAddress(addressId);
         realUser.getAddresses().remove(realAddress);
         addressRepository.delete(realAddress);
-        return addressMapper.mapToSuucessDeleteAddress();
+        return addressMapper.mapToSuccessDeleteAddress();
     }
 
     //Helper Methods

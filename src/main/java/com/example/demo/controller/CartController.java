@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -25,9 +24,10 @@ public class CartController
     private CartService cartService;
     private UserMapper userMapper;
     private final CartMapper cartMapper=new CartMapper();
+    private static final String HEADER="Authorization";
 
     @PostMapping("/addToCart")
-    public ResponseEntity<ResponseStructure<CartResponseDto>> addToCart(@RequestHeader(value = "Authorization")String authHeader,@Valid @RequestBody CartRequestDto cartRequestDto)
+    public ResponseEntity<ResponseStructure<CartResponseDto>> addToCart(@RequestHeader(value = HEADER)String authHeader,@Valid @RequestBody CartRequestDto cartRequestDto)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if(userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
@@ -38,7 +38,7 @@ public class CartController
     }
 
     @DeleteMapping("/removeFromCart/{cartId}")
-    public ResponseEntity<ResponseStructure<CartResponseDto>> removeFromCart(@RequestHeader(value = "Authorization")String authHeader,@PathVariable Long cartId)
+    public ResponseEntity<ResponseStructure<CartResponseDto>> removeFromCart(@RequestHeader(value = HEADER)String authHeader,@PathVariable Long cartId)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if(userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
@@ -49,7 +49,7 @@ public class CartController
     }
 
     @DeleteMapping("/clearCart")
-    public ResponseEntity<ResponseStructure<CartResponseDto>> clearCart(@RequestHeader(value = "Authorization")String authHeader)
+    public ResponseEntity<ResponseStructure<CartResponseDto>> clearCart(@RequestHeader(value = HEADER)String authHeader)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if(userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
@@ -60,7 +60,7 @@ public class CartController
     }
 
     @GetMapping("/getCart")
-    public ResponseEntity<ResponseStructure<List<CartResponseDto>>> getCartItems(@RequestHeader(value = "Authorization")String authHeader)
+    public ResponseEntity<ResponseStructure<List<CartResponseDto>>> getCartItems(@RequestHeader(value = HEADER)String authHeader)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if(userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))

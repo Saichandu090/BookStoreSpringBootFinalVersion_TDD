@@ -76,4 +76,12 @@ public class CartMapper
     {
         return ResponseEntity.noContent().build();
     }
+
+    public CartResponseDto mapToCartResponse(Cart cart)
+    {
+        return CartResponseDto.builder()
+                .bookId(cart.getBookId())
+                .cartId(cart.getCartId())
+                .cartQuantity(cart.getCartQuantity()).build();
+    }
 }

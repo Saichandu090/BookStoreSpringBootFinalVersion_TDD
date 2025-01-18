@@ -24,11 +24,12 @@ public class AddressController
 {
     private AddressService addressService;
     private UserMapper userMapper;
+    private static final String HEADER="Authorization";
 
     private final AddressMapper addressMapper=new AddressMapper();
 
     @PostMapping("/addAddress")
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> addAddress(@RequestHeader(value = "Authorization")String authHeader,@Valid @RequestBody AddressRequestDto addressRequestDto)
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> addAddress(@RequestHeader(value = HEADER)String authHeader,@Valid @RequestBody AddressRequestDto addressRequestDto)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
@@ -39,7 +40,7 @@ public class AddressController
     }
 
     @PutMapping("/editAddress/{addressId}")
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> updateAddress(@RequestHeader(value = "Authorization")String authHeader,@PathVariable Long addressId,@Valid @RequestBody AddressRequestDto addressRequestDto)
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> updateAddress(@RequestHeader(value = HEADER)String authHeader,@PathVariable Long addressId,@Valid @RequestBody AddressRequestDto addressRequestDto)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
@@ -50,7 +51,7 @@ public class AddressController
     }
 
     @GetMapping("/getAddress/{addressId}")
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(@RequestHeader(value = "Authorization")String authHeader,@PathVariable Long addressId)
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(@RequestHeader(value = HEADER)String authHeader,@PathVariable Long addressId)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
@@ -62,7 +63,7 @@ public class AddressController
 
 
     @GetMapping("/getAllAddress")
-    public ResponseEntity<ResponseStructure<List<AddressResponseDto>>> getAllAddress(@RequestHeader(value = "Authorization")String authHeader)
+    public ResponseEntity<ResponseStructure<List<AddressResponseDto>>> getAllAddress(@RequestHeader(value = HEADER)String authHeader)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
@@ -73,7 +74,7 @@ public class AddressController
     }
 
     @DeleteMapping("/deleteAddress/{addressId}")
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> deleteAddressById(@RequestHeader(value = "Authorization")String authHeader,@PathVariable Long addressId)
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> deleteAddressById(@RequestHeader(value = HEADER)String authHeader,@PathVariable Long addressId)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))

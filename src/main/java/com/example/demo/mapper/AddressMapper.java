@@ -81,7 +81,7 @@ public class AddressMapper
                 .setStatus(HttpStatus.OK.value()));
     }
 
-    public ResponseEntity<ResponseStructure<List<AddressResponseDto>>> mapToSucessGetAllAddress(List<AddressResponseDto> responseDtoList)
+    public ResponseEntity<ResponseStructure<List<AddressResponseDto>>> mapToSuccessGetAllAddress(List<AddressResponseDto> responseDtoList)
     {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<AddressResponseDto>>()
                 .setStatus(HttpStatus.OK.value())
@@ -89,7 +89,7 @@ public class AddressMapper
                 .setMessage("User AddressList fetched successfully"));
     }
 
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> mapToSuucessDeleteAddress()
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> mapToSuccessDeleteAddress()
     {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<AddressResponseDto>()
                 .setMessage("Address deleted successfully")

@@ -25,9 +25,10 @@ public class WishListController
     private WishListService wishListService;
     private UserMapper userMapper;
     private final WishListMapper wishListMapper=new WishListMapper();
+    private static final String HEADER="Authorization";
 
     @PostMapping("/addToWishList")
-    public ResponseEntity<ResponseStructure<WishListResponseDto>> addToWishList(@RequestHeader(value = "Authorization")String authHeader,@Valid @RequestBody WishListRequestDto wishListRequestDto)
+    public ResponseEntity<ResponseStructure<WishListResponseDto>> addToWishList(@RequestHeader(value = HEADER)String authHeader,@Valid @RequestBody WishListRequestDto wishListRequestDto)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
@@ -38,7 +39,7 @@ public class WishListController
     }
 
     @GetMapping("/getWishList")
-    public ResponseEntity<ResponseStructure<List<WishListResponseDto>>> getWishList(@RequestHeader(value = "Authorization")String authHeader)
+    public ResponseEntity<ResponseStructure<List<WishListResponseDto>>> getWishList(@RequestHeader(value = HEADER)String authHeader)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))

@@ -66,7 +66,7 @@ public class CartServiceImpl implements CartService
         List<Cart> userCarts=user.getCarts();
         if(userCarts.isEmpty())
             return cartMapper.mapToCartIsEmpty();
-        List<CartResponseDto> cartResponseDto=userCarts.stream().map(cart -> new CartResponseDto(cart.getCartId(),cart.getBookId(),cart.getCartQuantity())).toList();
+        List<CartResponseDto> cartResponseDto=userCarts.stream().map(cartMapper::mapToCartResponse).toList();
         return cartMapper.mapToSuccessGetCart(cartResponseDto);
     }
 

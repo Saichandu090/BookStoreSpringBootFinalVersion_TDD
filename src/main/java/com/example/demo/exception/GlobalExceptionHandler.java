@@ -35,7 +35,7 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData(data)
+                .setData(null)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 
@@ -44,7 +44,7 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData(data)
+                .setData(null)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData(data)
+                .setData(null)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 
@@ -62,7 +62,16 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData(data)
+                .setData(null)
+                .setStatus(HttpStatus.NOT_FOUND.value()));
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<ResponseStructure<String>> orderNotFound(OrderNotFoundException exception)
+    {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
+                .setMessage(exception.getMessage())
+                .setData(null)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 }
