@@ -8,16 +8,18 @@ import com.example.demo.service.BookService;
 import com.example.demo.util.ResponseStructure;
 import com.example.demo.util.Roles;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
+@CrossOrigin(allowedHeaders = "*",origins = "*")
 @RestController
 @RequestMapping("/book")
+@AllArgsConstructor
 public class BookController
 {
     private BookService bookService;

@@ -245,6 +245,7 @@ public class BookControllerIT
         addBookTest_ValidScene();
 
         BookRequestDto bookRequestDto=BookRequestDto.builder()
+                .bookId(3245L)
                 .bookName("TESTING")
                 .bookPrice(399.3)
                 .bookAuthor("Manual Test")
@@ -274,6 +275,7 @@ public class BookControllerIT
 
         addBookTest_ValidScene();
         BookRequestDto bookRequestDto=BookRequestDto.builder()
+                .bookId(32455L)
                 .bookName("TESTING")
                 .bookPrice(399.3)
                 .bookAuthor("Manual Test")

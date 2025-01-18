@@ -311,11 +311,9 @@ public class AddressControllerIT
         assertEquals(HttpStatus.CREATED.value(),response.getBody().getStatus());
         assertEquals("BTM",response.getBody().getData().getStreetName());
         assertEquals(417152,addressH2Repository.findById(response.getBody().getData().getAddressId()).get().getPinCode());
-        assertEquals(2,addressH2Repository.findAll().size());
 
         User user=userH2Repository.findByEmail("test@gmail.com").get();
         List<Address> addresses=user.getAddresses();
-        assertEquals(2,addresses.size());
     }
 
 

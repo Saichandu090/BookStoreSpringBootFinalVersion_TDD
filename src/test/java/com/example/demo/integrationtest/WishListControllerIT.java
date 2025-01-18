@@ -251,4 +251,17 @@ public class WishListControllerIT
         assertEquals(1,user.getWishList().size());
     }
 
+
+    @Test
+    void getWishList_IfWishListIsEmpty()
+    {
+        userAuthToken=getUSERAuthToken();
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+userAuthToken);
+
+        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+        ResponseEntity<ResponseStructure<List<WishListResponseDto>>> response=restTemplate.exchange(baseUrl + "/getWishList", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<List<WishListResponseDto>>>() {});
+        assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
+    }
+
 }
