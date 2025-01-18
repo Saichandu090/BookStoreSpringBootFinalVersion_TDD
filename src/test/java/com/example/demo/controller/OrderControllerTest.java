@@ -26,17 +26,19 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -234,6 +236,88 @@ class OrderControllerTest
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(orderRequestDto)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
+    }
+
+
+    @Test
+    void orderController_GetOrder_ValidTest() throws Exception
+    {
+        ResponseEntity<ResponseStructure<OrderResponseDto>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<OrderResponseDto>()
+                .setData(orderResponseDto)
+                .setMessage("Order fetched successfully")
+                .setStatus(HttpStatus.OK.value()));
+        when(orderService.getOrder(anyString(),anyLong())).thenReturn(response);
+        when(userMapper.validateUserToken(anyString())).thenReturn(userDetails);
+
+        mockMvc.perform(get("/order/getOrder?orderId={orderId}",1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.orderAddress.addressId").value(1))
+                .andExpect(jsonPath("$.data.orderQuantity").value(3))
+                .andExpect(jsonPath("$.data.orderId").value(1))
+                .andExpect(jsonPath("$.data.orderPrice").value(999.99));
+    }
+
+
+    @Test
+    void orderController_GetOrder_IfRequestParamIsAbsent() throws Exception
+    {
+        mockMvc.perform(get("/order/getOrder")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingServletRequestParameterException.class,result.getResolvedException()));
+    }
+
+    @Test
+    void orderController_GetOrder_IfHeaderIsMissing() throws Exception
+    {
+        mockMvc.perform(get("/order/getOrder?orderId={orderId}",1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
+    }
+
+
+    @Test
+    void orderController_GetAllOrders_ValidTest() throws Exception
+    {
+        ResponseEntity<ResponseStructure<List<OrderResponseDto>>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<OrderResponseDto>>()
+                .setData(List.of(orderResponseDto))
+                .setMessage("Order fetched successfully")
+                .setStatus(HttpStatus.OK.value()));
+        when(orderService.getAllOrdersForUser(anyString())).thenReturn(response);
+        when(userMapper.validateUserToken(anyString())).thenReturn(userDetails);
+
+        mockMvc.perform(get("/order/getAllOrders")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].orderAddress.addressId").value(1))
+                .andExpect(jsonPath("$.data[0].orderQuantity").value(3))
+                .andExpect(jsonPath("$.data[0].orderId").value(1))
+                .andExpect(jsonPath("$.data[0].orderPrice").value(999.99));
+    }
+
+
+    @Test
+    void orderController_GetAllOrders_IfHeaderIsMissing() throws Exception
+    {
+        mockMvc.perform(get("/order/getAllOrders")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));

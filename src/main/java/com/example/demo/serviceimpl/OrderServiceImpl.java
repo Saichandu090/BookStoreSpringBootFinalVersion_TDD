@@ -8,6 +8,7 @@ import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.repository.*;
 import com.example.demo.requestdto.OrderRequestDto;
+import com.example.demo.responsedto.BookResponseDto;
 import com.example.demo.responsedto.OrderResponseDto;
 import com.example.demo.service.OrderService;
 import com.example.demo.util.ResponseStructure;
@@ -40,7 +41,8 @@ public class OrderServiceImpl implements OrderService
             return orderMapper.mapToCartIsEmpty();
         Order order=processUserPlaceOrder(userCarts,address,user);
         Order savedOrder=orderRepository.save(order);
-        return orderMapper.mapToSuccessPlaceOrder(savedOrder,address);
+        List<BookResponseDto> books=getBooksResponseFromOrder(order);
+        return orderMapper.mapToSuccessPlaceOrder(savedOrder,address,books);
     }
 
     @Transactional
@@ -49,10 +51,35 @@ public class OrderServiceImpl implements OrderService
     {
         User user=getUser(email);
         Order userOrder=getOrder(orderId,user.getUserId());
-        if(userOrder.getCancelOrder())
+        if(Boolean.TRUE.equals(userOrder.getCancelOrder()))
             return orderMapper.mapToAlreadyCancelled();
         Order savedOrder=processCancelOrder(userOrder);
         return orderMapper.mapToSuccessCancelOrder(savedOrder);
+    }
+
+    @Override
+    public ResponseEntity<ResponseStructure<OrderResponseDto>> getOrder(String email, Long orderId)
+    {
+        User user=getUser(email);
+        Order order=getOrder(orderId,user.getUserId());
+        Address address=getAddress(order.getAddressId());
+        List<BookResponseDto> books=getBooksResponseFromOrder(order);
+        return orderMapper.mapToSuccessGetOrder(order,address,books);
+    }
+
+    @Override
+    public ResponseEntity<ResponseStructure<List<OrderResponseDto>>> getAllOrdersForUser(String email)
+    {
+        User user=getUser(email);
+        List<Order> userOrders=user.getOrders();
+        if(userOrders.isEmpty())
+            return orderMapper.mapToNoContentForGetAllOrders();
+        List<OrderResponseDto> orderResponseDtos = userOrders.stream().map(order -> {
+                    Address address = getAddress(order.getAddressId());
+                    List<BookResponseDto> bookResponseDtos = getBooksResponseFromOrder(order);
+                    return orderMapper.mapToOrderResponse(order, address, bookResponseDtos);
+        }).toList();
+        return orderMapper.mapToSuccessGetAllOrders(orderResponseDtos);
     }
 
 
@@ -85,6 +112,21 @@ public class OrderServiceImpl implements OrderService
         }
         userCarts.clear();
         return orderMapper.createAnOrder(cartsForOrder,totalPrice,totalQuantity,address,user);
+    }
+
+
+    private List<BookResponseDto> getBooksResponseFromOrder(Order order)
+    {
+        List<Cart> carts=order.getCarts();
+        List<Book> books=carts.stream().map(cart ->getBook(cart.getBookId())).toList();
+        return books.stream()
+                .map(book ->BookResponseDto.builder()
+                        .bookId(book.getBookId())
+                        .bookAuthor(book.getBookAuthor())
+                        .bookDescription(book.getBookDescription())
+                        .bookLogo(book.getBookLogo())
+                        .bookName(book.getBookName())
+                        .bookPrice(book.getBookPrice()).build()).toList();
     }
 
     private Order getOrder(Long orderId,Long userId)

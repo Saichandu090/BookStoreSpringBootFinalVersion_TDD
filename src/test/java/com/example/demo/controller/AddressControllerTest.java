@@ -244,7 +244,7 @@ class AddressControllerTest
     public void addressController_GetAddressById_MustReturnOkStatusCode() throws Exception
     {
         ResponseStructure<AddressResponseDto> response=new ResponseStructure<>(HttpStatus.OK.value(),"Address fetched successfully",addressResponseDto);
-        given(addressService.getAddressById(ArgumentMatchers.anyLong())).willReturn(new ResponseEntity<>(response,HttpStatus.OK));
+        given(addressService.getAddressById(ArgumentMatchers.anyString(),ArgumentMatchers.anyLong())).willReturn(new ResponseEntity<>(response,HttpStatus.OK));
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(userDetails);
 
         mockMvc.perform(get("/address/getAddress/{id}",1)

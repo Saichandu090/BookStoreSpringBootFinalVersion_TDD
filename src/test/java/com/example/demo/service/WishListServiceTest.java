@@ -75,7 +75,7 @@ class WishListServiceTest
 
         wishListRequestDto=WishListRequestDto.builder().bookId(book.getBookId()).build();
 
-        wishList=WishList.builder().id(1L).bookId(book.getBookId()).userId(user.getUserId()).build();
+        wishList=WishList.builder().wishListId(1L).bookId(book.getBookId()).userId(user.getUserId()).build();
     }
 
     @Test
@@ -119,7 +119,7 @@ class WishListServiceTest
     @Test
     public void wishListService_AddToWishList_IfBookIsAlreadyPresent()
     {
-        WishList dummy=WishList.builder().userId(12L).bookId(book.getBookId()).id(1L).build();
+        WishList dummy=WishList.builder().userId(12L).bookId(book.getBookId()).wishListId(1L).build();
         List<WishList> wishLists=new ArrayList<>();
         wishLists.add(dummy);
 
@@ -149,7 +149,7 @@ class WishListServiceTest
     @Test
     public void wishListService_GetWishList_ValidTest()
     {
-        WishList dummy=WishList.builder().userId(12L).bookId(book.getBookId()).id(1L).build();
+        WishList dummy=WishList.builder().userId(12L).bookId(book.getBookId()).wishListId(1L).build();
         List<WishList> wishLists=new ArrayList<>();
         wishLists.add(dummy);
 

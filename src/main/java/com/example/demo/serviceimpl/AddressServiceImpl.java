@@ -43,7 +43,7 @@ public class AddressServiceImpl implements AddressService
     public ResponseEntity<ResponseStructure<AddressResponseDto>> updateAddress(String email, Long addressId, AddressRequestDto addressRequestDto)
     {
         User user=getUser(email);
-        Address realAddress=getAddress(addressId);
+        Address realAddress=getAddress(addressId,user.getUserId());
         Address updatedAddress=addressMapper.mapOldAddressToNewAddress(realAddress,addressRequestDto);
         Address saved=addressRepository.save(updatedAddress);
         return addressMapper.mapToSuccessUpdateAddress(saved,user.getEmail());
@@ -51,9 +51,10 @@ public class AddressServiceImpl implements AddressService
 
 
     @Override
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(Long addressId)
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(String email,Long addressId)
     {
-        Address resultAddress=getAddress(addressId);
+        User user=getUser(email);
+        Address resultAddress=getAddress(addressId,user.getUserId());
         return addressMapper.mapToSuccessGetAddressById(resultAddress);
     }
 
@@ -62,7 +63,9 @@ public class AddressServiceImpl implements AddressService
     public ResponseEntity<ResponseStructure<List<AddressResponseDto>>> getAllAddress(String email)
     {
         User realUser=getUser(email);
-        List<Address> addresses=addressRepository.findByUser(realUser);
+        List<Address> addresses=addressRepository.findByUserId(realUser.getUserId());
+        if(addresses.isEmpty())
+            return addressMapper.mapToNoContentForGetAllAddress();
         List<AddressResponseDto> responseDtoList=addresses.stream().map(addressMapper::mapAddressToAddressResponse).toList();
         return addressMapper.mapToSuccessGetAllAddress(responseDtoList);
     }
@@ -72,7 +75,7 @@ public class AddressServiceImpl implements AddressService
     public ResponseEntity<ResponseStructure<AddressResponseDto>> deleteAddress(String email, Long addressId)
     {
         User realUser=getUser(email);
-        Address realAddress=getAddress(addressId);
+        Address realAddress=getAddress(addressId,realUser.getUserId());
         realUser.getAddresses().remove(realAddress);
         addressRepository.delete(realAddress);
         return addressMapper.mapToSuccessDeleteAddress();
@@ -87,9 +90,9 @@ public class AddressServiceImpl implements AddressService
         return user.get();
     }
 
-    private Address getAddress(Long addressId)
+    private Address getAddress(Long addressId,Long userId)
     {
-        Optional<Address> address=addressRepository.findById(addressId);
+        Optional<Address> address=addressRepository.findByAddressIdAndUserId(addressId,userId);
         if(address.isEmpty())
             throw new AddressNotFoundException("Address with id "+addressId+" not found");
         return address.get();

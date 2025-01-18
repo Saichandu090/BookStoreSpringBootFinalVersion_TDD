@@ -149,7 +149,7 @@ public class AddressRepositoryTests
 
         AddressResponseDto responseDto=responseEntity.getBody().getData();
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.getAddressById(responseDto.getAddressId());
+        ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.getAddressById(user.getEmail(),responseDto.getAddressId());
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(200,response.getBody().getStatus());

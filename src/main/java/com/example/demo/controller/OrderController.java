@@ -14,6 +14,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/order")
 @AllArgsConstructor
@@ -45,5 +47,28 @@ public class OrderController
             return orderService.cancelOrder(userDetails.getUsername(),orderId);
         }
         return orderMapper.noAuthorityForMethod();
+    }
+
+    @GetMapping("/getOrder")
+    public ResponseEntity<ResponseStructure<OrderResponseDto>> getOrder(@RequestHeader(value = HEADER)String authHeader,@RequestParam Long orderId)
+    {
+        UserDetails userDetails=userMapper.validateUserToken(authHeader);
+        if(userDetails!=null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
+        {
+            return orderService.getOrder(userDetails.getUsername(),orderId);
+        }
+        return orderMapper.noAuthority();
+    }
+
+
+    @GetMapping("/getAllOrders")
+    public ResponseEntity<ResponseStructure<List<OrderResponseDto>>> getAllOrdersForUser(@RequestHeader(value = HEADER)String authHeader)
+    {
+        UserDetails userDetails=userMapper.validateUserToken(authHeader);
+        if(userDetails!=null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
+        {
+            return orderService.getAllOrdersForUser(userDetails.getUsername());
+        }
+        return orderMapper.unAuthorized();
     }
 }

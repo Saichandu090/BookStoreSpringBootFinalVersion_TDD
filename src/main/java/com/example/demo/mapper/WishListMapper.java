@@ -30,7 +30,7 @@ public class WishListMapper
     public WishListResponseDto mapWishListToResponse(WishList saved)
     {
         return WishListResponseDto.builder()
-                .wishListId(saved.getId())
+                .wishListId(saved.getWishListId())
                 .bookId(saved.getBookId()).build();
     }
 
@@ -67,7 +67,7 @@ public class WishListMapper
 
     public ResponseEntity<ResponseStructure<List<WishListResponseDto>>> mapToSuccessGetWishList(List<WishList> userWishList)
     {
-        List<WishListResponseDto> wishListResponseDto=userWishList.stream().map(wishList -> new WishListResponseDto(wishList.getId(), wishList.getBookId())).toList();
+        List<WishListResponseDto> wishListResponseDto=userWishList.stream().map(wishList -> new WishListResponseDto(wishList.getWishListId(), wishList.getBookId())).toList();
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<WishListResponseDto>>()
                 .setMessage("Wishlist fetched successfully")
                 .setData(wishListResponseDto)

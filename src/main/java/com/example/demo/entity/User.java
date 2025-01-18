@@ -36,9 +36,11 @@ public class User
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id",referencedColumnName = "userId")
     @JsonIgnore
-    private List<Order> order=new ArrayList<>();
+    private List<Order> orders=new ArrayList<>();
 
-    @OneToMany(mappedBy = "user",fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id",referencedColumnName = "userId")
+    @JsonIgnore
     private List<Address> addresses=new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)

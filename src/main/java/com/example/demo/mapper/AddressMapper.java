@@ -31,7 +31,7 @@ public class AddressMapper
     public Address mapAddressRequestToAddress(User user, AddressRequestDto addressRequestDto)
     {
         return Address.builder()
-                .user(user)
+                .userId(user.getUserId())
                 .streetName(addressRequestDto.getStreetName())
                 .city(addressRequestDto.getCity())
                 .state(addressRequestDto.getState())
@@ -95,5 +95,10 @@ public class AddressMapper
                 .setMessage("Address deleted successfully")
                 .setData(null)
                 .setStatus(HttpStatus.OK.value()));
+    }
+
+    public ResponseEntity<ResponseStructure<List<AddressResponseDto>>> mapToNoContentForGetAllAddress()
+    {
+        return ResponseEntity.noContent().build();
     }
 }

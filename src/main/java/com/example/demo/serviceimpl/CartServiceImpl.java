@@ -51,7 +51,7 @@ public class CartServiceImpl implements CartService
     public ResponseEntity<ResponseStructure<CartResponseDto>> removeFromCart(String email, Long cartId)
     {
         User user=getUser(email);
-        Cart cart=getCart(cartId);
+        Cart cart=getCart(cartId,user.getUserId());
         List<Cart> userCarts=user.getCarts();
         if(userCarts.isEmpty())
             throw new CartNotFoundException("Cart is empty");
@@ -157,9 +157,9 @@ public class CartServiceImpl implements CartService
     }
 
 
-    private Cart getCart(Long cartId)
+    private Cart getCart(Long cartId,Long userId)
     {
-        Optional<Cart> cart=cartRepository.findById(cartId);
+        Optional<Cart> cart=cartRepository.findByCartIdAndUserId(cartId,userId);
         if(cart.isEmpty())
             throw new CartNotFoundException("Cart not found with Id "+cartId);
         return cart.get();

@@ -7,11 +7,11 @@ import com.example.demo.repository.AddressRepository;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.requestdto.CartRequestDto;
 import com.example.demo.requestdto.OrderRequestDto;
 import com.example.demo.responsedto.OrderResponseDto;
 import com.example.demo.serviceimpl.OrderServiceImpl;
 import com.example.demo.util.ResponseStructure;
+import org.aspectj.weaver.ast.Or;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,12 +20,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -93,7 +91,7 @@ class OrderServiceTest
                 .dob(LocalDate.of(2002,8,24))
                 .email("sai@gmail.com")
                 .password("saichandu")
-                .order(orders)
+                .orders(orders)
                 .carts(carts)
                 .userId(1L)
                 .role("USER").build();
@@ -104,7 +102,7 @@ class OrderServiceTest
                 .city("Pune")
                 .state("Maharastra")
                 .order(new ArrayList<>())
-                .user(user).build();
+                .userId(user.getUserId()).build();
     }
 
 
@@ -155,5 +153,57 @@ class OrderServiceTest
         assertThrows(OrderNotFoundException.class,()->orderService.cancelOrder(user.getEmail(),1L));
 
         verify(orderRepository,times(1)).findByOrderIdAndUserId(anyLong(),anyLong());
+    }
+
+
+    @Test
+    public void orderService_getOrder_ValidTest()
+    {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
+        when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
+        when(orderRepository.findByOrderIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.of(order));
+
+        ResponseEntity<ResponseStructure<OrderResponseDto>> response=orderService.getOrder(user.getEmail(),1L);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(1,response.getBody().getData().getOrderBooks().size());
+    }
+
+    @Test
+    public void orderService_getOrder_IfOrderIdIsInvalid()
+    {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(orderRepository.findByOrderIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(OrderNotFoundException.class,()->orderService.getOrder(user.getEmail(),1L));
+
+        verify(orderRepository,times(1)).findByOrderIdAndUserId(anyLong(),anyLong());
+    }
+
+
+    @Test
+    public void orderService_getAllOrders_ValidTest()
+    {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
+        when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
+
+        ResponseEntity<ResponseStructure<List<OrderResponseDto>>> response=orderService.getAllOrdersForUser(user.getEmail());
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(1,response.getBody().getData().getFirst().getOrderBooks().size());
+        assertEquals(1,response.getBody().getData().getFirst().getOrderId());
+        assertFalse(response.getBody().getData().getFirst().getCancelOrder());
+        assertEquals("User orders fetched successfully",response.getBody().getMessage());
+    }
+
+
+    @Test
+    public void orderService_getAllOrders_IfOrdersAreEmpty()
+    {
+        User user1=User.builder().userId(1L).email("something@gmail.com").orders(new ArrayList<>()).build();
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));
+
+        ResponseEntity<ResponseStructure<List<OrderResponseDto>>> response=orderService.getAllOrdersForUser(user1.getEmail());
+        assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode(),"If user orders are empty");
     }
 }

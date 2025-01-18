@@ -21,6 +21,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -172,26 +173,27 @@ public class OrderControllerIT
         assertEquals(HttpStatus.CREATED,response4.getStatusCode());
         assertEquals("Baner",response4.getBody().getData().getOrderAddress().getStreetName());
         assertEquals(false,response4.getBody().getData().getCancelOrder());
+        assertEquals(2,response4.getBody().getData().getOrderBooks().size(),"Checking the quantity of books ordered");
 
 
         User user1=userH2Repository.findByEmail("dinesh@gmail.com").get();
         assertEquals(0,user1.getCarts().size());
         assertEquals(1,user1.getAddresses().size());
-        assertEquals(1,user1.getOrder().size());
+        assertEquals(1,user1.getOrders().size());
 
 
         //Trying again if cart is empty
         OrderRequestDto orderRequestDto1=OrderRequestDto.builder().addressId(1L).build();
         HttpEntity<Object> httpEntity5=new HttpEntity<>(orderRequestDto1,httpHeaders);
         ResponseEntity<ResponseStructure<OrderResponseDto>> response5=restTemplate.exchange(baseUrl + "/placeOrder", HttpMethod.POST, httpEntity5, new ParameterizedTypeReference<ResponseStructure<OrderResponseDto>>() {});
-        assertEquals(HttpStatus.NO_CONTENT,response5.getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT,response5.getStatusCode(),"Once the order is placed cart should get cleared and cart is empty should be displayed");
 
 
         //Test if address id is invalid
         OrderRequestDto orderRequestDto2=OrderRequestDto.builder().addressId(10L).build();
         HttpEntity<Object> httpEntity6=new HttpEntity<>(orderRequestDto2,httpHeaders);
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/placeOrder", HttpMethod.POST, httpEntity6, new ParameterizedTypeReference<ResponseStructure<OrderResponseDto>>() {}));
-        assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode(),"If the provided addressId is not found or not related to user");
         String responseBody = exception.getResponseBodyAsString();
         assertTrue(responseBody.contains("\"message\":\"Address not found with Id 10\""));
     }
@@ -210,14 +212,14 @@ public class OrderControllerIT
         assertEquals(HttpStatus.OK,response.getStatusCode());
 
         User user1=userH2Repository.findByEmail("dinesh@gmail.com").get();
-        assertEquals(0,user1.getCarts().size());
+        assertEquals(0,user1.getCarts().size(),"user cart should get cleared after placing an order successfully");
         assertEquals(1,user1.getAddresses().size());
-        assertEquals(1,user1.getOrder().size());
+        assertEquals(1,user1.getOrders().size(),"user should hold one order now");
 
 
         //Testing to cancel order which is already cancelled
         ResponseEntity<ResponseStructure<String>> response2=restTemplate.exchange(baseUrl + "/cancelOrder/1", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<String>>() {});
-        assertEquals(HttpStatus.NO_CONTENT,response2.getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT,response2.getStatusCode(),"If request is successful but the order is already cancelled");
     }
 
 
@@ -232,7 +234,7 @@ public class OrderControllerIT
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/cancelOrder/10", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<String>>() {}));
-        assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode(),"If order is not found by id or not in the list of user orders");
         String responseBody = exception.getResponseBodyAsString();
         assertTrue(responseBody.contains("\"message\":\"Order not found\""));
     }
@@ -247,6 +249,86 @@ public class OrderControllerIT
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/cancelOrder/1", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<String>>() {}));
-        assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode(),"If token is missing or invalid");
+    }
+
+
+    @Test
+    void getOrder_ValidTest()
+    {
+        placeOrder_ValidTest_AlsoTested_IfAddressIsInvalid_IfCartIsEmpty();
+
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+authToken);
+
+        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+        ResponseEntity<ResponseStructure<OrderResponseDto>> response=restTemplate.exchange(baseUrl + "/getOrder?orderId=1", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<OrderResponseDto>>() {});
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(2,response.getBody().getData().getOrderBooks().size(),"Checking the correct quantity of books and debugging the book details");
+        assertEquals(1,response.getBody().getData().getOrderId());
+        assertEquals(2,response.getBody().getData().getOrderQuantity());
+        assertFalse(response.getBody().getData().getCancelOrder());
+
+        User user1=userH2Repository.findByEmail("dinesh@gmail.com").get();
+        assertEquals(0,user1.getCarts().size(),"user cart should get cleared after placing an order successfully");
+        assertEquals(1,user1.getAddresses().size());
+        assertEquals(1,user1.getOrders().size(),"user should hold one order now");
+    }
+
+
+    @Test
+    void getOrder_IfOrderIdIsInvalid()
+    {
+        placeOrder_ValidTest_AlsoTested_IfAddressIsInvalid_IfCartIsEmpty();
+
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+authToken);
+
+        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/getOrder?orderId=10", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<OrderResponseDto>>() {}));
+        assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode(),"If order id is not found or order does not belong to user");
+    }
+
+
+    @Test
+    void getAllOrders_ValidTest()
+    {
+        placeOrder_ValidTest_AlsoTested_IfAddressIsInvalid_IfCartIsEmpty();
+
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+authToken);
+
+        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+        ResponseEntity<ResponseStructure<List<OrderResponseDto>>> response=restTemplate.exchange(baseUrl + "/getAllOrders", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<List<OrderResponseDto>>>() {});
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(2,response.getBody().getData().getFirst().getOrderBooks().size(),"Checking the correct quantity of books and debugging the book details");
+        assertEquals(1,response.getBody().getData().getFirst().getOrderId());
+        assertEquals(2,response.getBody().getData().getFirst().getOrderQuantity());
+        assertFalse(response.getBody().getData().getFirst().getCancelOrder());
+
+        User user1=userH2Repository.findByEmail("dinesh@gmail.com").get();
+        assertEquals(0,user1.getCarts().size(),"user cart should get cleared after placing an order successfully");
+        assertEquals(1,user1.getAddresses().size());
+        assertEquals(1,user1.getOrders().size(),"user should hold one order now");
+    }
+
+
+    @Test
+    void getAllOrders_IfOrdersAreEmpty()
+    {
+        authToken=getAuthToken();
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+authToken);
+
+        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+
+        ResponseEntity<ResponseStructure<List<OrderResponseDto>>> response=restTemplate.exchange(baseUrl + "/getAllOrders", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<List<OrderResponseDto>>>() {});
+        assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
+
+
+        User user1=userH2Repository.findByEmail("dinesh@gmail.com").get();
+        assertEquals(0,user1.getCarts().size(),"user carts should be empty");
+        assertEquals(0,user1.getAddresses().size(),"user address should be empty");
+        assertEquals(0,user1.getOrders().size(),"user should not hold any order now");
     }
 }

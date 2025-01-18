@@ -58,7 +58,7 @@ public class AddressController
         {
             return new ResponseEntity<>(addressMapper.noAuthority(),HttpStatus.UNAUTHORIZED);
         }
-        return addressService.getAddressById(addressId);
+        return addressService.getAddressById(userDetails.getUsername(),addressId);
     }
 
 

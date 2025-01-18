@@ -13,7 +13,7 @@ public interface AddressService
 
     ResponseEntity<ResponseStructure<AddressResponseDto>> updateAddress(String email,Long addressId,AddressRequestDto addressRequestDto);
 
-    ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(Long addressId);
+    ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(String email,Long addressId);
 
     ResponseEntity<ResponseStructure<List<AddressResponseDto>>> getAllAddress(String email);
 

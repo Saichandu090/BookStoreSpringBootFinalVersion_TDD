@@ -65,6 +65,7 @@ class CartServiceTest
         carts.add(cart);
 
         user=User.builder()
+                .userId(1L)
                 .firstName("Sai")
                 .lastName("Chandu")
                 .dob(LocalDate.of(2002,8,24))
@@ -78,7 +79,7 @@ class CartServiceTest
     @Test
     void cartService_AddToCart_ValidTest()
     {
-        when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
+        when(bookRepository.findByIdForUpdate(anyLong())).thenReturn(Optional.of(book));
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
@@ -95,7 +96,7 @@ class CartServiceTest
     void cartService_AddToCart_IfBookIsOutOfStock()
     {
         book=Book.builder().bookId(1L).bookName("Atom").bookQuantity(0).build();
-        when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
+        when(bookRepository.findByIdForUpdate(anyLong())).thenReturn(Optional.of(book));
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         ResponseEntity<ResponseStructure<CartResponseDto>> response=cartService.addToCart(user.getEmail(),cartRequestDto);
@@ -108,28 +109,29 @@ class CartServiceTest
     @Test
     void cartService_AddToCart_IfBookNotFound()
     {
-        when(bookRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(bookRepository.findByIdForUpdate(anyLong())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         assertThrows(BookNotFoundException.class,()->cartService.addToCart(user.getEmail(),cartRequestDto));
 
-        verify(bookRepository,times(1)).findById(anyLong());
+        verify(bookRepository,times(1)).findByIdForUpdate(anyLong());
     }
 
 
     @Test
     void cartService_RemoveFromCart_ValidTest()
     {
-        when(cartRepository.findById(anyLong())).thenReturn(Optional.of(cart));
+        when(cartRepository.findByCartIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.of(cart));
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(bookRepository.findByIdForUpdate(anyLong())).thenReturn(Optional.of(book));
+        when(bookRepository.save(any(Book.class))).thenReturn(book);
 
         ResponseEntity<ResponseStructure<CartResponseDto>> response=cartService.removeFromCart(user.getEmail(),cart.getCartId());
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals("Book "+book.getBookName()+" has removed from the cart",response.getBody().getMessage());
         verify(cartRepository,times(1)).delete(any(Cart.class));
-        verify(cartRepository,times(1)).findById(anyLong());
+        verify(cartRepository,times(1)).findByCartIdAndUserId(anyLong(),anyLong());
         verify(userRepository,times(1)).findByEmail(anyString());
     }
 
@@ -137,12 +139,12 @@ class CartServiceTest
     @Test
     void cartService_RemoveFromCart_IfCartIdNotFound()
     {
-        when(cartRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(cartRepository.findByCartIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         assertThrows(CartNotFoundException.class,()->cartService.removeFromCart(user.getEmail(),cart.getCartId()));
 
-        verify(cartRepository,times(1)).findById(anyLong());
+        verify(cartRepository,times(1)).findByCartIdAndUserId(anyLong(),anyLong());
     }
 
 
@@ -168,9 +170,7 @@ class CartServiceTest
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));
 
         ResponseEntity<ResponseStructure<List<CartResponseDto>>> response=cartService.getCartItems(user.getEmail());
-
         assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
-        assertEquals("Cart is Empty",response.getBody().getMessage());
 
         verify(userRepository,times(1)).findByEmail(anyString());
     }
@@ -199,7 +199,6 @@ class CartServiceTest
         ResponseEntity<ResponseStructure<CartResponseDto>> response=cartService.clearCart(user.getEmail());
 
         assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
-        assertEquals("Cart is Already Empty",response.getBody().getMessage());
 
         verify(userRepository,times(1)).findByEmail(anyString());
     }

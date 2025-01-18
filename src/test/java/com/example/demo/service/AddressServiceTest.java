@@ -65,12 +65,13 @@ class AddressServiceTest
                 .city(addressRequestDto.getCity())
                 .pinCode(addressRequestDto.getPinCode())
                 .streetName(addressRequestDto.getStreetName())
-                .user(user).build();
+                .userId(1L).build();
 
         List<Address> addresses=new ArrayList<>();
         addresses.add(address);
 
         user=User.builder()
+                .userId(1L)
                 .firstName("Sai")
                 .lastName("Chandu")
                 .userId(1L)
@@ -118,8 +119,8 @@ class AddressServiceTest
     @Test
     public void addressService_UpdateAddress_MustReturnOKStatusCode()
     {
-        when(userRepository.findByEmail("chandu@gmail.com")).thenReturn(Optional.of(user));
-        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(addressRepository.findByAddressIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.of(address));
         when(addressRepository.save(Mockito.any(Address.class))).thenReturn(address);
 
         ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.updateAddress("chandu@gmail.com",1L,addressRequestDto);
@@ -130,7 +131,7 @@ class AddressServiceTest
         assertEquals("Address with id "+address.getAddressId()+" updated successfully for the user "+user.getEmail(),response.getBody().getMessage());
 
         verify(userRepository,times(1)).findByEmail(anyString());
-        verify(addressRepository,times(1)).findById(anyLong());
+        verify(addressRepository,times(1)).findByAddressIdAndUserId(anyLong(),anyLong());
         verify(addressRepository,times(1)).save(any(Address.class));
     }
 
@@ -147,12 +148,12 @@ class AddressServiceTest
     @Test
     public void addressService_UpdateAddress_MustReturnNotFoundStatusCodeIfAddressNotFound()
     {
-        when(userRepository.findByEmail("chandu@gmail.com")).thenReturn(Optional.of(user));
-        when(addressRepository.findById(1L)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(addressRepository.findByAddressIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.empty());
 
         assertThrows(AddressNotFoundException.class,()->addressService.updateAddress("chandu@gmail.com",1L,addressRequestDto),"If address is not found by the Id from repository");
         verify(userRepository,times(1)).findByEmail(anyString());
-        verify(addressRepository,times(1)).findById(anyLong());
+        verify(addressRepository,times(1)).findByAddressIdAndUserId(anyLong(),anyLong());
     }
 
 
@@ -160,9 +161,10 @@ class AddressServiceTest
     @Test
     public void addressService_GetAddressById_MustReturnOkStatusCode()
     {
-        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(addressRepository.findByAddressIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.of(address));
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.getAddressById(1L);
+        ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.getAddressById(user.getEmail(),1L);
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(200,response.getBody().getStatus());
@@ -174,11 +176,12 @@ class AddressServiceTest
     @Test
     public void addressService_GetAddressById_MustThrowException()
     {
-        when(addressRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(addressRepository.findByAddressIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(AddressNotFoundException.class,()->addressService.getAddressById(1L));
+        assertThrows(AddressNotFoundException.class,()->addressService.getAddressById(user.getEmail(),1L));
 
-        verify(addressRepository,times(1)).findById(anyLong());
+        verify(addressRepository,times(1)).findByAddressIdAndUserId(anyLong(),anyLong());
     }
 
 
@@ -186,7 +189,7 @@ class AddressServiceTest
     @Test
     public void addressService_GetAllAddress_MustReturnOkStatusCode()
     {
-        when(addressRepository.findByUser(any(User.class))).thenReturn(List.of(address));
+        when(addressRepository.findByUserId(anyLong())).thenReturn(List.of(address));
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         ResponseEntity<ResponseStructure<List<AddressResponseDto>>> response=addressService.getAllAddress(user.getEmail());
@@ -201,11 +204,12 @@ class AddressServiceTest
     @Test
     public void addressService_GetAllAddress_MustThrowException()
     {
-        when(addressRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(addressRepository.findByUserId(anyLong())).thenReturn(List.of());
 
-        assertThrows(AddressNotFoundException.class,()->addressService.getAddressById(1L));
-
-        verify(addressRepository,times(1)).findById(anyLong());
+        ResponseEntity<ResponseStructure<List<AddressResponseDto>>> response=addressService.getAllAddress(user.getEmail());
+        assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
+        verify(addressRepository,times(1)).findByUserId(anyLong());
     }
 
 
@@ -214,7 +218,7 @@ class AddressServiceTest
     public void addressService_DeleteAddressById_MustReturnOkStatusCode()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
+        when(addressRepository.findByAddressIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.of(address));
 
         ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.deleteAddress(user.getEmail(),address.getAddressId());
 
@@ -223,7 +227,7 @@ class AddressServiceTest
         assertEquals("Address deleted successfully",response.getBody().getMessage());
 
         verify(userRepository,times(1)).findByEmail(anyString());
-        verify(addressRepository,times(1)).findById(anyLong());
+        verify(addressRepository,times(1)).findByAddressIdAndUserId(anyLong(),anyLong());
     }
 
 
@@ -242,11 +246,11 @@ class AddressServiceTest
     public void addressService_DeleteAddressById_MustThrowAddressNotFoundException()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-        when(addressRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(addressRepository.findByAddressIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.empty());
 
         assertThrows(AddressNotFoundException.class,()->addressService.deleteAddress(user.getEmail(),address.getAddressId()));
 
-        verify(addressRepository,times(1)).findById(anyLong());
+        verify(addressRepository,times(1)).findByAddressIdAndUserId(anyLong(),anyLong());
         verify(userRepository,times(1)).findByEmail(anyString());
     }
 }
