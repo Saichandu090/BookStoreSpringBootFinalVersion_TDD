@@ -37,7 +37,9 @@ public class UserController
     }
 
     @PutMapping("/forgetPassword/{email}")
-    public ResponseEntity<ResponseStructure<Boolean>> forgetPassword(@PathVariable String email,@RequestParam String newPassword)
+    public ResponseEntity<ResponseStructure<Boolean>> forgetPassword(
+            @PathVariable String email,
+            @RequestParam String newPassword)
     {
         return userService.forgetPassword(email,newPassword);
     }

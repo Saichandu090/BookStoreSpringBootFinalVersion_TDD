@@ -148,11 +148,11 @@ public class CartControllerIT
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
-        assertEquals(3,response.getBody().getData().getBookId());
-        assertEquals(1,response.getBody().getData().getCartQuantity());
+        assertEquals(3,response.getBody().getData().getBookId(),"checking if the same book is added to cart or not");
+        assertEquals(1,response.getBody().getData().getCartQuantity(),"checking the cart quantity");
 
         Book book=bookH2Repository.findById(3L).get();
-        assertEquals(1,book.getBookQuantity());
+        assertEquals(1,book.getBookQuantity(),"checking the book quantity as it should get reduced if user added to cart");
 
         User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
         assertEquals(1,user.getCarts().size());
@@ -175,10 +175,10 @@ public class CartControllerIT
         HttpEntity<Object> httpEntity3=new HttpEntity<>(cartRequestDto3,httpHeaders);
 
         ResponseEntity<ResponseStructure<CartResponseDto>> response3=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity3, new ParameterizedTypeReference<ResponseStructure<CartResponseDto>>() {});
-        assertEquals(HttpStatus.NO_CONTENT,response3.getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT,response3.getStatusCode(),"user wont be able to add the book to cart if its out of quantity");
 
         Book book3=bookH2Repository.findById(3L).get();
-        assertEquals(0,book3.getBookQuantity());
+        assertEquals(0,book3.getBookQuantity(),"If user cant add the book to cart ,it should be 0");
     }
 
 

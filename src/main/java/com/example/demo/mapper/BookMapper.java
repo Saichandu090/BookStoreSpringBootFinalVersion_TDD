@@ -11,19 +11,28 @@ import java.util.List;
 
 public class BookMapper
 {
-    public ResponseStructure<BookResponseDto> noAuthority()
+    public ResponseEntity<ResponseStructure<BookResponseDto>> noAuthority()
     {
-        return new ResponseStructure<>(HttpStatus.UNAUTHORIZED.value(), "No Authority to access", null);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<BookResponseDto>()
+                .setStatus(HttpStatus.UNAUTHORIZED.value())
+                .setData(null)
+                .setMessage("No Authority to access"));
     }
 
-    public ResponseStructure<String> noAuthority(String message)
+    public ResponseEntity<ResponseStructure<String>> noAuthority(String message)
     {
-        return new ResponseStructure<>(HttpStatus.UNAUTHORIZED.value(), "No Authority to access", message);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<String>()
+                .setStatus(HttpStatus.UNAUTHORIZED.value())
+                .setData(null)
+                .setMessage(message));
     }
 
-    public ResponseStructure<List<BookResponseDto>> noAuthorityForUser()
+    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> noAuthorityForUser()
     {
-        return new ResponseStructure<>(HttpStatus.UNAUTHORIZED.value(), "No Authority to access", null);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<List<BookResponseDto>>()
+                .setStatus(HttpStatus.UNAUTHORIZED.value())
+                .setData(null)
+                .setMessage("No Authority to access"));
     }
 
 

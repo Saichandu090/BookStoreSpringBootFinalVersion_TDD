@@ -35,7 +35,7 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData(null)
+                .setData(data)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 
@@ -44,7 +44,7 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData(null)
+                .setData(data)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData(null)
+                .setData(data)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 
@@ -62,7 +62,7 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData(null)
+                .setData(data)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 
@@ -71,7 +71,7 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData(null)
+                .setData(data)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 
@@ -80,7 +80,25 @@ public class GlobalExceptionHandler
     {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<String>()
                 .setMessage(exception.getMessage())
-                .setData(null)
+                .setData(data)
                 .setStatus(HttpStatus.UNAUTHORIZED.value()));
+    }
+
+    @ExceptionHandler(InvalidPaginationException.class)
+    public ResponseEntity<ResponseStructure<String>> invalidPagination(InvalidPaginationException exception)
+    {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseStructure<String>()
+                .setMessage(exception.getMessage())
+                .setData(data)
+                .setStatus(HttpStatus.BAD_REQUEST.value()));
+    }
+
+    @ExceptionHandler(InvalidSortingFieldException.class)
+    public ResponseEntity<ResponseStructure<String>> invalidSortingField(InvalidSortingFieldException exception)
+    {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseStructure<String>()
+                .setMessage(exception.getMessage())
+                .setData(data)
+                .setStatus(HttpStatus.BAD_REQUEST.value()));
     }
 }

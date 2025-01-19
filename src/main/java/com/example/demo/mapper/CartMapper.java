@@ -11,20 +11,20 @@ import java.util.List;
 
 public class CartMapper
 {
-    public ResponseStructure<CartResponseDto> noAuthority()
+    public ResponseEntity<ResponseStructure<CartResponseDto>> noAuthority()
     {
-        return new ResponseStructure<CartResponseDto>()
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<CartResponseDto>()
                 .setMessage("No Authority")
                 .setData(null)
-                .setStatus(HttpStatus.UNAUTHORIZED.value());
+                .setStatus(HttpStatus.UNAUTHORIZED.value()));
     }
 
-    public ResponseStructure<List<CartResponseDto>> noAuthority(String message)
+    public ResponseEntity<ResponseStructure<List<CartResponseDto>>> noAuthority(String message)
     {
-        return new ResponseStructure<List<CartResponseDto>>()
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<List<CartResponseDto>>()
                 .setMessage(message)
                 .setData(null)
-                .setStatus(HttpStatus.UNAUTHORIZED.value());
+                .setStatus(HttpStatus.UNAUTHORIZED.value()));
     }
 
     public ResponseEntity<ResponseStructure<CartResponseDto>> mapToSuccessRemoveFromCart(String bookName)

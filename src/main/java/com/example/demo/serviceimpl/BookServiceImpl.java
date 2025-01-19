@@ -2,27 +2,29 @@ package com.example.demo.serviceimpl;
 
 import com.example.demo.entity.Book;
 import com.example.demo.exception.BookNotFoundException;
+import com.example.demo.exception.InvalidPaginationException;
+import com.example.demo.exception.InvalidSortingFieldException;
 import com.example.demo.mapper.BookMapper;
 import com.example.demo.requestdto.BookRequestDto;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.responsedto.BookResponseDto;
 import com.example.demo.service.BookService;
 import com.example.demo.util.ResponseStructure;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class BookServiceImpl implements BookService
 {
-    @Autowired
     private BookRepository bookRepository;
-
     private final BookMapper bookMapper=new BookMapper();
 
     @Override
@@ -49,6 +51,48 @@ public class BookServiceImpl implements BookService
         return bookMapper.mapToSuccessFetchBook(book);
     }
 
+    @Override
+    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> findBooksWithSorting(String field)
+    {
+        List<String> validFields = List.of("bookId", "bookName", "bookAuthor", "bookPrice");
+        if (!validFields.contains(field))
+            throw new InvalidSortingFieldException("The field '" + field + "' is not a valid sorting field. Valid fields are: "+ validFields);
+        List<Book> sortedBooks=bookRepository.findAll(Sort.by(Sort.Direction.ASC,field));
+        if(sortedBooks.isEmpty())
+            return bookMapper.noContent();
+        List<BookResponseDto> responseDTOs= sortedBooks.stream().map(bookMapper::mapBookToBookResponse).toList();
+        return bookMapper.mapToSuccessGetAllBooks("Books sorted successfully based on "+field,responseDTOs);
+    }
+
+
+    @Override
+    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> searchBooks(String query)
+    {
+        if(query==null || query.trim().isEmpty())
+            return bookMapper.noContent();
+        List<Book> foundBooks = bookRepository.findByBookNameContainingOrBookAuthorContainingOrBookDescriptionContaining(query, query, query);
+        if (foundBooks.isEmpty())
+            return bookMapper.noContent();
+        List<BookResponseDto> responseDTOs = foundBooks.stream()
+                .map(bookMapper::mapBookToBookResponse)
+                .collect(Collectors.toList());
+        return bookMapper.mapToSuccessGetAllBooks("Books matching the query: " + query, responseDTOs);
+    }
+
+
+    @Override
+    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> findBooksWithPagination(int pageNumber,int pageSize)
+    {
+        if(pageNumber<0 || pageSize<=0)
+            throw new InvalidPaginationException("Page number must be non-negative and Page size must be greater than 0.");
+        Page<Book> books=bookRepository.findAll(PageRequest.of(pageNumber,pageSize));
+        List<Book> bookList=books.getContent();
+        if(bookList.isEmpty())
+            return bookMapper.noContent();
+        List<BookResponseDto> responseDTOs= bookList.stream().map(bookMapper::mapBookToBookResponse).toList();
+        return bookMapper.mapToSuccessGetAllBooks("Books fetched successfully",responseDTOs);
+    }
+
 
     @Override
     public ResponseEntity<ResponseStructure<List<BookResponseDto>>> getAllBooks()
@@ -56,9 +100,8 @@ public class BookServiceImpl implements BookService
         List<Book> books=bookRepository.findAll();
         if(books.isEmpty())
             return bookMapper.noContent();
-
-        List<BookResponseDto> bookResponseDtos =books.stream().map(bookMapper::mapBookToBookResponse).toList();
-        return bookMapper.mapToSuccessGetAllBooks("Books fetched successfully",bookResponseDtos);
+        List<BookResponseDto> bookResponseDto =books.stream().map(bookMapper::mapBookToBookResponse).toList();
+        return bookMapper.mapToSuccessGetAllBooks("Books fetched successfully",bookResponseDto);
     }
 
 
@@ -78,31 +121,6 @@ public class BookServiceImpl implements BookService
         Book book=getBookByIdFromOptional(bookId);
         bookRepository.delete(book);
         return bookMapper.mapToSuccessDeleteBook("Book with name "+book.getBookName()+" deleted successfully");
-    }
-
-
-    @Override
-    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> sortByBookName()
-    {
-        List<Book> books=bookRepository.findAll();
-        if(books.isEmpty())
-            return bookMapper.noContent();
-        List<Book> sortedBooks=books.stream().sorted(Comparator.comparing(Book::getBookName)).toList();
-        List<BookResponseDto> responseDTOs=
-                sortedBooks.stream().map(book->new BookResponseDto(book.getBookId(),book.getBookName(),book.getBookAuthor(),book.getBookDescription(),book.getBookPrice(),book.getBookLogo())).toList();
-        return bookMapper.mapToSuccessGetAllBooks("Books sorted successfully",responseDTOs);
-    }
-
-    @Override
-    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> sortByBookPrice()
-    {
-        List<Book> books=bookRepository.findAll();
-        if(books.isEmpty())
-            return bookMapper.noContent();
-        List<Book> sortedBooks=books.stream().sorted(Comparator.comparing(Book::getBookPrice)).toList();
-        List<BookResponseDto> responseDTOs=
-                sortedBooks.stream().map(book->new BookResponseDto(book.getBookId(),book.getBookName(),book.getBookAuthor(),book.getBookDescription(),book.getBookPrice(),book.getBookLogo())).toList();
-        return bookMapper.mapToSuccessGetAllBooks("Books sorted successfully",responseDTOs);
     }
 
 

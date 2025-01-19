@@ -28,15 +28,18 @@ public class WishListController
     private static final String HEADER="Authorization";
 
     @PostMapping("/addToWishList")
-    public ResponseEntity<ResponseStructure<WishListResponseDto>> addToWishList(@RequestHeader(value = HEADER)String authHeader,@Valid @RequestBody WishListRequestDto wishListRequestDto)
+    public ResponseEntity<ResponseStructure<WishListResponseDto>> addToWishList(
+            @RequestHeader(value = HEADER)String authHeader,
+            @Valid @RequestBody WishListRequestDto wishListRequestDto)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
         {
-            return new ResponseEntity<>(wishListMapper.headerError(), HttpStatus.UNAUTHORIZED);
+            return wishListMapper.headerError();
         }
         return wishListService.addToWishList(userDetails.getUsername(),wishListRequestDto);
     }
+
 
     @GetMapping("/getWishList")
     public ResponseEntity<ResponseStructure<List<WishListResponseDto>>> getWishList(@RequestHeader(value = HEADER)String authHeader)
@@ -44,7 +47,7 @@ public class WishListController
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
         {
-            return new ResponseEntity<>(wishListMapper.noAuthority(), HttpStatus.UNAUTHORIZED);
+            return wishListMapper.noAuthority();
         }
         return wishListService.getWishList(userDetails.getUsername());
     }

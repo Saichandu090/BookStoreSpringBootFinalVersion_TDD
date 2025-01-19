@@ -136,7 +136,7 @@ public class BookRepositoryTests
     }
 
     @Test
-    public void sortByBookNameTest()
+    public void findBooksWithSorting_BookName()
     {
         BookRequestDto bookRequestDto=BookRequestDto.builder()
                 .bookId(789654123L)
@@ -169,7 +169,7 @@ public class BookRepositoryTests
         bookService.addBook(bookRequestDto);
         bookService.addBook(bookRequestDto2);
 
-        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.sortByBookName();
+        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.findBooksWithSorting("bookName");
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody().getData().size()).isEqualTo(3);
@@ -186,7 +186,7 @@ public class BookRepositoryTests
     }
 
     @Test
-    public void sortByBookPriceTest()
+    public void findBooksWithSorting_BookPrice()
     {
         BookRequestDto bookRequestDto=BookRequestDto.builder()
                 .bookId(789654123L)
@@ -219,7 +219,7 @@ public class BookRepositoryTests
         bookService.addBook(bookRequestDto);
         bookService.addBook(bookRequestDto2);
 
-        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.sortByBookPrice();
+        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.findBooksWithSorting("bookPrice");
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody().getData().size()).isEqualTo(3);

@@ -36,9 +36,9 @@ public class WishListServiceImpl implements WishListService
         User user =getUser(email);
         Book book =getBook(wishListRequestDto.getBookId());
         if(isInWishList(user,book.getBookId()))
-            return addBookToWishList(user,book);
-        else
             return removeBookFromWishList(user,book);
+        else
+            return addBookToWishList(user,book);
     }
 
     @Override
@@ -79,9 +79,9 @@ public class WishListServiceImpl implements WishListService
         for(WishList wishList:wishLists)
         {
             if(wishList.getBookId().equals(bookId))
-                return false;
+                return true;
         }
-        return true;
+        return false;
     }
 
 

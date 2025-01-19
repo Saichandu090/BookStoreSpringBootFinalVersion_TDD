@@ -11,20 +11,20 @@ import java.util.List;
 
 public class WishListMapper
 {
-    public ResponseStructure<WishListResponseDto> headerError()
+    public ResponseEntity<ResponseStructure<WishListResponseDto>> headerError()
     {
-        return new ResponseStructure<WishListResponseDto>()
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<WishListResponseDto>()
                 .setData(null)
                 .setMessage("Token Error")
-                .setStatus(HttpStatus.UNAUTHORIZED.value());
+                .setStatus(HttpStatus.UNAUTHORIZED.value()));
     }
 
-    public ResponseStructure<List<WishListResponseDto>> noAuthority()
+    public ResponseEntity<ResponseStructure<List<WishListResponseDto>>> noAuthority()
     {
-        return new ResponseStructure<List<WishListResponseDto>>()
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<List<WishListResponseDto>>()
                 .setStatus(HttpStatus.UNAUTHORIZED.value())
                 .setData(null)
-                .setMessage("Token Error");
+                .setMessage("Token Error"));
     }
 
     public WishListResponseDto mapWishListToResponse(WishList saved)

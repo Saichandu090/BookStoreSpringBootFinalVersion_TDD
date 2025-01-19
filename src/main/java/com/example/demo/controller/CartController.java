@@ -9,7 +9,6 @@ import com.example.demo.util.ResponseStructure;
 import com.example.demo.util.Roles;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,27 +26,34 @@ public class CartController
     private final CartMapper cartMapper=new CartMapper();
     private static final String HEADER="Authorization";
 
+
     @PostMapping("/addToCart")
-    public ResponseEntity<ResponseStructure<CartResponseDto>> addToCart(@RequestHeader(value = HEADER)String authHeader,@Valid @RequestBody CartRequestDto cartRequestDto)
+    public ResponseEntity<ResponseStructure<CartResponseDto>> addToCart(
+            @RequestHeader(value = HEADER)String authHeader,
+            @Valid @RequestBody CartRequestDto cartRequestDto)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if(userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
         {
             return cartService.addToCart(userDetails.getUsername(),cartRequestDto);
         }
-        return new ResponseEntity<>(cartMapper.noAuthority(), HttpStatus.UNAUTHORIZED);
+        return cartMapper.noAuthority();
     }
 
+
     @DeleteMapping("/removeFromCart/{cartId}")
-    public ResponseEntity<ResponseStructure<CartResponseDto>> removeFromCart(@RequestHeader(value = HEADER)String authHeader,@PathVariable Long cartId)
+    public ResponseEntity<ResponseStructure<CartResponseDto>> removeFromCart(
+            @RequestHeader(value = HEADER)String authHeader,
+            @PathVariable Long cartId)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if(userDetails != null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
         {
             return cartService.removeFromCart(userDetails.getUsername(),cartId);
         }
-        return new ResponseEntity<>(cartMapper.noAuthority(), HttpStatus.UNAUTHORIZED);
+        return cartMapper.noAuthority();
     }
+
 
     @DeleteMapping("/clearCart")
     public ResponseEntity<ResponseStructure<CartResponseDto>> clearCart(@RequestHeader(value = HEADER)String authHeader)
@@ -57,8 +63,9 @@ public class CartController
         {
             return cartService.clearCart(userDetails.getUsername());
         }
-        return new ResponseEntity<>(cartMapper.noAuthority(), HttpStatus.UNAUTHORIZED);
+        return cartMapper.noAuthority();
     }
+
 
     @GetMapping("/getCart")
     public ResponseEntity<ResponseStructure<List<CartResponseDto>>> getCartItems(@RequestHeader(value = HEADER)String authHeader)
@@ -68,6 +75,6 @@ public class CartController
         {
             return cartService.getCartItems(userDetails.getUsername());
         }
-        return new ResponseEntity<>(cartMapper.noAuthority("No Authority"), HttpStatus.UNAUTHORIZED);
+        return cartMapper.noAuthority("No Authority");
     }
 }

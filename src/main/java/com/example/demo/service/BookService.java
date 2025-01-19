@@ -21,7 +21,9 @@ public interface BookService
 
     ResponseEntity<ResponseStructure<String>> deleteBook(Long bookId);
 
-    ResponseEntity<ResponseStructure<List<BookResponseDto>>> sortByBookName();
+    ResponseEntity<ResponseStructure<List<BookResponseDto>>> findBooksWithSorting(String field);
 
-    ResponseEntity<ResponseStructure<List<BookResponseDto>>> sortByBookPrice();
+    ResponseEntity<ResponseStructure<List<BookResponseDto>>> searchBooks(String query);
+
+    ResponseEntity<ResponseStructure<List<BookResponseDto>>> findBooksWithPagination(int pageNumber,int pageSize);
 }

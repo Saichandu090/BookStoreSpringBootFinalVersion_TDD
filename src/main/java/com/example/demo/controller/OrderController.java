@@ -27,7 +27,9 @@ public class OrderController
     private static final String HEADER="Authorization";
 
     @PostMapping("/placeOrder")
-    public ResponseEntity<ResponseStructure<OrderResponseDto>> placeOrder(@RequestHeader(value = HEADER)String authHeader,@Valid @RequestBody OrderRequestDto orderRequestDto)
+    public ResponseEntity<ResponseStructure<OrderResponseDto>> placeOrder(
+            @RequestHeader(value = HEADER)String authHeader,
+            @Valid @RequestBody OrderRequestDto orderRequestDto)
     {
         UserDetails userDetails=userMapper.validateUserToken(authHeader);
         if(userDetails!=null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
@@ -39,7 +41,9 @@ public class OrderController
 
 
     @DeleteMapping("/cancelOrder/{orderId}")
-    public ResponseEntity<ResponseStructure<String>> cancelOrder(@RequestHeader(value = HEADER)String authHeader,@PathVariable Long orderId)
+    public ResponseEntity<ResponseStructure<String>> cancelOrder(
+            @RequestHeader(value = HEADER)String authHeader,
+            @PathVariable Long orderId)
     {
         UserDetails userDetails=userMapper.validateUserToken(authHeader);
         if(userDetails!=null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
@@ -49,8 +53,11 @@ public class OrderController
         return orderMapper.noAuthorityForMethod();
     }
 
+
     @GetMapping("/getOrder")
-    public ResponseEntity<ResponseStructure<OrderResponseDto>> getOrder(@RequestHeader(value = HEADER)String authHeader,@RequestParam Long orderId)
+    public ResponseEntity<ResponseStructure<OrderResponseDto>> getOrder(
+            @RequestHeader(value = HEADER)String authHeader,
+            @RequestParam Long orderId)
     {
         UserDetails userDetails=userMapper.validateUserToken(authHeader);
         if(userDetails!=null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))

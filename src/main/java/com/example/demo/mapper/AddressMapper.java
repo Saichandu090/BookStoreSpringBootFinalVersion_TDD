@@ -12,20 +12,20 @@ import java.util.List;
 
 public class AddressMapper
 {
-    public ResponseStructure<AddressResponseDto> noAuthority()
+    public ResponseEntity<ResponseStructure<AddressResponseDto>> noAuthority()
     {
-        return new ResponseStructure<AddressResponseDto>()
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<AddressResponseDto>()
                 .setMessage("No Authority")
                 .setStatus(HttpStatus.UNAUTHORIZED.value())
-                .setData(null);
+                .setData(null));
     }
 
-    public ResponseStructure<List<AddressResponseDto>> noAuthorityForAllAddress()
+    public ResponseEntity<ResponseStructure<List<AddressResponseDto>>> noAuthorityForAllAddress()
     {
-        return new ResponseStructure<List<AddressResponseDto>>()
+        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<List<AddressResponseDto>>()
                 .setMessage("No Authority")
                 .setStatus(HttpStatus.UNAUTHORIZED.value())
-                .setData(null);
+                .setData(null));
     }
 
     public Address mapAddressRequestToAddress(User user, AddressRequestDto addressRequestDto)

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -18,4 +19,6 @@ public interface BookRepository extends JpaRepository<Book,Long>
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT b FROM Book b WHERE b.bookId = :bookId")
     Optional<Book> findByIdForUpdate(@Param("bookId") Long bookId);
+
+    List<Book> findByBookNameContainingOrBookAuthorContainingOrBookDescriptionContaining(String bookName, String bookAuthor, String bookDescription);
 }

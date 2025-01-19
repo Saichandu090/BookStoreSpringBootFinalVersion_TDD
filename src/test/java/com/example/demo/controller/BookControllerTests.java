@@ -39,9 +39,12 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = BookController.class)
 @ExtendWith(MockitoExtension.class)
@@ -161,7 +164,7 @@ public class BookControllerTests
                 .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
                 .content(objectMapper.writeValueAsString(bookRequestDTO)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.CREATED.value())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.bookName",CoreMatchers.is(bookResponseDTO.getBookName())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.bookId",CoreMatchers.is(bookResponseDTO.getBookId().intValue())))
@@ -184,7 +187,7 @@ public class BookControllerTests
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
                         .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -201,7 +204,7 @@ public class BookControllerTests
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
                         .content(objectMapper.writeValueAsString(bookRequestDTO)))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(status().isUnauthorized())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -215,7 +218,7 @@ public class BookControllerTests
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(bookRequestDTO)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -234,7 +237,7 @@ public class BookControllerTests
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.OK.value())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.bookName",CoreMatchers.is(bookResponseDTO.getBookName())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.bookId",CoreMatchers.is(bookResponseDTO.getBookId().intValue())))
@@ -248,7 +251,7 @@ public class BookControllerTests
         mockMvc.perform(get("/book/getBookByName/{bookName}",bookRequestDTO.getBookName())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -263,7 +266,7 @@ public class BookControllerTests
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("Authorization",token)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(status().isNotFound())
                 .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -281,7 +284,7 @@ public class BookControllerTests
         mockMvc.perform(get("/book/getBookById/{bookId}",bookRequestDTO.getBookId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.OK.value())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.bookName",CoreMatchers.is(bookResponseDTO.getBookName())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.bookId",CoreMatchers.is(bookResponseDTO.getBookId().intValue())))
@@ -294,7 +297,7 @@ public class BookControllerTests
     {
         mockMvc.perform(get("/book/getBookById/{bookId}",bookRequestDTO.getBookId())
                         .characterEncoding(StandardCharsets.UTF_8))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -310,7 +313,7 @@ public class BookControllerTests
         mockMvc.perform(get("/book/getBookById")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(status().isNotFound())
                 .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -328,7 +331,7 @@ public class BookControllerTests
         mockMvc.perform(get("/book/getBooks")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.OK.value())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.size()",CoreMatchers.is(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].bookName",CoreMatchers.is(bookResponseDTO.getBookName())))
@@ -340,7 +343,7 @@ public class BookControllerTests
     {
         mockMvc.perform(get("/book/getBooks")
                         .characterEncoding(StandardCharsets.UTF_8))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -360,7 +363,7 @@ public class BookControllerTests
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
                         .content(objectMapper.writeValueAsString(bookRequestDTO)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.OK.value())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.bookName",CoreMatchers.is(bookResponseDTO.getBookName())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.bookId",CoreMatchers.is(bookResponseDTO.getBookId().intValue())))
@@ -375,7 +378,7 @@ public class BookControllerTests
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(bookRequestDTO)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -391,7 +394,7 @@ public class BookControllerTests
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
                         .content(objectMapper.writeValueAsString(bookRequestDTO)))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(status().isUnauthorized())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -409,7 +412,7 @@ public class BookControllerTests
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
                         .content(objectMapper.writeValueAsString(bookRequestDto)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -428,7 +431,7 @@ public class BookControllerTests
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.OK.value())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data",CoreMatchers.is(responseStructure.getData())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message",CoreMatchers.is(responseStructure.getMessage())))
@@ -445,7 +448,7 @@ public class BookControllerTests
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+                .andExpect(status().isUnauthorized())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -458,7 +461,7 @@ public class BookControllerTests
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(status().isNotFound())
                 .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
@@ -466,17 +469,17 @@ public class BookControllerTests
 
 
     @Test
-    public void bookController_SortByBookName_MustReturnOKStatus() throws Exception
+    public void bookController_SortByField_MustReturnOKStatus() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<List<BookResponseDto>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Books sorted successfully",List.of(bookResponseDTO));
-        given(bookService.sortByBookName()).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        given(bookService.findBooksWithSorting(anyString())).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
-        mockMvc.perform(get("/book/sortByBookName")
+        mockMvc.perform(get("/book/sortBy/{field}","something")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.OK.value())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.size()",CoreMatchers.is(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].bookName",CoreMatchers.is(bookResponseDTO.getBookName())))
@@ -484,30 +487,42 @@ public class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
+
     @Test
-    public void bookController_SortByBookName_TestWithoutHeader() throws Exception
+    public void bookController_SortByField_IfPathVariableIsMissing() throws Exception
     {
-        mockMvc.perform(get("/book/sortByBookName")
+        String token="Bearer-token";
+        mockMvc.perform(get("/book/sortBy")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void bookController_SortByField_TestWithoutHeader() throws Exception
+    {
+        mockMvc.perform(get("/book/sortBy/{field}","something")
                         .characterEncoding(StandardCharsets.UTF_8))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
 
 
-
     @Test
-    public void bookController_SortByBookPrice_MustReturnOKStatus() throws Exception
+    public void bookController_Pagination_ValidTest() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<List<BookResponseDto>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Books sorted successfully",List.of(bookResponseDTO));
-        given(bookService.sortByBookPrice()).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        ResponseStructure<List<BookResponseDto>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Books fetched successfully",List.of(bookResponseDTO));
+        given(bookService.findBooksWithPagination(anyInt(),anyInt())).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
-        mockMvc.perform(get("/book/sortByBookPrice")
+        mockMvc.perform(get("/book/pagination/{pageSize}",10)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("Authorization",token))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.OK.value())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.size()",CoreMatchers.is(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].bookName",CoreMatchers.is(bookResponseDTO.getBookName())))
@@ -515,13 +530,60 @@ public class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
+
     @Test
-    public void bookController_SortByBookPrice_TestCaseWithoutHeader() throws Exception
+    public void bookController_Pagination_IfPageSizeIsMissing() throws Exception
     {
-        mockMvc.perform(get("/book/sortByBookPrice")
+        String token="Bearer-token";
+        mockMvc.perform(get("/book/pagination")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+
+    @Test
+    public void bookController_SearchQuery_MustReturnOKStatus() throws Exception
+    {
+        String token="Bearer-token";
+        ResponseStructure<List<BookResponseDto>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully",List.of(bookResponseDTO));
+        given(bookService.searchBooks(anyString())).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+
+        mockMvc.perform(get("/book/search/{field}","something")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.OK.value())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.size()",CoreMatchers.is(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].bookName",CoreMatchers.is(bookResponseDTO.getBookName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].bookPrice",CoreMatchers.is(bookResponseDTO.getBookPrice())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+
+    @Test
+    public void bookController_SearchQuery_IfHeaderIsMissing() throws Exception
+    {
+        mockMvc.perform(get("/book/search/{field}","something")
                         .characterEncoding(StandardCharsets.UTF_8))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+
+    @Test
+    public void bookController_SearchQuery_IfPathVariableIsMissing() throws Exception
+    {
+        String token="Bearer-token";
+        mockMvc.perform(get("/book/search")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization",token))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
     }
 }
