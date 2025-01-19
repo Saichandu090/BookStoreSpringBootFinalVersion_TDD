@@ -7,8 +7,8 @@ import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.mapper.AddressMapper;
 import com.example.demo.repository.AddressRepository;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.requestdto.AddressRequestDto;
-import com.example.demo.responsedto.AddressResponseDto;
+import com.example.demo.requestdto.AddressRequest;
+import com.example.demo.responsedto.AddressResponse;
 import com.example.demo.service.AddressService;
 import com.example.demo.util.ResponseStructure;
 import lombok.AllArgsConstructor;
@@ -27,10 +27,10 @@ public class AddressServiceImpl implements AddressService
     private final AddressMapper addressMapper=new AddressMapper();
 
     @Override
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> addAddress(String email, AddressRequestDto addressRequestDto)
+    public ResponseEntity<ResponseStructure<AddressResponse>> addAddress(String email, AddressRequest addressRequest)
     {
         User realUser=getUser(email);
-        Address address=addressMapper.mapAddressRequestToAddress(realUser,addressRequestDto);
+        Address address=addressMapper.mapAddressRequestToAddress(realUser, addressRequest);
         if(realUser.getAddresses()==null)
             realUser.setAddresses(new ArrayList<>());
         realUser.getAddresses().add(address);
@@ -40,18 +40,18 @@ public class AddressServiceImpl implements AddressService
 
 
     @Override
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> updateAddress(String email, Long addressId, AddressRequestDto addressRequestDto)
+    public ResponseEntity<ResponseStructure<AddressResponse>> updateAddress(String email, Long addressId, AddressRequest addressRequest)
     {
         User user=getUser(email);
         Address realAddress=getAddress(addressId,user.getUserId());
-        Address updatedAddress=addressMapper.mapOldAddressToNewAddress(realAddress,addressRequestDto);
+        Address updatedAddress=addressMapper.mapOldAddressToNewAddress(realAddress, addressRequest);
         Address saved=addressRepository.save(updatedAddress);
         return addressMapper.mapToSuccessUpdateAddress(saved,user.getEmail());
     }
 
 
     @Override
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(String email,Long addressId)
+    public ResponseEntity<ResponseStructure<AddressResponse>> getAddressById(String email, Long addressId)
     {
         User user=getUser(email);
         Address resultAddress=getAddress(addressId,user.getUserId());
@@ -60,19 +60,19 @@ public class AddressServiceImpl implements AddressService
 
 
     @Override
-    public ResponseEntity<ResponseStructure<List<AddressResponseDto>>> getAllAddress(String email)
+    public ResponseEntity<ResponseStructure<List<AddressResponse>>> getAllAddress(String email)
     {
         User realUser=getUser(email);
         List<Address> addresses=addressRepository.findByUserId(realUser.getUserId());
         if(addresses.isEmpty())
             return addressMapper.mapToNoContentForGetAllAddress();
-        List<AddressResponseDto> responseDtoList=addresses.stream().map(addressMapper::mapAddressToAddressResponse).toList();
+        List<AddressResponse> responseDtoList=addresses.stream().map(addressMapper::mapAddressToAddressResponse).toList();
         return addressMapper.mapToSuccessGetAllAddress(responseDtoList);
     }
 
 
     @Override
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> deleteAddress(String email, Long addressId)
+    public ResponseEntity<ResponseStructure<AddressResponse>> deleteAddress(String email, Long addressId)
     {
         User realUser=getUser(email);
         Address realAddress=getAddress(addressId,realUser.getUserId());

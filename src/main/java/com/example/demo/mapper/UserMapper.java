@@ -1,14 +1,12 @@
 package com.example.demo.mapper;
 
 import com.example.demo.entity.User;
-import com.example.demo.requestdto.UserRegisterDTO;
-import com.example.demo.responsedto.LoginResponseDto;
-import com.example.demo.responsedto.RegisterResponseDto;
+import com.example.demo.requestdto.UserRegister;
+import com.example.demo.responsedto.LoginResponse;
+import com.example.demo.responsedto.RegisterResponse;
 import com.example.demo.serviceimpl.JWTService;
 import com.example.demo.serviceimpl.MyUserDetailsService;
 import com.example.demo.util.ResponseStructure;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -46,15 +44,15 @@ public class UserMapper
             return null;
     }
 
-    public ResponseEntity<ResponseStructure<RegisterResponseDto>> userAlreadyExists()
+    public ResponseEntity<ResponseStructure<RegisterResponse>> userAlreadyExists()
     {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseStructure<RegisterResponseDto>()
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseStructure<RegisterResponse>()
                 .setMessage("User Already Registered")
                 .setStatus(HttpStatus.CONFLICT.value())
                 .setData(null));
     }
 
-    public User convertFromRegisterDTO(UserRegisterDTO registerDTO)
+    public User convertFromRegisterDTO(UserRegister registerDTO)
     {
         return User.builder()
                 .email(registerDTO.getEmail())
@@ -67,20 +65,20 @@ public class UserMapper
                 .password(registerDTO.getPassword()).build();
     }
 
-    public ResponseEntity<ResponseStructure<RegisterResponseDto>> convertUser(User savedUser)
+    public ResponseEntity<ResponseStructure<RegisterResponse>> convertUser(User savedUser)
     {
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<RegisterResponseDto>()
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<RegisterResponse>()
                 .setMessage("User "+savedUser.getEmail()+" has registered successfully")
                 .setStatus(HttpStatus.CREATED.value())
-                .setData(RegisterResponseDto.builder().userId(savedUser.getUserId()).email(savedUser.getEmail()).role(savedUser.getRole()).build()));
+                .setData(RegisterResponse.builder().userId(savedUser.getUserId()).email(savedUser.getEmail()).role(savedUser.getRole()).build()));
     }
 
-    public ResponseEntity<ResponseStructure<LoginResponseDto>> loginSuccess(String token, String email, String role)
+    public ResponseEntity<ResponseStructure<LoginResponse>> loginSuccess(String token, String email, String role)
     {
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<LoginResponseDto>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<LoginResponse>()
                 .setStatus(HttpStatus.OK.value())
                 .setMessage(token)
-                .setData(LoginResponseDto.builder().role(role).email(email).build()));
+                .setData(LoginResponse.builder().role(role).email(email).build()));
     }
 
     public ResponseEntity<ResponseStructure<Boolean>> mapToFailureUserNotExist()

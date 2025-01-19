@@ -2,10 +2,10 @@ package com.example.demo.integrationtest;
 
 import com.example.demo.entity.User;
 import com.example.demo.integrationtest.repo.UserH2Repository;
-import com.example.demo.requestdto.UserLoginDTO;
-import com.example.demo.requestdto.UserRegisterDTO;
-import com.example.demo.responsedto.LoginResponseDto;
-import com.example.demo.responsedto.RegisterResponseDto;
+import com.example.demo.requestdto.UserLogin;
+import com.example.demo.requestdto.UserRegister;
+import com.example.demo.responsedto.LoginResponse;
+import com.example.demo.responsedto.RegisterResponse;
 import com.example.demo.util.ResponseStructure;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +50,7 @@ public class UserControllerIT
     @Test
     void registerUserTest()
     {
-        UserRegisterDTO userRegisterDTO=UserRegisterDTO.builder()
+        UserRegister userRegister = UserRegister.builder()
                 .firstName("Test")
                 .lastName("Chandu")
                 .dob(LocalDate.of(2002,8,24))
@@ -58,18 +58,18 @@ public class UserControllerIT
                 .role("ADMIN")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<RegisterResponseDto>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponseDto>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegister), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
-        assertEquals(userRegisterDTO.getEmail(),registerResponse.getBody().getData().getEmail());
-        assertEquals(userRegisterDTO.getRole(),registerResponse.getBody().getData().getRole());
+        assertEquals(userRegister.getEmail(),registerResponse.getBody().getData().getEmail());
+        assertEquals(userRegister.getRole(),registerResponse.getBody().getData().getRole());
         assertEquals(1, userH2Repository.findAll().size());
     }
 
 
     @Test
-    public void registerUserTest_WithInvalidBody()
+    public void registerUserTestWithInvalidBody()
     {
-        UserRegisterDTO requestDTO = new UserRegisterDTO();
+        UserRegister requestDTO = new UserRegister();
         requestDTO.setLastName("Chandu");
         requestDTO.setDob(LocalDate.of(2012, 8, 24));
         requestDTO.setPassword("saichandu@090");
@@ -79,16 +79,16 @@ public class UserControllerIT
         HttpEntity<Object> httpEntity=new HttpEntity<>(requestDTO);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, httpEntity,
-                new ParameterizedTypeReference<ResponseStructure<RegisterResponseDto>>() {}));
+                new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>() {}));
         assertEquals(HttpStatus.BAD_REQUEST,exception.getStatusCode());
     }
 
 
     @Test
-    public void loginTest_ValidTest()
+    public void loginTestValidTest()
     {
         //Register test
-        UserRegisterDTO userRegisterDTO=UserRegisterDTO.builder()
+        UserRegister userRegister = UserRegister.builder()
                 .firstName("Test")
                 .lastName("Chandu")
                 .dob(LocalDate.of(2002,8,24))
@@ -96,21 +96,21 @@ public class UserControllerIT
                 .role("ADMIN")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<RegisterResponseDto>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponseDto>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegister), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
         assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
-        assertEquals(userRegisterDTO.getEmail(),registerResponse.getBody().getData().getEmail());
-        assertEquals(userRegisterDTO.getRole(),registerResponse.getBody().getData().getRole());
+        assertEquals(userRegister.getEmail(),registerResponse.getBody().getData().getEmail());
+        assertEquals(userRegister.getRole(),registerResponse.getBody().getData().getRole());
         assertEquals(1, userH2Repository.findAll().size());
 
 
         //Login test
-        UserLoginDTO userLoginDTO=UserLoginDTO.builder()
+        UserLogin userLogin = UserLogin.builder()
                 .email("test@gmail.com")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<LoginResponseDto>> loginResponse = restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginDTO), new ParameterizedTypeReference<ResponseStructure<LoginResponseDto>>(){});
+        ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLogin), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
         assertEquals(HttpStatus.OK,loginResponse.getStatusCode());
         assertEquals(HttpStatus.OK.value(),loginResponse.getBody().getStatus());
@@ -119,10 +119,10 @@ public class UserControllerIT
     }
 
     @Test
-    public void loginTest_WithInvalidUserEmail()
+    public void loginTestWithInvalidUserEmail()
     {
         //Register test
-        UserRegisterDTO userRegisterDTO=UserRegisterDTO.builder()
+        UserRegister userRegister = UserRegister.builder()
                 .firstName("Test")
                 .lastName("Chandu")
                 .dob(LocalDate.of(2002,8,24))
@@ -130,31 +130,31 @@ public class UserControllerIT
                 .role("ADMIN")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<RegisterResponseDto>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponseDto>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegister), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
         assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
-        assertEquals(userRegisterDTO.getEmail(),registerResponse.getBody().getData().getEmail());
-        assertEquals(userRegisterDTO.getRole(),registerResponse.getBody().getData().getRole());
+        assertEquals(userRegister.getEmail(),registerResponse.getBody().getData().getEmail());
+        assertEquals(userRegister.getRole(),registerResponse.getBody().getData().getRole());
         assertEquals(1, userH2Repository.findAll().size());
 
 
         //Login test
-        UserLoginDTO userLoginDTO=UserLoginDTO.builder()
+        UserLogin userLogin = UserLogin.builder()
                 .email("tes@gmail.com")
                 .password("saichandu@090").build();
 
-        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()-> restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginDTO), new ParameterizedTypeReference<ResponseStructure<LoginResponseDto>>() {
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()-> restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLogin), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>() {
         }));
         assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
     }
 
 
     @Test
-    public void loginTest_WithInvalidUserPassword()
+    public void loginTestWithInvalidUserPassword()
     {
         //Register test
-        UserRegisterDTO userRegisterDTO=UserRegisterDTO.builder()
+        UserRegister userRegister = UserRegister.builder()
                 .firstName("Test")
                 .lastName("Chandu")
                 .dob(LocalDate.of(2002,8,24))
@@ -162,28 +162,28 @@ public class UserControllerIT
                 .role("ADMIN")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<RegisterResponseDto>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponseDto>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegister), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
         assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
-        assertEquals(userRegisterDTO.getEmail(),registerResponse.getBody().getData().getEmail());
-        assertEquals(userRegisterDTO.getRole(),registerResponse.getBody().getData().getRole());
+        assertEquals(userRegister.getEmail(),registerResponse.getBody().getData().getEmail());
+        assertEquals(userRegister.getRole(),registerResponse.getBody().getData().getRole());
         assertEquals(1, userH2Repository.findAll().size());
 
 
         //Login test
-        UserLoginDTO userLoginDTO=UserLoginDTO.builder()
+        UserLogin userLogin = UserLogin.builder()
                 .email("test@gmail.com")
                 .password("sai@090").build();
 
-        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginDTO), new ParameterizedTypeReference<ResponseStructure<LoginResponseDto>>() {
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLogin), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>() {
         }));
         assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
     }
 
 
     @Test
-    public void isUserExists_ValidTest_IfUserExists()
+    public void isUserExistsValidTestIfUserExists()
     {
         User user= User.builder()
                 .email("chandu@gmail.com").build();
@@ -200,7 +200,7 @@ public class UserControllerIT
     }
 
     @Test
-    public void isUserExists_IfUserNotExists()
+    public void isUserExistsIfUserNotExists()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
@@ -211,9 +211,9 @@ public class UserControllerIT
 
 
     @Test
-    public void forgetPassword_ValidTest_IfUserExists()
+    public void forgetPasswordValidTestIfUserExists()
     {
-        loginTest_ValidTest();
+        loginTestValidTest();
         HttpHeaders httpHeaders=new HttpHeaders();
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
 
@@ -228,21 +228,21 @@ public class UserControllerIT
 
 
         //Trying to login with old password
-        UserLoginDTO fail=UserLoginDTO.builder()
+        UserLogin fail= UserLogin.builder()
                 .email("test@gmail.com")
                 .password("saichandu@090").build();
 
-        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(fail), new ParameterizedTypeReference<ResponseStructure<LoginResponseDto>>() {
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(fail), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>() {
         }));
         assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode(),"login should fail as we have updated the password for the user");
 
 
         //Trying to login after changing the password with updated password
-        UserLoginDTO userLoginDTO=UserLoginDTO.builder()
+        UserLogin userLogin = UserLogin.builder()
                 .email("test@gmail.com")
                 .password("testing@090").build();
 
-        ResponseEntity<ResponseStructure<LoginResponseDto>> loginResponse = restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginDTO), new ParameterizedTypeReference<ResponseStructure<LoginResponseDto>>(){});
+        ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLogin), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
         assertEquals(HttpStatus.OK,loginResponse.getStatusCode(),"login should succeed as user have provided the updated password");
         assertEquals(HttpStatus.OK.value(),loginResponse.getBody().getStatus());
@@ -252,7 +252,7 @@ public class UserControllerIT
 
 
     @Test
-    public void forgetPassword_IfUserNotExists()
+    public void forgetPasswordIfUserNotExists()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);

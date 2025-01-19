@@ -1,8 +1,8 @@
 package com.example.demo.mapper;
 
 import com.example.demo.entity.Book;
-import com.example.demo.requestdto.BookRequestDto;
-import com.example.demo.responsedto.BookResponseDto;
+import com.example.demo.requestdto.BookRequest;
+import com.example.demo.responsedto.BookResponse;
 import com.example.demo.util.ResponseStructure;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,9 +11,9 @@ import java.util.List;
 
 public class BookMapper
 {
-    public ResponseEntity<ResponseStructure<BookResponseDto>> noAuthority()
+    public ResponseEntity<ResponseStructure<BookResponse>> noAuthority()
     {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<BookResponseDto>()
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<BookResponse>()
                 .setStatus(HttpStatus.UNAUTHORIZED.value())
                 .setData(null)
                 .setMessage("No Authority to access"));
@@ -27,16 +27,16 @@ public class BookMapper
                 .setMessage(message));
     }
 
-    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> noAuthorityForUser()
+    public ResponseEntity<ResponseStructure<List<BookResponse>>> noAuthorityForUser()
     {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<List<BookResponseDto>>()
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<List<BookResponse>>()
                 .setStatus(HttpStatus.UNAUTHORIZED.value())
                 .setData(null)
                 .setMessage("No Authority to access"));
     }
 
 
-    public Book addBook(BookRequestDto requestDTO)
+    public Book addBook(BookRequest requestDTO)
     {
         return Book.builder()
                 .bookId(requestDTO.getBookId())
@@ -49,9 +49,9 @@ public class BookMapper
                 .cartBookQuantity(0).build();
     }
 
-    public BookResponseDto mapBookToBookResponse(Book savedBook)
+    public BookResponse mapBookToBookResponse(Book savedBook)
     {
-        return BookResponseDto.builder()
+        return BookResponse.builder()
                 .bookId(savedBook.getBookId())
                 .bookName(savedBook.getBookName())
                 .bookDescription(savedBook.getBookDescription())
@@ -61,7 +61,7 @@ public class BookMapper
 
     }
 
-    public Book updateCurrentBook(Long bookId, BookRequestDto requestDTO, int cartQuantity)
+    public Book updateCurrentBook(Long bookId, BookRequest requestDTO, int cartQuantity)
     {
         return Book.builder()
                 .bookId(bookId)
@@ -74,41 +74,41 @@ public class BookMapper
                 .cartBookQuantity(cartQuantity).build();
     }
 
-    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> mapToSuccessGetAllBooks(String message,List<BookResponseDto> bookResponseDtos)
+    public ResponseEntity<ResponseStructure<List<BookResponse>>> mapToSuccessGetAllBooks(String message, List<BookResponse> bookResponses)
     {
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<BookResponseDto>>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<BookResponse>>()
                 .setStatus(HttpStatus.OK.value())
                 .setMessage(message)
-                .setData(bookResponseDtos));
+                .setData(bookResponses));
     }
 
-    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> noContent()
+    public ResponseEntity<ResponseStructure<List<BookResponse>>> noContent()
     {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponseDto>>()
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponse>>()
                 .setStatus(HttpStatus.NO_CONTENT.value())
                 .setMessage("Books are empty")
                 .setData(null));
     }
 
-    public ResponseEntity<ResponseStructure<BookResponseDto>> mapToSuccessFetchBook(Book book)
+    public ResponseEntity<ResponseStructure<BookResponse>> mapToSuccessFetchBook(Book book)
     {
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponseDto>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponse>()
                 .setStatus(HttpStatus.OK.value())
                 .setMessage("Book fetched successfully")
                 .setData(mapBookToBookResponse(book)));
     }
 
-    public ResponseEntity<ResponseStructure<BookResponseDto>> mapToSuccessAddBook(Book savedBook)
+    public ResponseEntity<ResponseStructure<BookResponse>> mapToSuccessAddBook(Book savedBook)
     {
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<BookResponseDto>().
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<BookResponse>().
                 setStatus(HttpStatus.CREATED.value())
                 .setMessage("Book with name "+savedBook.getBookName()+" added successfully")
                 .setData(mapBookToBookResponse(savedBook)));
     }
 
-    public ResponseEntity<ResponseStructure<BookResponseDto>> mapToSuccessUpdateBook(Book saveUpdatedBook)
+    public ResponseEntity<ResponseStructure<BookResponse>> mapToSuccessUpdateBook(Book saveUpdatedBook)
     {
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponseDto>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<BookResponse>()
                 .setStatus(HttpStatus.OK.value())
                 .setMessage("Book Updated successfully")
                 .setData(mapBookToBookResponse(saveUpdatedBook)));

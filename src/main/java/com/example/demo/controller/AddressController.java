@@ -2,8 +2,8 @@ package com.example.demo.controller;
 
 import com.example.demo.mapper.AddressMapper;
 import com.example.demo.mapper.UserMapper;
-import com.example.demo.requestdto.AddressRequestDto;
-import com.example.demo.responsedto.AddressResponseDto;
+import com.example.demo.requestdto.AddressRequest;
+import com.example.demo.responsedto.AddressResponse;
 import com.example.demo.service.AddressService;
 import com.example.demo.util.ResponseStructure;
 import com.example.demo.util.Roles;
@@ -28,36 +28,36 @@ public class AddressController
 
 
     @PostMapping("/addAddress")
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> addAddress(
+    public ResponseEntity<ResponseStructure<AddressResponse>> addAddress(
             @RequestHeader(value = HEADER)String authHeader,
-            @Valid @RequestBody AddressRequestDto addressRequestDto)
+            @Valid @RequestBody AddressRequest addressRequest)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
         {
             return addressMapper.noAuthority();
         }
-        return addressService.addAddress(userDetails.getUsername(),addressRequestDto);
+        return addressService.addAddress(userDetails.getUsername(), addressRequest);
     }
 
 
     @PutMapping("/editAddress/{addressId}")
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> updateAddress(
+    public ResponseEntity<ResponseStructure<AddressResponse>> updateAddress(
             @RequestHeader(value = HEADER)String authHeader,
             @PathVariable Long addressId,
-            @Valid @RequestBody AddressRequestDto addressRequestDto)
+            @Valid @RequestBody AddressRequest addressRequest)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
         {
             return addressMapper.noAuthority();
         }
-        return addressService.updateAddress(userDetails.getUsername(),addressId,addressRequestDto);
+        return addressService.updateAddress(userDetails.getUsername(),addressId, addressRequest);
     }
 
 
     @GetMapping("/getAddress/{addressId}")
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(
+    public ResponseEntity<ResponseStructure<AddressResponse>> getAddressById(
             @RequestHeader(value = HEADER)String authHeader,
             @PathVariable Long addressId)
     {
@@ -71,7 +71,7 @@ public class AddressController
 
 
     @GetMapping("/getAllAddress")
-    public ResponseEntity<ResponseStructure<List<AddressResponseDto>>> getAllAddress(@RequestHeader(value = HEADER)String authHeader)
+    public ResponseEntity<ResponseStructure<List<AddressResponse>>> getAllAddress(@RequestHeader(value = HEADER)String authHeader)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails == null || !userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
@@ -83,7 +83,7 @@ public class AddressController
 
 
     @DeleteMapping("/deleteAddress/{addressId}")
-    public ResponseEntity<ResponseStructure<AddressResponseDto>> deleteAddressById(
+    public ResponseEntity<ResponseStructure<AddressResponse>> deleteAddressById(
             @RequestHeader(value = HEADER)String authHeader,
             @PathVariable Long addressId)
     {

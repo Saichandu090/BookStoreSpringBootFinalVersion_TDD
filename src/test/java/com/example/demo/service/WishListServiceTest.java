@@ -8,8 +8,8 @@ import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WishListRepository;
-import com.example.demo.requestdto.WishListRequestDto;
-import com.example.demo.responsedto.WishListResponseDto;
+import com.example.demo.requestdto.WishListRequest;
+import com.example.demo.responsedto.WishListResponse;
 import com.example.demo.serviceimpl.WishListServiceImpl;
 import com.example.demo.util.ResponseStructure;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +47,7 @@ class WishListServiceTest
     private Book book;
     private WishList wishList;
 
-    private WishListRequestDto wishListRequestDto;
+    private WishListRequest wishListRequest;
 
     @BeforeEach
     public void init()
@@ -73,19 +73,19 @@ class WishListServiceTest
                 .cartBookQuantity(0)
                 .build();
 
-        wishListRequestDto=WishListRequestDto.builder().bookId(book.getBookId()).build();
+        wishListRequest = WishListRequest.builder().bookId(book.getBookId()).build();
 
         wishList=WishList.builder().wishListId(1L).bookId(book.getBookId()).userId(user.getUserId()).build();
     }
 
     @Test
-    public void wishListService_AddToWishList_MustReturnCreatedStatusCode()
+    public void wishListServiceAddToWishListMustReturnCreatedStatusCode()
     {
         when(wishListRepository.save(any(WishList.class))).thenReturn(wishList);
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
 
-        ResponseEntity<ResponseStructure<WishListResponseDto>> response=wishListService.addToWishList(user.getEmail(),wishListRequestDto);
+        ResponseEntity<ResponseStructure<WishListResponse>> response=wishListService.addToWishList(user.getEmail(), wishListRequest);
 
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
         assertEquals(201,response.getBody().getStatus());
@@ -97,27 +97,27 @@ class WishListServiceTest
     }
 
     @Test
-    public void wishListService_AddToWishList_TestWhenBookIdIsWrong()
+    public void wishListServiceAddToWishListTestWhenBookIdIsWrong()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(bookRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(BookNotFoundException.class,()->wishListService.addToWishList(user.getEmail(),wishListRequestDto));
+        assertThrows(BookNotFoundException.class,()->wishListService.addToWishList(user.getEmail(), wishListRequest));
 
         verify(bookRepository,times(1)).findById(anyLong());
         verify(userRepository,times(1)).findByEmail(anyString());
     }
 
     @Test
-    public void wishListService_AddToWishList_TestWhenUserEmailIsWrong()
+    public void wishListServiceAddToWishListTestWhenUserEmailIsWrong()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        assertThrows(UserNotFoundException.class,()->wishListService.addToWishList(user.getEmail(),wishListRequestDto));
+        assertThrows(UserNotFoundException.class,()->wishListService.addToWishList(user.getEmail(), wishListRequest));
         verify(userRepository,times(1)).findByEmail(anyString());
     }
 
     @Test
-    public void wishListService_AddToWishList_IfBookIsAlreadyPresent()
+    public void wishListServiceAddToWishListIfBookIsAlreadyPresent()
     {
         WishList dummy=WishList.builder().userId(12L).bookId(book.getBookId()).wishListId(1L).build();
         List<WishList> wishLists=new ArrayList<>();
@@ -128,13 +128,13 @@ class WishListServiceTest
                 .email("Testing")
                 .wishList(wishLists).build();
 
-        WishListRequestDto wishListRequestDto1=WishListRequestDto.builder().bookId(book.getBookId()).build();
+        WishListRequest wishListRequest1 = WishListRequest.builder().bookId(book.getBookId()).build();
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));
         when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
         when(wishListRepository.saveAll(anyList())).thenReturn(List.of());
 
-        ResponseEntity<ResponseStructure<WishListResponseDto>> response=wishListService.addToWishList(user1.getEmail(),wishListRequestDto1);
+        ResponseEntity<ResponseStructure<WishListResponse>> response=wishListService.addToWishList(user1.getEmail(), wishListRequest1);
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(200,response.getBody().getStatus());
@@ -147,7 +147,7 @@ class WishListServiceTest
 
 
     @Test
-    public void wishListService_GetWishList_ValidTest()
+    public void wishListServiceGetWishListValidTest()
     {
         WishList dummy=WishList.builder().userId(12L).bookId(book.getBookId()).wishListId(1L).build();
         List<WishList> wishLists=new ArrayList<>();
@@ -160,7 +160,7 @@ class WishListServiceTest
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));
 
-        ResponseEntity<ResponseStructure<List<WishListResponseDto>>> response=wishListService.getWishList(user1.getEmail());
+        ResponseEntity<ResponseStructure<List<WishListResponse>>> response=wishListService.getWishList(user1.getEmail());
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(200,response.getBody().getStatus());
@@ -172,11 +172,11 @@ class WishListServiceTest
 
 
     @Test
-    public void wishListService_GetWishList_IfWishListIsEmpty()
+    public void wishListServiceGetWishListIfWishListIsEmpty()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
-        ResponseEntity<ResponseStructure<List<WishListResponseDto>>> response=wishListService.getWishList(user.getEmail());
+        ResponseEntity<ResponseStructure<List<WishListResponse>>> response=wishListService.getWishList(user.getEmail());
 
         assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
         assertEquals(204,response.getBody().getStatus());

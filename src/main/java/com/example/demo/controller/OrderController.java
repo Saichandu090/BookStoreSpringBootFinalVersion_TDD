@@ -2,8 +2,8 @@ package com.example.demo.controller;
 
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.mapper.UserMapper;
-import com.example.demo.requestdto.OrderRequestDto;
-import com.example.demo.responsedto.OrderResponseDto;
+import com.example.demo.requestdto.OrderRequest;
+import com.example.demo.responsedto.OrderResponse;
 import com.example.demo.service.OrderService;
 import com.example.demo.util.ResponseStructure;
 import com.example.demo.util.Roles;
@@ -27,14 +27,14 @@ public class OrderController
     private static final String HEADER="Authorization";
 
     @PostMapping("/placeOrder")
-    public ResponseEntity<ResponseStructure<OrderResponseDto>> placeOrder(
+    public ResponseEntity<ResponseStructure<OrderResponse>> placeOrder(
             @RequestHeader(value = HEADER)String authHeader,
-            @Valid @RequestBody OrderRequestDto orderRequestDto)
+            @Valid @RequestBody OrderRequest orderRequest)
     {
         UserDetails userDetails=userMapper.validateUserToken(authHeader);
         if(userDetails!=null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
         {
-            return orderService.placeOrder(userDetails.getUsername(),orderRequestDto);
+            return orderService.placeOrder(userDetails.getUsername(), orderRequest);
         }
         return orderMapper.noAuthority();
     }
@@ -55,7 +55,7 @@ public class OrderController
 
 
     @GetMapping("/getOrder")
-    public ResponseEntity<ResponseStructure<OrderResponseDto>> getOrder(
+    public ResponseEntity<ResponseStructure<OrderResponse>> getOrder(
             @RequestHeader(value = HEADER)String authHeader,
             @RequestParam Long orderId)
     {
@@ -69,7 +69,7 @@ public class OrderController
 
 
     @GetMapping("/getAllOrders")
-    public ResponseEntity<ResponseStructure<List<OrderResponseDto>>> getAllOrdersForUser(@RequestHeader(value = HEADER)String authHeader)
+    public ResponseEntity<ResponseStructure<List<OrderResponse>>> getAllOrdersForUser(@RequestHeader(value = HEADER)String authHeader)
     {
         UserDetails userDetails=userMapper.validateUserToken(authHeader);
         if(userDetails!=null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))

@@ -1,9 +1,9 @@
 package com.example.demo.controller;
 
-import com.example.demo.requestdto.UserLoginDTO;
-import com.example.demo.requestdto.UserRegisterDTO;
-import com.example.demo.responsedto.LoginResponseDto;
-import com.example.demo.responsedto.RegisterResponseDto;
+import com.example.demo.requestdto.UserLogin;
+import com.example.demo.requestdto.UserRegister;
+import com.example.demo.responsedto.LoginResponse;
+import com.example.demo.responsedto.RegisterResponse;
 import com.example.demo.service.UserService;
 import com.example.demo.util.ResponseStructure;
 import jakarta.validation.Valid;
@@ -19,13 +19,13 @@ public class UserController
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<ResponseStructure<RegisterResponseDto>> registerUser(@Valid @RequestBody UserRegisterDTO registerDTO)
+    public ResponseEntity<ResponseStructure<RegisterResponse>> registerUser(@Valid @RequestBody UserRegister registerDTO)
     {
         return userService.registerUser(registerDTO);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseStructure<LoginResponseDto>> login(@Valid @RequestBody UserLoginDTO loginDTO)
+    public ResponseEntity<ResponseStructure<LoginResponse>> login(@Valid @RequestBody UserLogin loginDTO)
     {
         return userService.login(loginDTO);
     }

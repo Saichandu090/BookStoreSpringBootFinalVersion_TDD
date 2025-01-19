@@ -5,9 +5,9 @@ import com.example.demo.exception.BookNotFoundException;
 import com.example.demo.exception.InvalidPaginationException;
 import com.example.demo.exception.InvalidSortingFieldException;
 import com.example.demo.mapper.BookMapper;
-import com.example.demo.requestdto.BookRequestDto;
+import com.example.demo.requestdto.BookRequest;
 import com.example.demo.repository.BookRepository;
-import com.example.demo.responsedto.BookResponseDto;
+import com.example.demo.responsedto.BookResponse;
 import com.example.demo.service.BookService;
 import com.example.demo.util.ResponseStructure;
 import lombok.AllArgsConstructor;
@@ -28,16 +28,16 @@ public class BookServiceImpl implements BookService
     private final BookMapper bookMapper=new BookMapper();
 
     @Override
-    public ResponseEntity<ResponseStructure<BookResponseDto>> addBook(BookRequestDto bookRequestDTO)
+    public ResponseEntity<ResponseStructure<BookResponse>> addBook(BookRequest bookRequest)
     {
-        Book book=bookMapper.addBook(bookRequestDTO);
+        Book book=bookMapper.addBook(bookRequest);
         Book savedBook=bookRepository.save(book);
         return bookMapper.mapToSuccessAddBook(savedBook);
     }
 
 
     @Override
-    public ResponseEntity<ResponseStructure<BookResponseDto>> getBookByName(String bookName)
+    public ResponseEntity<ResponseStructure<BookResponse>> getBookByName(String bookName)
     {
         Book book=getBook(bookName);
         return bookMapper.mapToSuccessFetchBook(book);
@@ -45,14 +45,14 @@ public class BookServiceImpl implements BookService
 
 
     @Override
-    public ResponseEntity<ResponseStructure<BookResponseDto>> getBookById(Long bookId)
+    public ResponseEntity<ResponseStructure<BookResponse>> getBookById(Long bookId)
     {
         Book book=getBookByIdFromOptional(bookId);
         return bookMapper.mapToSuccessFetchBook(book);
     }
 
     @Override
-    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> findBooksWithSorting(String field)
+    public ResponseEntity<ResponseStructure<List<BookResponse>>> findBooksWithSorting(String field)
     {
         List<String> validFields = List.of("bookId", "bookName", "bookAuthor", "bookPrice");
         if (!validFields.contains(field))
@@ -60,20 +60,20 @@ public class BookServiceImpl implements BookService
         List<Book> sortedBooks=bookRepository.findAll(Sort.by(Sort.Direction.ASC,field));
         if(sortedBooks.isEmpty())
             return bookMapper.noContent();
-        List<BookResponseDto> responseDTOs= sortedBooks.stream().map(bookMapper::mapBookToBookResponse).toList();
+        List<BookResponse> responseDTOs= sortedBooks.stream().map(bookMapper::mapBookToBookResponse).toList();
         return bookMapper.mapToSuccessGetAllBooks("Books sorted successfully based on "+field,responseDTOs);
     }
 
 
     @Override
-    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> searchBooks(String query)
+    public ResponseEntity<ResponseStructure<List<BookResponse>>> searchBooks(String query)
     {
         if(query==null || query.trim().isEmpty())
             return bookMapper.noContent();
         List<Book> foundBooks = bookRepository.findByBookNameContainingOrBookAuthorContainingOrBookDescriptionContaining(query, query, query);
         if (foundBooks.isEmpty())
             return bookMapper.noContent();
-        List<BookResponseDto> responseDTOs = foundBooks.stream()
+        List<BookResponse> responseDTOs = foundBooks.stream()
                 .map(bookMapper::mapBookToBookResponse)
                 .collect(Collectors.toList());
         return bookMapper.mapToSuccessGetAllBooks("Books matching the query: " + query, responseDTOs);
@@ -81,7 +81,7 @@ public class BookServiceImpl implements BookService
 
 
     @Override
-    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> findBooksWithPagination(int pageNumber,int pageSize)
+    public ResponseEntity<ResponseStructure<List<BookResponse>>> findBooksWithPagination(int pageNumber, int pageSize)
     {
         if(pageNumber<0 || pageSize<=0)
             throw new InvalidPaginationException("Page number must be non-negative and Page size must be greater than 0.");
@@ -89,27 +89,27 @@ public class BookServiceImpl implements BookService
         List<Book> bookList=books.getContent();
         if(bookList.isEmpty())
             return bookMapper.noContent();
-        List<BookResponseDto> responseDTOs= bookList.stream().map(bookMapper::mapBookToBookResponse).toList();
+        List<BookResponse> responseDTOs= bookList.stream().map(bookMapper::mapBookToBookResponse).toList();
         return bookMapper.mapToSuccessGetAllBooks("Books fetched successfully",responseDTOs);
     }
 
 
     @Override
-    public ResponseEntity<ResponseStructure<List<BookResponseDto>>> getAllBooks()
+    public ResponseEntity<ResponseStructure<List<BookResponse>>> getAllBooks()
     {
         List<Book> books=bookRepository.findAll();
         if(books.isEmpty())
             return bookMapper.noContent();
-        List<BookResponseDto> bookResponseDto =books.stream().map(bookMapper::mapBookToBookResponse).toList();
-        return bookMapper.mapToSuccessGetAllBooks("Books fetched successfully",bookResponseDto);
+        List<BookResponse> bookResponse =books.stream().map(bookMapper::mapBookToBookResponse).toList();
+        return bookMapper.mapToSuccessGetAllBooks("Books fetched successfully", bookResponse);
     }
 
 
     @Override
-    public ResponseEntity<ResponseStructure<BookResponseDto>> updateBook(Long bookId, BookRequestDto bookRequestDTO)
+    public ResponseEntity<ResponseStructure<BookResponse>> updateBook(Long bookId, BookRequest bookRequest)
     {
         Book book=getBookByIdFromOptional(bookId);
-        Book updatedBook=bookMapper.updateCurrentBook(bookId,bookRequestDTO,book.getCartBookQuantity());
+        Book updatedBook=bookMapper.updateCurrentBook(bookId, bookRequest,book.getCartBookQuantity());
         Book saveUpdatedBook=bookRepository.save(updatedBook);
         return bookMapper.mapToSuccessUpdateBook(saveUpdatedBook);
     }

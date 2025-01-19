@@ -4,12 +4,12 @@ import com.example.demo.entity.Address;
 import com.example.demo.entity.User;
 import com.example.demo.integrationtest.repo.AddressH2Repository;
 import com.example.demo.integrationtest.repo.UserH2Repository;
-import com.example.demo.requestdto.AddressRequestDto;
-import com.example.demo.requestdto.UserLoginDTO;
-import com.example.demo.requestdto.UserRegisterDTO;
-import com.example.demo.responsedto.AddressResponseDto;
-import com.example.demo.responsedto.LoginResponseDto;
-import com.example.demo.responsedto.RegisterResponseDto;
+import com.example.demo.requestdto.AddressRequest;
+import com.example.demo.requestdto.UserLogin;
+import com.example.demo.requestdto.UserRegister;
+import com.example.demo.responsedto.AddressResponse;
+import com.example.demo.responsedto.LoginResponse;
+import com.example.demo.responsedto.RegisterResponse;
 import com.example.demo.util.ResponseStructure;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +63,7 @@ public class AddressControllerIT
     {
         if (authToken == null)
         {
-            UserRegisterDTO userRegisterDTO=UserRegisterDTO.builder()
+            UserRegister userRegister = UserRegister.builder()
                     .firstName("Test")
                     .lastName("Chandu")
                     .dob(LocalDate.of(2002,8,24))
@@ -71,16 +71,16 @@ public class AddressControllerIT
                     .role("USER")
                     .password("saichandu@090").build();
 
-            ResponseEntity<ResponseStructure<RegisterResponseDto>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponseDto>>(){});
+            ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegister), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
             assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
             assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
 
-            UserLoginDTO userLoginDTO=UserLoginDTO.builder()
+            UserLogin userLogin = UserLogin.builder()
                     .email("test@gmail.com")
                     .password("saichandu@090").build();
 
-            ResponseEntity<ResponseStructure<LoginResponseDto>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLoginDTO), new ParameterizedTypeReference<ResponseStructure<LoginResponseDto>>(){});
+            ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLogin), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
             assertEquals(HttpStatus.OK,loginResponse.getStatusCode());
             assertEquals(HttpStatus.OK.value(),loginResponse.getBody().getStatus());
@@ -93,22 +93,22 @@ public class AddressControllerIT
 
 
     @Test
-    void addAddress_ValidTest()
+    void addAddressValidTest()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        AddressRequestDto addressRequestDto=AddressRequestDto.builder()
+        AddressRequest addressRequest = AddressRequest.builder()
                 .streetName("Baner")
                 .city("Pune")
                 .pinCode(414004)
                 .state("Maharastra").build();
 
-        HttpEntity<Object> entity = new HttpEntity<>(addressRequestDto,httpHeaders);
+        HttpEntity<Object> entity = new HttpEntity<>(addressRequest,httpHeaders);
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> response = restTemplate.exchange(baseUrl + "/addAddress", HttpMethod.POST, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {});
+        ResponseEntity<ResponseStructure<AddressResponse>> response = restTemplate.exchange(baseUrl + "/addAddress", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {});
 
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),response.getBody().getStatus());
@@ -122,78 +122,78 @@ public class AddressControllerIT
     }
 
     @Test
-    void addAddress_TokenInvalidTest()
+    void addAddressTokenInvalidTest()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer Token");
 
-        AddressRequestDto addressRequestDto=AddressRequestDto.builder()
+        AddressRequest addressRequest = AddressRequest.builder()
                 .streetName("Baner")
                 .city("Pune")
                 .pinCode(414004)
                 .state("Maharastra").build();
 
-        HttpEntity<Object> entity = new HttpEntity<>(addressRequestDto,httpHeaders);
+        HttpEntity<Object> entity = new HttpEntity<>(addressRequest,httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/addAddress", HttpMethod.POST, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {}));
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {}));
         assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
         exception.printStackTrace();
     }
 
 
     @Test
-    public void addAddress_IfBodyIsInvalid()
+    public void addAddressIfBodyIsInvalid()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        AddressRequestDto addressRequestDto=AddressRequestDto.builder()
+        AddressRequest addressRequest = AddressRequest.builder()
                 .city("Pune")
                 .pinCode(414004)
                 .state("Maharastra").build();
 
-        HttpEntity<Object> entity = new HttpEntity<>(addressRequestDto,httpHeaders);
+        HttpEntity<Object> entity = new HttpEntity<>(addressRequest,httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/addAddress", HttpMethod.POST, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {}));
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {}));
         assertEquals(HttpStatus.BAD_REQUEST,exception.getStatusCode());
     }
 
 
     @Test
-    public void addAddress_IfTokenIsInvalid()
+    public void addAddressIfTokenIsInvalid()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization",authToken);
 
-        AddressRequestDto addressRequestDto=AddressRequestDto.builder()
+        AddressRequest addressRequest = AddressRequest.builder()
                 .streetName("Baner")
                 .city("Pune")
                 .pinCode(414004)
                 .state("Maharastra").build();
 
-        HttpEntity<Object> entity = new HttpEntity<>(addressRequestDto,httpHeaders);
+        HttpEntity<Object> entity = new HttpEntity<>(addressRequest,httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/addAddress", HttpMethod.POST, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {}));
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {}));
         assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
     }
 
 
     @Test
-    public void deleteAddress_ValidTest()
+    public void deleteAddressValidTest()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addAddress_ValidTest();
+        addAddressValidTest();
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> response = restTemplate.exchange(baseUrl + "/deleteAddress/1", HttpMethod.DELETE, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {});
+        ResponseEntity<ResponseStructure<AddressResponse>> response = restTemplate.exchange(baseUrl + "/deleteAddress/1", HttpMethod.DELETE, entity,
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {});
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
@@ -206,47 +206,47 @@ public class AddressControllerIT
 
 
     @Test
-    public void deleteAddress_IfAddressIdIsInvalid()
+    public void deleteAddressIfAddressIdIsInvalid()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addAddress_ValidTest();
+        addAddressValidTest();
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/deleteAddress/4", HttpMethod.DELETE, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {}));
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {}));
         assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
     }
 
     @Test
-    public void deleteAddress_IfTokenIsInvalid()
+    public void deleteAddressIfTokenIsInvalid()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization",null);
 
-        addAddress_ValidTest();
+        addAddressValidTest();
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/deleteAddress/1", HttpMethod.DELETE, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {}));
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {}));
         assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
     }
 
 
     @Test
-    public void getAddressById_ValidTest()
+    public void getAddressByIdValidTest()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addAddress_ValidTest();
+        addAddressValidTest();
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> response = restTemplate.exchange(baseUrl + "/getAddress/1", HttpMethod.GET, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {});
+        ResponseEntity<ResponseStructure<AddressResponse>> response = restTemplate.exchange(baseUrl + "/getAddress/1", HttpMethod.GET, entity,
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {});
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
@@ -260,52 +260,52 @@ public class AddressControllerIT
     }
 
     @Test
-    public void getAddressById_IfAddressIdInvalid()
+    public void getAddressByIdIfAddressIdInvalid()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addAddress_ValidTest();
+        addAddressValidTest();
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/getAddress/10", HttpMethod.GET, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {}));
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {}));
         assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
     }
 
     @Test
-    public void getAddressById_IfTokenIsInvalid()
+    public void getAddressByIdIfTokenIsInvalid()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization",null);
 
-        addAddress_ValidTest();
+        addAddressValidTest();
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/getAddress/1", HttpMethod.GET, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {}));
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {}));
         assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
     }
 
 
     @Test
-    public void addAddress_ValidTest_Second()
+    public void addAddressValidTestSecond()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        AddressRequestDto addressRequestDto=AddressRequestDto.builder()
+        AddressRequest addressRequest = AddressRequest.builder()
                 .streetName("BTM")
                 .city("Bangalore")
                 .pinCode(417152)
                 .state("Karnataka").build();
 
-        HttpEntity<Object> entity = new HttpEntity<>(addressRequestDto,httpHeaders);
+        HttpEntity<Object> entity = new HttpEntity<>(addressRequest,httpHeaders);
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> response = restTemplate.exchange(baseUrl + "/addAddress", HttpMethod.POST, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {});
+        ResponseEntity<ResponseStructure<AddressResponse>> response = restTemplate.exchange(baseUrl + "/addAddress", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {});
 
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),response.getBody().getStatus());
@@ -318,19 +318,19 @@ public class AddressControllerIT
 
 
     @Test
-    public void getAllAddress_ValidTest()
+    public void getAllAddressValidTest()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addAddress_ValidTest();
-        addAddress_ValidTest_Second();
+        addAddressValidTest();
+        addAddressValidTestSecond();
 
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
 
-        ResponseEntity<ResponseStructure<List<AddressResponseDto>>> response = restTemplate.exchange(baseUrl + "/getAllAddress", HttpMethod.GET, entity,
-                new ParameterizedTypeReference<ResponseStructure<List<AddressResponseDto>>>() {});
+        ResponseEntity<ResponseStructure<List<AddressResponse>>> response = restTemplate.exchange(baseUrl + "/getAllAddress", HttpMethod.GET, entity,
+                new ParameterizedTypeReference<ResponseStructure<List<AddressResponse>>>() {});
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
@@ -343,41 +343,41 @@ public class AddressControllerIT
 
 
     @Test
-    public void getAllAddress_IfTokenIsNotValid()
+    public void getAllAddressIfTokenIsNotValid()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization",null);
 
-        addAddress_ValidTest();
-        addAddress_ValidTest_Second();
+        addAddressValidTest();
+        addAddressValidTestSecond();
 
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/getAllAddress", HttpMethod.GET, entity,
-                new ParameterizedTypeReference<ResponseStructure<List<AddressResponseDto>>>() {}));
+                new ParameterizedTypeReference<ResponseStructure<List<AddressResponse>>>() {}));
         assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
     }
 
 
     @Test
-    public void editAddress_ValidTest()
+    public void editAddressValidTest()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addAddress_ValidTest();
+        addAddressValidTest();
 
-        AddressRequestDto addressRequestDto=AddressRequestDto.builder()
+        AddressRequest addressRequest = AddressRequest.builder()
                 .streetName("Ambedgoan")
                 .city("Pune")
                 .pinCode(414074)
                 .state("Maharastra").build();
 
-        HttpEntity<Object> entity = new HttpEntity<>(addressRequestDto,httpHeaders);
+        HttpEntity<Object> entity = new HttpEntity<>(addressRequest,httpHeaders);
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> response = restTemplate.exchange(baseUrl + "/editAddress/1", HttpMethod.PUT, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {});
+        ResponseEntity<ResponseStructure<AddressResponse>> response = restTemplate.exchange(baseUrl + "/editAddress/1", HttpMethod.PUT, entity,
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {});
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
@@ -393,68 +393,68 @@ public class AddressControllerIT
 
 
     @Test
-    public void editAddress_IfAddressIdIsInvalid()
+    public void editAddressIfAddressIdIsInvalid()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addAddress_ValidTest();
+        addAddressValidTest();
 
-        AddressRequestDto addressRequestDto=AddressRequestDto.builder()
+        AddressRequest addressRequest = AddressRequest.builder()
                 .streetName("Ambedgoan")
                 .city("Pune")
                 .pinCode(414074)
                 .state("Maharastra").build();
 
-        HttpEntity<Object> entity = new HttpEntity<>(addressRequestDto,httpHeaders);
+        HttpEntity<Object> entity = new HttpEntity<>(addressRequest,httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/editAddress/10", HttpMethod.PUT, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {}));
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {}));
         assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
     }
 
 
     @Test
-    public void editAddress_IfBodyIsInvalid()
+    public void editAddressIfBodyIsInvalid()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addAddress_ValidTest();
+        addAddressValidTest();
 
-        AddressRequestDto addressRequestDto=AddressRequestDto.builder()
+        AddressRequest addressRequest = AddressRequest.builder()
                 .city("Pune")
                 .pinCode(414074)
                 .state("Maharastra").build();
 
-        HttpEntity<Object> entity = new HttpEntity<>(addressRequestDto,httpHeaders);
+        HttpEntity<Object> entity = new HttpEntity<>(addressRequest,httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/editAddress/1", HttpMethod.PUT, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {}));
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {}));
         assertEquals(HttpStatus.BAD_REQUEST,exception.getStatusCode());
     }
 
 
     @Test
-    public void editAddress_IfTokenIsInvalid()
+    public void editAddressIfTokenIsInvalid()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization",null);
 
-        addAddress_ValidTest();
+        addAddressValidTest();
 
-        AddressRequestDto addressRequestDto=AddressRequestDto.builder()
+        AddressRequest addressRequest = AddressRequest.builder()
                 .streetName("Baner")
                 .city("Pune")
                 .pinCode(414074)
                 .state("Maharastra").build();
 
-        HttpEntity<Object> entity = new HttpEntity<>(addressRequestDto,httpHeaders);
+        HttpEntity<Object> entity = new HttpEntity<>(addressRequest,httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/editAddress/1", HttpMethod.PUT, entity,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {}));
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {}));
         assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
     }
 }

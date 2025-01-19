@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.requestdto.BookRequestDto;
-import com.example.demo.responsedto.BookResponseDto;
+import com.example.demo.requestdto.BookRequest;
+import com.example.demo.responsedto.BookResponse;
 import com.example.demo.util.ResponseStructure;
 import org.springframework.http.ResponseEntity;
 
@@ -9,21 +9,21 @@ import java.util.List;
 
 public interface BookService
 {
-    ResponseEntity<ResponseStructure<BookResponseDto>> addBook(BookRequestDto bookRequestDTO);
+    ResponseEntity<ResponseStructure<BookResponse>> addBook(BookRequest bookRequest);
 
-    ResponseEntity<ResponseStructure<BookResponseDto>> getBookByName(String bookName);
+    ResponseEntity<ResponseStructure<BookResponse>> getBookByName(String bookName);
 
-    ResponseEntity<ResponseStructure<BookResponseDto>> getBookById(Long bookId);
+    ResponseEntity<ResponseStructure<BookResponse>> getBookById(Long bookId);
 
-    ResponseEntity<ResponseStructure<List<BookResponseDto>>> getAllBooks();
+    ResponseEntity<ResponseStructure<List<BookResponse>>> getAllBooks();
 
-    ResponseEntity<ResponseStructure<BookResponseDto>> updateBook(Long bookId, BookRequestDto bookRequestDTO);
+    ResponseEntity<ResponseStructure<BookResponse>> updateBook(Long bookId, BookRequest bookRequest);
 
     ResponseEntity<ResponseStructure<String>> deleteBook(Long bookId);
 
-    ResponseEntity<ResponseStructure<List<BookResponseDto>>> findBooksWithSorting(String field);
+    ResponseEntity<ResponseStructure<List<BookResponse>>> findBooksWithSorting(String field);
 
-    ResponseEntity<ResponseStructure<List<BookResponseDto>>> searchBooks(String query);
+    ResponseEntity<ResponseStructure<List<BookResponse>>> searchBooks(String query);
 
-    ResponseEntity<ResponseStructure<List<BookResponseDto>>> findBooksWithPagination(int pageNumber,int pageSize);
+    ResponseEntity<ResponseStructure<List<BookResponse>>> findBooksWithPagination(int pageNumber, int pageSize);
 }

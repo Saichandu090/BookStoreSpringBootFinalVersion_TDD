@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.requestdto.UserRegisterDTO;
-import com.example.demo.responsedto.RegisterResponseDto;
+import com.example.demo.requestdto.UserRegister;
+import com.example.demo.responsedto.RegisterResponse;
 import com.example.demo.service.UserService;
 import com.example.demo.util.ResponseStructure;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,9 +47,9 @@ class UserControllerTest
     private UserService userService;
 
     @Test
-    public void userController_RegisterUser_MustReturnCreatedStatusCode() throws Exception
+    public void userControllerRegisterUserMustReturnCreatedStatusCode() throws Exception
     {
-        UserRegisterDTO registerDTO=UserRegisterDTO.builder()
+        UserRegister registerDTO= UserRegister.builder()
                 .email("test@gmail.com")
                 .password("saichandu@090")
                 .dob(LocalDate.of(2002,8,24))
@@ -57,13 +57,13 @@ class UserControllerTest
                 .firstName("Sai")
                 .lastName("Chandu").build();
 
-        RegisterResponseDto registerResponseDto = RegisterResponseDto.builder()
+        RegisterResponse registerResponse = RegisterResponse.builder()
                 .userId(1L)
                 .role(registerDTO.getRole())
                 .email(registerDTO.getEmail()).build();
 
-        ResponseEntity<ResponseStructure<RegisterResponseDto>> response=ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<RegisterResponseDto>().setStatus(HttpStatus.CREATED.value()).setMessage("User registered successfully").setData(registerResponseDto));
-        given(userService.registerUser(any(UserRegisterDTO.class))).willReturn(response);
+        ResponseEntity<ResponseStructure<RegisterResponse>> response=ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<RegisterResponse>().setStatus(HttpStatus.CREATED.value()).setMessage("User registered successfully").setData(registerResponse));
+        given(userService.registerUser(any(UserRegister.class))).willReturn(response);
 
         mockMvc.perform(post("/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -72,14 +72,14 @@ class UserControllerTest
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value(HttpStatus.CREATED.value()))
-                .andExpect(jsonPath("$.data").value(registerResponseDto));
+                .andExpect(jsonPath("$.data").value(registerResponse));
     }
 
 
     @Test
-    public void userController_RegisterUser_MustReturnBadRequestStatusCode_ForInvalidBody() throws Exception
+    public void userControllerRegisterUserMustReturnBadRequestStatusCodeForInvalidBody() throws Exception
     {
-        UserRegisterDTO registerDTO=UserRegisterDTO.builder()
+        UserRegister registerDTO= UserRegister.builder()
                 .email("test@gmail.com")
                 .password("saichandu@090")
                 .dob(LocalDate.of(2032,8,24))
@@ -98,7 +98,7 @@ class UserControllerTest
 
 
     @Test
-    public void userController_IsUserExists_IfExists() throws Exception
+    public void userControllerIsUserExistsIfExists() throws Exception
     {
         ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.OK.value()).setMessage("User exists").setData(true));
         when(userService.isUserExists(anyString())).thenReturn(response);
@@ -114,7 +114,7 @@ class UserControllerTest
 
 
     @Test
-    public void userController_IsUserExists_IfNotExists() throws Exception
+    public void userControllerIsUserExistsIfNotExists() throws Exception
     {
         ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.NOT_FOUND.value()).setMessage("User not exists").setData(false));
         when(userService.isUserExists(anyString())).thenReturn(response);
@@ -130,7 +130,7 @@ class UserControllerTest
 
 
     @Test
-    public void userController_ForgetPassword_IfUserExists() throws Exception
+    public void userControllerForgetPasswordIfUserExists() throws Exception
     {
         ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.OK.value()).setMessage("User password updated successfully").setData(true));
         when(userService.forgetPassword(anyString(),anyString())).thenReturn(response);
@@ -147,7 +147,7 @@ class UserControllerTest
 
 
     @Test
-    public void userController_ForgetPassword_IfUserNotExists() throws Exception
+    public void userControllerForgetPasswordIfUserNotExists() throws Exception
     {
         ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.NOT_FOUND.value()).setMessage("User not found with email").setData(false));
         when(userService.forgetPassword(anyString(),anyString())).thenReturn(response);
@@ -161,7 +161,7 @@ class UserControllerTest
     }
 
     @Test
-    public void userController_ForgetPassword_IfParamIsMissing() throws Exception
+    public void userControllerForgetPasswordIfParamIsMissing() throws Exception
     {
         mockMvc.perform(put("/forgetPassword/{email}","sai@gmail.com")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -9,8 +9,8 @@ import com.example.demo.mapper.WishListMapper;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WishListRepository;
-import com.example.demo.requestdto.WishListRequestDto;
-import com.example.demo.responsedto.WishListResponseDto;
+import com.example.demo.requestdto.WishListRequest;
+import com.example.demo.responsedto.WishListResponse;
 import com.example.demo.service.WishListService;
 import com.example.demo.util.ResponseStructure;
 import lombok.AllArgsConstructor;
@@ -31,10 +31,10 @@ public class WishListServiceImpl implements WishListService
 
 
     @Override
-    public ResponseEntity<ResponseStructure<WishListResponseDto>> addToWishList(String email, WishListRequestDto wishListRequestDto)
+    public ResponseEntity<ResponseStructure<WishListResponse>> addToWishList(String email, WishListRequest wishListRequest)
     {
         User user =getUser(email);
-        Book book =getBook(wishListRequestDto.getBookId());
+        Book book =getBook(wishListRequest.getBookId());
         if(isInWishList(user,book.getBookId()))
             return removeBookFromWishList(user,book);
         else
@@ -42,7 +42,7 @@ public class WishListServiceImpl implements WishListService
     }
 
     @Override
-    public ResponseEntity<ResponseStructure<List<WishListResponseDto>>> getWishList(String email)
+    public ResponseEntity<ResponseStructure<List<WishListResponse>>> getWishList(String email)
     {
         User user=getUser(email);
         List<WishList> userWishList=user.getWishList();
@@ -53,7 +53,7 @@ public class WishListServiceImpl implements WishListService
 
 
     //Helper Methods
-    public ResponseEntity<ResponseStructure<WishListResponseDto>> addBookToWishList(User user, Book book)
+    public ResponseEntity<ResponseStructure<WishListResponse>> addBookToWishList(User user, Book book)
     {
         if(user.getWishList()==null)
             user.setWishList(new ArrayList<>());
@@ -64,7 +64,7 @@ public class WishListServiceImpl implements WishListService
     }
 
 
-    public ResponseEntity<ResponseStructure<WishListResponseDto>> removeBookFromWishList(User user, Book book)
+    public ResponseEntity<ResponseStructure<WishListResponse>> removeBookFromWishList(User user, Book book)
     {
         List<WishList> wishLists=user.getWishList();
         wishLists.removeIf(wishList -> wishList.getBookId().equals(book.getBookId()));

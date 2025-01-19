@@ -5,12 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class LoginResponseDto
+@Data
+public class AddressResponse
 {
-    private String email;
-    private String role;
+    private Long addressId;
+    private String streetName;
+    private String city;
+    private String state;
+    private int pinCode;
 }

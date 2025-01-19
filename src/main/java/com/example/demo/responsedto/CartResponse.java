@@ -1,17 +1,17 @@
-package com.example.demo.requestdto;
+package com.example.demo.responsedto;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class WishListRequestDto
+public class CartResponse
 {
-    @NotNull(message = "Book Id must not be null")
+    private Long cartId;
     private Long bookId;
+    private Integer cartQuantity;
 }

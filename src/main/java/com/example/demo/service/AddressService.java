@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.requestdto.AddressRequestDto;
-import com.example.demo.responsedto.AddressResponseDto;
+import com.example.demo.requestdto.AddressRequest;
+import com.example.demo.responsedto.AddressResponse;
 import com.example.demo.util.ResponseStructure;
 import org.springframework.http.ResponseEntity;
 
@@ -9,13 +9,13 @@ import java.util.List;
 
 public interface AddressService
 {
-    ResponseEntity<ResponseStructure<AddressResponseDto>> addAddress(String email, AddressRequestDto addressRequestDto);
+    ResponseEntity<ResponseStructure<AddressResponse>> addAddress(String email, AddressRequest addressRequest);
 
-    ResponseEntity<ResponseStructure<AddressResponseDto>> updateAddress(String email,Long addressId,AddressRequestDto addressRequestDto);
+    ResponseEntity<ResponseStructure<AddressResponse>> updateAddress(String email, Long addressId, AddressRequest addressRequest);
 
-    ResponseEntity<ResponseStructure<AddressResponseDto>> getAddressById(String email,Long addressId);
+    ResponseEntity<ResponseStructure<AddressResponse>> getAddressById(String email, Long addressId);
 
-    ResponseEntity<ResponseStructure<List<AddressResponseDto>>> getAllAddress(String email);
+    ResponseEntity<ResponseStructure<List<AddressResponse>>> getAllAddress(String email);
 
-    ResponseEntity<ResponseStructure<AddressResponseDto>> deleteAddress(String email,Long addressId);
+    ResponseEntity<ResponseStructure<AddressResponse>> deleteAddress(String email, Long addressId);
 }

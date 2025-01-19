@@ -2,8 +2,8 @@ package com.example.demo.repository;
 
 import com.example.demo.entity.Book;
 import com.example.demo.exception.BookNotFoundException;
-import com.example.demo.requestdto.BookRequestDto;
-import com.example.demo.responsedto.BookResponseDto;
+import com.example.demo.requestdto.BookRequest;
+import com.example.demo.responsedto.BookResponse;
 import com.example.demo.service.BookService;
 import com.example.demo.util.ResponseStructure;
 import jakarta.transaction.Transactional;
@@ -13,13 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("h2")
 @Transactional
 public class BookRepositoryTests
 {
@@ -32,7 +30,7 @@ public class BookRepositoryTests
     @Test
     public void addBookTest()
     {
-        BookRequestDto bookRequestDto=BookRequestDto.builder()
+        BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654L)
                 .bookName("ABCD")
                 .bookPrice(789.0)
@@ -41,25 +39,25 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.addBook(bookRequestDto);
+        ResponseEntity<ResponseStructure<BookResponse>> response=bookService.addBook(bookRequest);
 
         Assertions.assertThat(response.getStatusCode().is2xxSuccessful());
-        Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookRequestDto.getBookId());
+        Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookRequest.getBookId());
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.CREATED.value());
 
-        Optional<Book> book=bookRepository.findById(bookRequestDto.getBookId());
+        Optional<Book> book=bookRepository.findById(bookRequest.getBookId());
         assertNotNull(book,"Book should not be null");
 
         Book actual=book.get();
-        assertEquals(bookRequestDto.getBookId(),actual.getBookId());
-        assertEquals(bookRequestDto.getBookName(),actual.getBookName());
+        assertEquals(bookRequest.getBookId(),actual.getBookId());
+        assertEquals(bookRequest.getBookName(),actual.getBookName());
     }
 
 
     @Test
     public void getBookByIdTest()
     {
-        BookRequestDto bookRequestDto=BookRequestDto.builder()
+        BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
                 .bookName("ABCD")
                 .bookPrice(789.0)
@@ -68,20 +66,20 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        bookService.addBook(bookRequestDto);
+        bookService.addBook(bookRequest);
 
-        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.getBookById(bookRequestDto.getBookId());
+        ResponseEntity<ResponseStructure<BookResponse>> response=bookService.getBookById(bookRequest.getBookId());
 
         Assertions.assertThat(response.getStatusCode().is2xxSuccessful());
-        Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookRequestDto.getBookId());
-        Assertions.assertThat(response.getBody().getData().getBookName()).isEqualTo(bookRequestDto.getBookName());
+        Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookRequest.getBookId());
+        Assertions.assertThat(response.getBody().getData().getBookName()).isEqualTo(bookRequest.getBookName());
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
     public void getBookByNameTest()
     {
-        BookRequestDto bookRequestDto=BookRequestDto.builder()
+        BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
                 .bookName("ABCD")
                 .bookPrice(789.0)
@@ -90,20 +88,20 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        bookService.addBook(bookRequestDto);
+        bookService.addBook(bookRequest);
 
-        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.getBookByName(bookRequestDto.getBookName());
+        ResponseEntity<ResponseStructure<BookResponse>> response=bookService.getBookByName(bookRequest.getBookName());
 
         Assertions.assertThat(response.getStatusCode().is2xxSuccessful());
-        Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookRequestDto.getBookId());
-        Assertions.assertThat(response.getBody().getData().getBookName()).isEqualTo(bookRequestDto.getBookName());
+        Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookRequest.getBookId());
+        Assertions.assertThat(response.getBody().getData().getBookName()).isEqualTo(bookRequest.getBookName());
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
     public void getAllBooksTest()
     {
-        BookRequestDto bookRequestDto=BookRequestDto.builder()
+        BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
                 .bookName("ABCD")
                 .bookPrice(789.0)
@@ -112,7 +110,7 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        BookRequestDto bookRequestDto2=BookRequestDto.builder()
+        BookRequest bookRequest2 = BookRequest.builder()
                 .bookId(789654126L)
                 .bookName("ZXCFG")
                 .bookPrice(989.0)
@@ -121,24 +119,24 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        bookService.addBook(bookRequestDto);
-        bookService.addBook(bookRequestDto2);
+        bookService.addBook(bookRequest);
+        bookService.addBook(bookRequest2);
 
-        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.getAllBooks();
+        ResponseEntity<ResponseStructure<List<BookResponse>>> response=bookService.getAllBooks();
 
         Assertions.assertThat(response.getStatusCode().is2xxSuccessful());
         Assertions.assertThat(response.getBody().getData().size()).isEqualTo(2);
-        Assertions.assertThat(response.getBody().getData().getFirst().getBookName()).isEqualTo(bookRequestDto.getBookName());
+        Assertions.assertThat(response.getBody().getData().getFirst().getBookName()).isEqualTo(bookRequest.getBookName());
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
 
-        assertEquals(response.getBody().getData().get(1).getBookId(),bookRequestDto2.getBookId());
-        assertEquals(response.getBody().getData().get(1).getBookName(),bookRequestDto2.getBookName());
+        assertEquals(response.getBody().getData().get(1).getBookId(), bookRequest2.getBookId());
+        assertEquals(response.getBody().getData().get(1).getBookName(), bookRequest2.getBookName());
     }
 
     @Test
-    public void findBooksWithSorting_BookName()
+    public void findBooksWithSortingBookName()
     {
-        BookRequestDto bookRequestDto=BookRequestDto.builder()
+        BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
                 .bookName("Annabell")
                 .bookPrice(789.0)
@@ -147,7 +145,7 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        BookRequestDto bookRequestDto1=BookRequestDto.builder()
+        BookRequest bookRequest1 = BookRequest.builder()
                 .bookId(789654121L)
                 .bookName("Chill")
                 .bookPrice(789.0)
@@ -156,7 +154,7 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        BookRequestDto bookRequestDto2=BookRequestDto.builder()
+        BookRequest bookRequest2 = BookRequest.builder()
                 .bookId(789654126L)
                 .bookName("Zing")
                 .bookPrice(989.0)
@@ -165,30 +163,30 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        bookService.addBook(bookRequestDto1);
-        bookService.addBook(bookRequestDto);
-        bookService.addBook(bookRequestDto2);
+        bookService.addBook(bookRequest1);
+        bookService.addBook(bookRequest);
+        bookService.addBook(bookRequest2);
 
-        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.findBooksWithSorting("bookName");
+        ResponseEntity<ResponseStructure<List<BookResponse>>> response=bookService.findBooksWithSorting("bookName");
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody().getData().size()).isEqualTo(3);
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
 
-        assertEquals(response.getBody().getData().get(1).getBookId(),bookRequestDto1.getBookId());
-        assertEquals(response.getBody().getData().get(1).getBookName(),bookRequestDto1.getBookName());
+        assertEquals(response.getBody().getData().get(1).getBookId(), bookRequest1.getBookId());
+        assertEquals(response.getBody().getData().get(1).getBookName(), bookRequest1.getBookName());
 
-        assertEquals(response.getBody().getData().get(2).getBookId(),bookRequestDto2.getBookId());
-        assertEquals(response.getBody().getData().get(2).getBookName(),bookRequestDto2.getBookName());
+        assertEquals(response.getBody().getData().get(2).getBookId(), bookRequest2.getBookId());
+        assertEquals(response.getBody().getData().get(2).getBookName(), bookRequest2.getBookName());
 
-        assertEquals(response.getBody().getData().getFirst().getBookId(),bookRequestDto.getBookId());
-        assertEquals(response.getBody().getData().getFirst().getBookName(),bookRequestDto.getBookName());
+        assertEquals(response.getBody().getData().getFirst().getBookId(), bookRequest.getBookId());
+        assertEquals(response.getBody().getData().getFirst().getBookName(), bookRequest.getBookName());
     }
 
     @Test
-    public void findBooksWithSorting_BookPrice()
+    public void findBooksWithSortingBookPrice()
     {
-        BookRequestDto bookRequestDto=BookRequestDto.builder()
+        BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
                 .bookName("Annabell")
                 .bookPrice(189.0)
@@ -197,7 +195,7 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        BookRequestDto bookRequestDto1=BookRequestDto.builder()
+        BookRequest bookRequest1 = BookRequest.builder()
                 .bookId(789654121L)
                 .bookName("Chill")
                 .bookPrice(389.0)
@@ -206,7 +204,7 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        BookRequestDto bookRequestDto2=BookRequestDto.builder()
+        BookRequest bookRequest2 = BookRequest.builder()
                 .bookId(789654126L)
                 .bookName("Zing")
                 .bookPrice(989.0)
@@ -215,34 +213,34 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        bookService.addBook(bookRequestDto1);
-        bookService.addBook(bookRequestDto);
-        bookService.addBook(bookRequestDto2);
+        bookService.addBook(bookRequest1);
+        bookService.addBook(bookRequest);
+        bookService.addBook(bookRequest2);
 
-        ResponseEntity<ResponseStructure<List<BookResponseDto>>> response=bookService.findBooksWithSorting("bookPrice");
+        ResponseEntity<ResponseStructure<List<BookResponse>>> response=bookService.findBooksWithSorting("bookPrice");
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody().getData().size()).isEqualTo(3);
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
 
-        assertEquals(response.getBody().getData().get(1).getBookId(),bookRequestDto1.getBookId());
-        assertEquals(response.getBody().getData().get(1).getBookName(),bookRequestDto1.getBookName());
-        assertEquals(response.getBody().getData().get(1).getBookPrice(),bookRequestDto1.getBookPrice());
+        assertEquals(response.getBody().getData().get(1).getBookId(), bookRequest1.getBookId());
+        assertEquals(response.getBody().getData().get(1).getBookName(), bookRequest1.getBookName());
+        assertEquals(response.getBody().getData().get(1).getBookPrice(), bookRequest1.getBookPrice());
 
-        assertEquals(response.getBody().getData().get(2).getBookId(),bookRequestDto2.getBookId());
-        assertEquals(response.getBody().getData().get(2).getBookName(),bookRequestDto2.getBookName());
-        assertEquals(response.getBody().getData().get(2).getBookPrice(),bookRequestDto2.getBookPrice());
+        assertEquals(response.getBody().getData().get(2).getBookId(), bookRequest2.getBookId());
+        assertEquals(response.getBody().getData().get(2).getBookName(), bookRequest2.getBookName());
+        assertEquals(response.getBody().getData().get(2).getBookPrice(), bookRequest2.getBookPrice());
 
-        assertEquals(response.getBody().getData().getFirst().getBookId(),bookRequestDto.getBookId());
-        assertEquals(response.getBody().getData().getFirst().getBookName(),bookRequestDto.getBookName());
-        assertEquals(response.getBody().getData().getFirst().getBookPrice(),bookRequestDto.getBookPrice());
+        assertEquals(response.getBody().getData().getFirst().getBookId(), bookRequest.getBookId());
+        assertEquals(response.getBody().getData().getFirst().getBookName(), bookRequest.getBookName());
+        assertEquals(response.getBody().getData().getFirst().getBookPrice(), bookRequest.getBookPrice());
     }
 
 
     @Test
     public void updateBookTest()
     {
-        BookRequestDto bookRequestDto=BookRequestDto.builder()
+        BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
                 .bookName("ABCD")
                 .bookPrice(789.0)
@@ -251,19 +249,19 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.addBook(bookRequestDto);
+        ResponseEntity<ResponseStructure<BookResponse>> response=bookService.addBook(bookRequest);
 
-        Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookRequestDto.getBookId());
+        Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookRequest.getBookId());
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.CREATED.value());
 
-        Optional<Book> book=bookRepository.findById(bookRequestDto.getBookId());
+        Optional<Book> book=bookRepository.findById(bookRequest.getBookId());
         assertNotNull(book,"Book should not be null");
 
         Book actual=book.get();
-        assertEquals(bookRequestDto.getBookId(),actual.getBookId());
-        assertEquals(bookRequestDto.getBookName(),actual.getBookName());
+        assertEquals(bookRequest.getBookId(),actual.getBookId());
+        assertEquals(bookRequest.getBookName(),actual.getBookName());
 
-        BookRequestDto updatableBook=BookRequestDto.builder()
+        BookRequest updatableBook= BookRequest.builder()
                 .bookName("ZXC")
                 .bookPrice(489.0)
                 .bookLogo("URI")
@@ -271,22 +269,22 @@ public class BookRepositoryTests
                 .bookDescription("Description")
                 .bookQuantity(858).build();
 
-        ResponseEntity<ResponseStructure<BookResponseDto>> findBook=bookService.updateBook(bookRequestDto.getBookId(),updatableBook);
+        ResponseEntity<ResponseStructure<BookResponse>> findBook=bookService.updateBook(bookRequest.getBookId(),updatableBook);
 
         Assertions.assertThat(findBook.getStatusCode().is2xxSuccessful());
-        Assertions.assertThat(findBook.getBody().getData().getBookId()).isEqualTo(bookRequestDto.getBookId());
+        Assertions.assertThat(findBook.getBody().getData().getBookId()).isEqualTo(bookRequest.getBookId());
         Assertions.assertThat(findBook.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
 
-        BookResponseDto result=findBook.getBody().getData();
+        BookResponse result=findBook.getBody().getData();
 
-        assertEquals(result.getBookId(),bookRequestDto.getBookId());
+        assertEquals(result.getBookId(), bookRequest.getBookId());
         assertEquals(result.getBookName(),updatableBook.getBookName());
     }
 
     @Test
     public void deleteBookTest()
     {
-        BookRequestDto bookRequestDto=BookRequestDto.builder()
+        BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
                 .bookName("ABCD")
                 .bookPrice(789.0)
@@ -295,32 +293,32 @@ public class BookRepositoryTests
                 .bookDescription("Descript")
                 .bookQuantity(85).build();
 
-        ResponseEntity<ResponseStructure<BookResponseDto>> response=bookService.addBook(bookRequestDto);
+        ResponseEntity<ResponseStructure<BookResponse>> response=bookService.addBook(bookRequest);
 
         Assertions.assertThat(response.getStatusCode().is2xxSuccessful());
-        Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookRequestDto.getBookId());
+        Assertions.assertThat(response.getBody().getData().getBookId()).isEqualTo(bookRequest.getBookId());
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.CREATED.value());
 
-        Optional<Book> book=bookRepository.findById(bookRequestDto.getBookId());
+        Optional<Book> book=bookRepository.findById(bookRequest.getBookId());
         assertNotNull(book,"Book should not be null");
 
         Book actual=book.get();
-        assertEquals(bookRequestDto.getBookId(),actual.getBookId());
-        assertEquals(bookRequestDto.getBookName(),actual.getBookName());
+        assertEquals(bookRequest.getBookId(),actual.getBookId());
+        assertEquals(bookRequest.getBookName(),actual.getBookName());
 
-        ResponseEntity<ResponseStructure<String>> deleteResponse=bookService.deleteBook(bookRequestDto.getBookId());
+        ResponseEntity<ResponseStructure<String>> deleteResponse=bookService.deleteBook(bookRequest.getBookId());
 
         Assertions.assertThat(deleteResponse.getStatusCode().is2xxSuccessful());
         Assertions.assertThat(deleteResponse.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
 
-        assertThrows(BookNotFoundException.class,()->bookService.deleteBook(bookRequestDto.getBookId()));
+        assertThrows(BookNotFoundException.class,()->bookService.deleteBook(bookRequest.getBookId()));
 
-        assertThrows(BookNotFoundException.class,()->bookService.getBookById(bookRequestDto.getBookId()));
+        assertThrows(BookNotFoundException.class,()->bookService.getBookById(bookRequest.getBookId()));
     }
 
 
     @Test
-    public void bookRepository_FindByBookNameTest_MustReturnBook()
+    public void bookRepositoryFindByBookNameTestMustReturnBook()
     {
         Book book= Book.builder()
                 .bookId(1L)
@@ -342,7 +340,7 @@ public class BookRepositoryTests
 
 
     @Test
-    public void bookRepository_FindByBookNameTest_MustThrowBookNotFoundException()
+    public void bookRepositoryFindByBookNameTestMustThrowBookNotFoundException()
     {
         Book book= Book.builder()
                 .bookId(1L)

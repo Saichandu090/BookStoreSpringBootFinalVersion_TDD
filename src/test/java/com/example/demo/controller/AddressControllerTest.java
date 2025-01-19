@@ -1,10 +1,9 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.User;
-import com.example.demo.mapper.AddressMapper;
 import com.example.demo.mapper.UserMapper;
-import com.example.demo.requestdto.AddressRequestDto;
-import com.example.demo.responsedto.AddressResponseDto;
+import com.example.demo.requestdto.AddressRequest;
+import com.example.demo.responsedto.AddressResponse;
 import com.example.demo.service.AddressService;
 import com.example.demo.util.ResponseStructure;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,7 +25,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 
 import java.nio.charset.StandardCharsets;
@@ -39,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(controllers = AddressController.class)
@@ -64,26 +61,26 @@ class AddressControllerTest
     private UserDetails userDetails;
     private User admin;
     private UserDetails adminDetails;
-    private AddressRequestDto addressRequestDto;
-    private AddressResponseDto addressResponseDto;
+    private AddressRequest addressRequest;
+    private AddressResponse addressResponse;
 
     @BeforeEach
     public void init()
     {
         token="Bearer token";
 
-        addressRequestDto=AddressRequestDto.builder()
+        addressRequest = AddressRequest.builder()
                 .streetName("Banner")
                 .city("Pune")
                 .state("Maharashtra")
                 .pinCode(414004).build();
 
-        addressResponseDto=AddressResponseDto.builder()
+        addressResponse = AddressResponse.builder()
                 .addressId(1L)
-                .streetName(addressRequestDto.getStreetName())
-                .city(addressRequestDto.getCity())
-                .state(addressRequestDto.getState())
-                .pinCode(addressRequestDto.getPinCode()).build();
+                .streetName(addressRequest.getStreetName())
+                .city(addressRequest.getCity())
+                .state(addressRequest.getState())
+                .pinCode(addressRequest.getPinCode()).build();
 
         user=User.builder()
                 .firstName("Test")
@@ -142,34 +139,34 @@ class AddressControllerTest
     //====================================================//
 
     @Test
-    public void addressController_AddAddress_MustReturnOkStatusCode() throws Exception
+    public void addressControllerAddAddressMustReturnOkStatusCode() throws Exception
     {
-        ResponseStructure<AddressResponseDto> response=new ResponseStructure<>(HttpStatus.CREATED.value(),"Address added successfully",addressResponseDto);
-        given(addressService.addAddress(ArgumentMatchers.anyString(),ArgumentMatchers.any(AddressRequestDto.class))).willReturn(new ResponseEntity<>(response,HttpStatus.CREATED));
+        ResponseStructure<AddressResponse> response=new ResponseStructure<>(HttpStatus.CREATED.value(),"Address added successfully", addressResponse);
+        given(addressService.addAddress(ArgumentMatchers.anyString(),ArgumentMatchers.any(AddressRequest.class))).willReturn(new ResponseEntity<>(response,HttpStatus.CREATED));
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(userDetails);
 
         mockMvc.perform(post("/address/addAddress")
                 .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
                 .header("Authorization",token)
-                .content(objectMapper.writeValueAsString(addressRequestDto)))
+                .content(objectMapper.writeValueAsString(addressRequest)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.CREATED.value()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data").value(addressResponseDto))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data.addressId").value(addressResponseDto.getAddressId()));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data").value(addressResponse))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.addressId").value(addressResponse.getAddressId()));
     }
 
 
     @Test
-    public void addressController_addAddress_IfUserHasNoAuthority_MustReturnUnauthorizedStatusCode() throws Exception
+    public void addressControllerAddAddressIfUserHasNoAuthorityMustReturnUnauthorizedStatusCode() throws Exception
     {
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
 
         mockMvc.perform(post("/address/addAddress")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(addressRequestDto))
+                        .content(objectMapper.writeValueAsString(addressRequest))
                         .header("Authorization",token))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized())
@@ -177,47 +174,47 @@ class AddressControllerTest
     }
 
     @Test
-    public void addressController_addAddress_MissingAuthHeader_ShouldReturnBadRequest() throws Exception
+    public void addressControllerAddAddressMissingAuthHeaderShouldReturnBadRequest() throws Exception
     {
         mockMvc.perform(post("/address/addAddress")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(addressRequestDto))
+                        .content(objectMapper.writeValueAsString(addressRequest))
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
     }
 
-    //============================================//
+
 
     @Test
-    public void addressController_EditAddress_MustReturnOkStatusCode() throws Exception
+    public void addressControllerEditAddressMustReturnOkStatusCode() throws Exception
     {
-        ResponseStructure<AddressResponseDto> response=new ResponseStructure<>(HttpStatus.OK.value(),"Address edited successfully",addressResponseDto);
-        given(addressService.updateAddress(ArgumentMatchers.anyString(),ArgumentMatchers.anyLong(),ArgumentMatchers.any(AddressRequestDto.class))).willReturn(new ResponseEntity<>(response,HttpStatus.OK));
+        ResponseStructure<AddressResponse> response=new ResponseStructure<>(HttpStatus.OK.value(),"Address edited successfully", addressResponse);
+        given(addressService.updateAddress(ArgumentMatchers.anyString(),ArgumentMatchers.anyLong(),ArgumentMatchers.any(AddressRequest.class))).willReturn(new ResponseEntity<>(response,HttpStatus.OK));
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(userDetails);
 
         mockMvc.perform(put("/address/editAddress/{id}",1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("Authorization",token)
-                        .content(objectMapper.writeValueAsString(addressRequestDto)))
+                        .content(objectMapper.writeValueAsString(addressRequest)))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data").value(addressResponseDto))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data.addressId").value(addressResponseDto.getAddressId()));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data").value(addressResponse))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.addressId").value(addressResponse.getAddressId()));
     }
 
     @Test
-    public void addressController_editAddress_IfUserHasNoAuthority_MustReturnUnauthorizedStatusCode() throws Exception
+    public void addressControllerEditAddressIfUserHasNoAuthorityMustReturnUnauthorizedStatusCode() throws Exception
     {
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
 
         mockMvc.perform(put("/address/editAddress/{id}",1)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(addressRequestDto))
+                        .content(objectMapper.writeValueAsString(addressRequest))
                         .header("Authorization",token))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized())
@@ -226,11 +223,11 @@ class AddressControllerTest
     }
 
     @Test
-    public void addressController_editAddressBy_MissingAuthHeader_ShouldReturnBadRequest() throws Exception
+    public void addressControllerEditAddressByMissingAuthHeaderShouldReturnBadRequest() throws Exception
     {
         mockMvc.perform(put("/address/editAddress/{id}",1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(addressRequestDto))
+                        .content(objectMapper.writeValueAsString(addressRequest))
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
@@ -238,12 +235,12 @@ class AddressControllerTest
     }
 
 
-    //===========================================//
+
 
     @Test
-    public void addressController_GetAddressById_MustReturnOkStatusCode() throws Exception
+    public void addressControllerGetAddressByIdMustReturnOkStatusCode() throws Exception
     {
-        ResponseStructure<AddressResponseDto> response=new ResponseStructure<>(HttpStatus.OK.value(),"Address fetched successfully",addressResponseDto);
+        ResponseStructure<AddressResponse> response=new ResponseStructure<>(HttpStatus.OK.value(),"Address fetched successfully", addressResponse);
         given(addressService.getAddressById(ArgumentMatchers.anyString(),ArgumentMatchers.anyLong())).willReturn(new ResponseEntity<>(response,HttpStatus.OK));
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(userDetails);
 
@@ -253,12 +250,12 @@ class AddressControllerTest
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data.addressId").value(addressResponseDto.getAddressId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data").value(addressResponseDto));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.addressId").value(addressResponse.getAddressId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data").value(addressResponse));
     }
 
     @Test
-    public void addressController_GetAddressById_IfUserHasNoAuthority_MustReturnUnauthorizedStatusCode() throws Exception
+    public void addressControllerGetAddressByIdIfUserHasNoAuthorityMustReturnUnauthorizedStatusCode() throws Exception
     {
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
 
@@ -272,7 +269,7 @@ class AddressControllerTest
     }
 
     @Test
-    public void addressController_GetAddressById_MissingAuthHeader_ShouldReturnBadRequest() throws Exception
+    public void addressControllerGetAddressByIdMissingAuthHeaderShouldReturnBadRequest() throws Exception
     {
         mockMvc.perform(get("/address/getAddress/{id}",1)
                         .characterEncoding(StandardCharsets.UTF_8))
@@ -284,9 +281,9 @@ class AddressControllerTest
 
 
     @Test
-    public void addressController_GetAllAddress_MustReturnOkStatusCode() throws Exception
+    public void addressControllerGetAllAddressMustReturnOkStatusCode() throws Exception
     {
-        ResponseStructure<List<AddressResponseDto>> response=new ResponseStructure<>(HttpStatus.OK.value(),"Address fetched successfully",List.of(addressResponseDto));
+        ResponseStructure<List<AddressResponse>> response=new ResponseStructure<>(HttpStatus.OK.value(),"Address fetched successfully",List.of(addressResponse));
         given(addressService.getAllAddress(anyString())).willReturn(new ResponseEntity<>(response,HttpStatus.OK));
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(userDetails);
 
@@ -296,12 +293,12 @@ class AddressControllerTest
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].addressId").value(addressResponseDto.getAddressId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0]").value(addressResponseDto));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].addressId").value(addressResponse.getAddressId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0]").value(addressResponse));
     }
 
     @Test
-    public void addressController_GetAllAddress_IfUserHasNoAuthority_MustReturnUnauthorizedStatusCode() throws Exception
+    public void addressControllerGetAllAddressIfUserHasNoAuthorityMustReturnUnauthorizedStatusCode() throws Exception
     {
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
 
@@ -315,7 +312,7 @@ class AddressControllerTest
     }
 
     @Test
-    public void addressController_GetAllAddress_MissingAuthHeader_ShouldReturnBadRequest() throws Exception
+    public void addressControllerGetAllAddressMissingAuthHeaderShouldReturnBadRequest() throws Exception
     {
         mockMvc.perform(get("/address/getAllAddress")
                         .characterEncoding(StandardCharsets.UTF_8))
@@ -327,9 +324,9 @@ class AddressControllerTest
 
 
     @Test
-    public void addressController_DeleteAddressById_MustReturnOkStatusCode() throws Exception
+    public void addressControllerDeleteAddressByIdMustReturnOkStatusCode() throws Exception
     {
-        ResponseStructure<AddressResponseDto> response=new ResponseStructure<>(HttpStatus.OK.value(),"Address deleted successfully",null);
+        ResponseStructure<AddressResponse> response=new ResponseStructure<>(HttpStatus.OK.value(),"Address deleted successfully",null);
         given(addressService.deleteAddress(anyString(),anyLong())).willReturn(new ResponseEntity<>(response,HttpStatus.OK));
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(userDetails);
 
@@ -343,7 +340,7 @@ class AddressControllerTest
     }
 
     @Test
-    public void addressController_DeleteAddressById_IfUserHasNoAuthority_MustReturnUnauthorizedStatusCode() throws Exception
+    public void addressControllerDeleteAddressByIdIfUserHasNoAuthorityMustReturnUnauthorizedStatusCode() throws Exception
     {
         given(userMapper.validateUserToken(ArgumentMatchers.anyString())).willReturn(adminDetails);
 
@@ -357,7 +354,7 @@ class AddressControllerTest
     }
 
     @Test
-    public void addressController_DeleteAddressById_MissingAuthHeader_ShouldReturnBadRequest() throws Exception
+    public void addressControllerDeleteAddressByIdMissingAuthHeaderShouldReturnBadRequest() throws Exception
     {
         mockMvc.perform(delete("/address/deleteAddress/{id}",1)
                         .characterEncoding(StandardCharsets.UTF_8))

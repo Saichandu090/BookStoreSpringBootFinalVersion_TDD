@@ -3,8 +3,8 @@ package com.example.demo.controller;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.CartMapper;
 import com.example.demo.mapper.UserMapper;
-import com.example.demo.requestdto.CartRequestDto;
-import com.example.demo.responsedto.CartResponseDto;
+import com.example.demo.requestdto.CartRequest;
+import com.example.demo.responsedto.CartResponse;
 import com.example.demo.service.CartService;
 import com.example.demo.util.ResponseStructure;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,8 +67,8 @@ class CartControllerTest
     private User admin;
     private UserDetails userDetails;
     private UserDetails adminDetails;
-    private CartRequestDto cartRequestDto;
-    private CartResponseDto cartResponseDto;
+    private CartRequest cartRequest;
+    private CartResponse cartResponse;
 
     @BeforeEach
     public void init()
@@ -129,48 +129,48 @@ class CartControllerTest
             }
         };
 
-        cartRequestDto=CartRequestDto.builder().bookId(1L).build();
-        cartResponseDto=CartResponseDto.builder().cartId(1L).bookId(cartRequestDto.getBookId()).cartQuantity(1).build();
+        cartRequest = CartRequest.builder().bookId(1L).build();
+        cartResponse = CartResponse.builder().cartId(1L).bookId(cartRequest.getBookId()).cartQuantity(1).build();
     }
 
 
     @Test
-    void cartController_AddToCart_ValidTest() throws Exception
+    void cartControllerAddToCartValidTest() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<CartResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book added to cart successfully",cartResponseDto);
-        when(cartService.addToCart(ArgumentMatchers.anyString(),ArgumentMatchers.any(CartRequestDto.class))).thenReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        ResponseStructure<CartResponse> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book added to cart successfully", cartResponse);
+        when(cartService.addToCart(ArgumentMatchers.anyString(),ArgumentMatchers.any(CartRequest.class))).thenReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
         mockMvc.perform(post("/cart/addToCart")
                         .header("Authorization",token)
                 .characterEncoding(StandardCharsets.UTF_8)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(cartRequestDto)))
+                .content(objectMapper.writeValueAsString(cartRequest)))
                 .andDo(print())
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.bookId").value(1))
                 .andExpect(jsonPath("$.data.cartQuantity").value(1))
-                .andExpect(jsonPath("$.status").value(HttpStatus.CREATED.value()));
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()));
     }
 
     @Test
-    void cartController_AddToCart_IfTokenIsMissing() throws Exception
+    void cartControllerAddToCartIfTokenIsMissing() throws Exception
     {
         mockMvc.perform(post("/cart/addToCart")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(cartRequestDto)))
+                        .content(objectMapper.writeValueAsString(cartRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
     }
 
     @Test
-    void cartController_AddToCart_IfBodyIsInvalid() throws Exception
+    void cartControllerAddToCartIfBodyIsInvalid() throws Exception
     {
         String token="Bearer token";
-        CartRequestDto dto=new CartRequestDto();
+        CartRequest dto=new CartRequest();
         mockMvc.perform(post("/cart/addToCart")
                         .header("Authorization",token)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -182,7 +182,7 @@ class CartControllerTest
     }
 
     @Test
-    void cartController_AddToCart_IfNoAuthority() throws Exception
+    void cartControllerAddToCartIfNoAuthority() throws Exception
     {
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
         String token="Bearer token";
@@ -190,17 +190,17 @@ class CartControllerTest
                         .header("Authorization",token)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(cartRequestDto)))
+                        .content(objectMapper.writeValueAsString(cartRequest)))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
 
 
     @Test
-    void cartController_RemoveFromCart_ValidTest() throws Exception
+    void cartControllerRemoveFromCartValidTest() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<CartResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book removed from cart successfully",null);
+        ResponseStructure<CartResponse> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book removed from cart successfully",null);
         when(cartService.removeFromCart(ArgumentMatchers.anyString(),ArgumentMatchers.anyLong())).thenReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
@@ -216,7 +216,7 @@ class CartControllerTest
 
 
     @Test
-    void cartController_RemoveFromCart_IfHeaderIsMissing() throws Exception
+    void cartControllerRemoveFromCartIfHeaderIsMissing() throws Exception
     {
         mockMvc.perform(delete("/cart/removeFromCart/{cartId}",1)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -228,7 +228,7 @@ class CartControllerTest
 
 
     @Test
-    void cartController_RemoveFromCart_IfPathVariableIsMissing() throws Exception
+    void cartControllerRemoveFromCartIfPathVariableIsMissing() throws Exception
     {
         String token="Bearer-token";
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
@@ -244,10 +244,10 @@ class CartControllerTest
 
 
     @Test
-    void cartController_getCart_ValidTest() throws Exception
+    void cartControllerGetCartValidTest() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<List<CartResponseDto>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"User cart fetched successfully",List.of(cartResponseDto));
+        ResponseStructure<List<CartResponse>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"User cart fetched successfully",List.of(cartResponse));
         when(cartService.getCartItems(ArgumentMatchers.anyString())).thenReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
@@ -258,11 +258,11 @@ class CartControllerTest
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data[0].cartId").value(1))
-                .andExpect(jsonPath("$.data[0]").value(cartResponseDto));
+                .andExpect(jsonPath("$.data[0]").value(cartResponse));
     }
 
     @Test
-    void cartController_getCart_IfTokenIsMissing() throws Exception
+    void cartControllerGetCartIfTokenIsMissing() throws Exception
     {
         mockMvc.perform(get("/cart/getCart")
                         .characterEncoding(StandardCharsets.UTF_8))
@@ -272,7 +272,7 @@ class CartControllerTest
     }
 
     @Test
-    void cartController_getCart_IfTokenIsInvalid() throws Exception
+    void cartControllerGetCartIfTokenIsInvalid() throws Exception
     {
         String token="jwt";
         when(userMapper.validateUserToken(anyString())).thenReturn(null);
@@ -287,10 +287,10 @@ class CartControllerTest
 
 
     @Test
-    void cartController_ClearCart_ValidTest() throws Exception
+    void cartControllerClearCartValidTest() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<CartResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"User cart cleared successfully",null);
+        ResponseStructure<CartResponse> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"User cart cleared successfully",null);
         when(cartService.clearCart(ArgumentMatchers.anyString())).thenReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
@@ -306,7 +306,7 @@ class CartControllerTest
 
 
     @Test
-    void cartController_ClearCart_IfTokenIsMissing() throws Exception
+    void cartControllerClearCartIfTokenIsMissing() throws Exception
     {
         mockMvc.perform(delete("/cart/clearCart")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -318,7 +318,7 @@ class CartControllerTest
 
 
     @Test
-    void cartController_ClearCart_IfTokenIsInvalid() throws Exception
+    void cartControllerClearCartIfTokenIsInvalid() throws Exception
     {
         String token="Bearer-token";
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(null);

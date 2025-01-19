@@ -3,8 +3,8 @@ package com.example.demo.controller;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.mapper.WishListMapper;
-import com.example.demo.requestdto.WishListRequestDto;
-import com.example.demo.responsedto.WishListResponseDto;
+import com.example.demo.requestdto.WishListRequest;
+import com.example.demo.responsedto.WishListResponse;
 import com.example.demo.service.WishListService;
 import com.example.demo.util.ResponseStructure;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
+
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -63,8 +63,8 @@ class WishListControllerTest
 
     private User user;
     private UserDetails userDetails;
-    private WishListRequestDto wishListRequestDto;
-    private WishListResponseDto wishListResponseDto;
+    private WishListRequest wishListRequest;
+    private WishListResponse wishListResponse;
 
     @BeforeEach
     public void init() {
@@ -98,50 +98,50 @@ class WishListControllerTest
             }
         };
 
-        wishListRequestDto=WishListRequestDto.builder().bookId(1L).build();
-        wishListResponseDto=WishListResponseDto.builder().wishListId(1L).bookId(wishListRequestDto.getBookId()).build();
+        wishListRequest = WishListRequest.builder().bookId(1L).build();
+        wishListResponse = WishListResponse.builder().wishListId(1L).bookId(wishListRequest.getBookId()).build();
     }
 
 
 
     @Test
-    public void wishListController_AddToWishList_MustReturnCreatedStatusCode() throws Exception
+    public void wishListControllerAddToWishListMustReturnCreatedStatusCode() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<WishListResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.CREATED.value(),"Book added to wishlist successfully",wishListResponseDto);
-        given(wishListService.addToWishList(anyString(),any(WishListRequestDto.class))).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.CREATED));
+        ResponseStructure<WishListResponse> responseStructure=new ResponseStructure<>(HttpStatus.CREATED.value(),"Book added to wishlist successfully", wishListResponse);
+        given(wishListService.addToWishList(anyString(),any(WishListRequest.class))).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.CREATED));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
         mockMvc.perform(post("/wishlist/addToWishList")
                 .characterEncoding(StandardCharsets.UTF_8)
                 .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
-                .content(objectMapper.writeValueAsString(wishListRequestDto)))
+                .content(objectMapper.writeValueAsString(wishListRequest)))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(responseStructure.getMessage()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data").value(wishListResponseDto))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data").value(wishListResponse))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.bookId").value(1));
     }
 
     @Test
-    public void wishListController_AddToWishList_TestForMissingHeader() throws Exception
+    public void wishListControllerAddToWishListTestForMissingHeader() throws Exception
     {
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
         mockMvc.perform(post("/wishlist/addToWishList")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(wishListRequestDto)))
+                        .content(objectMapper.writeValueAsString(wishListRequest)))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
     }
 
     @Test
-    public void wishListController_AddToWishList_TestForInvalidBody() throws Exception
+    public void wishListControllerAddToWishListTestForInvalidBody() throws Exception
     {
-        WishListRequestDto wishListRequestDto1=WishListRequestDto.builder().build();
+        WishListRequest wishListRequest1 = WishListRequest.builder().build();
         String token="Bearer-token";
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
@@ -149,25 +149,25 @@ class WishListControllerTest
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
-                        .content(objectMapper.writeValueAsString(wishListRequestDto1)))
+                        .content(objectMapper.writeValueAsString(wishListRequest1)))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,result.getResolvedException()));
     }
 
     @Test
-    public void wishListController_AddToWishList_IfBookAlreadyPresent() throws Exception
+    public void wishListControllerAddToWishListIfBookAlreadyPresent() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<WishListResponseDto> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book removed from wishlist successfully",null);
-        given(wishListService.addToWishList(anyString(),any(WishListRequestDto.class))).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
+        ResponseStructure<WishListResponse> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book removed from wishlist successfully",null);
+        given(wishListService.addToWishList(anyString(),any(WishListRequest.class))).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
         mockMvc.perform(post("/wishlist/addToWishList")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
-                        .content(objectMapper.writeValueAsString(wishListRequestDto)))
+                        .content(objectMapper.writeValueAsString(wishListRequest)))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Book removed from wishlist successfully"))
@@ -176,10 +176,10 @@ class WishListControllerTest
 
 
     @Test
-    public void wishListController_GetWishList_ValidTest() throws Exception
+    public void wishListControllerGetWishListValidTest() throws Exception
     {
         String token="Bearer-token";
-        ResponseStructure<List<WishListResponseDto>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"User wishlist fetched successfully",List.of(wishListResponseDto));
+        ResponseStructure<List<WishListResponse>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"User wishlist fetched successfully",List.of(wishListResponse));
         given(wishListService.getWishList(anyString())).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
@@ -190,12 +190,12 @@ class WishListControllerTest
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("User wishlist fetched successfully"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0]").value(wishListResponseDto));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0]").value(wishListResponse));
     }
 
 
     @Test
-    public void wishListController_GetWishList_IfTokenIsInvalidOrMissing() throws Exception
+    public void wishListControllerGetWishListIfTokenIsInvalidOrMissing() throws Exception
     {
         mockMvc.perform(get("/wishlist/getWishList")
                         .characterEncoding(StandardCharsets.UTF_8))

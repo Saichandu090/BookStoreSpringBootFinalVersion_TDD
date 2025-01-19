@@ -2,8 +2,8 @@ package com.example.demo.repository;
 
 import com.example.demo.entity.Address;
 import com.example.demo.entity.User;
-import com.example.demo.requestdto.AddressRequestDto;
-import com.example.demo.responsedto.AddressResponseDto;
+import com.example.demo.requestdto.AddressRequest;
+import com.example.demo.responsedto.AddressResponse;
 import com.example.demo.service.AddressService;
 import com.example.demo.util.ResponseStructure;
 import jakarta.transaction.Transactional;
@@ -46,13 +46,13 @@ public class AddressRepositoryTests
         user.setRole("USER");
         userRepository.save(user);
 
-        AddressRequestDto addressRequestDto = new AddressRequestDto();
-        addressRequestDto.setStreetName("123 Main St");
-        addressRequestDto.setCity("Test City");
-        addressRequestDto.setState("Test State");
-        addressRequestDto.setPinCode(12345);
+        AddressRequest addressRequest = new AddressRequest();
+        addressRequest.setStreetName("123 Main St");
+        addressRequest.setCity("Test City");
+        addressRequest.setState("Test State");
+        addressRequest.setPinCode(12345);
 
-        addressService.addAddress(user.getEmail(), addressRequestDto);
+        addressService.addAddress(user.getEmail(), addressRequest);
 
         Optional<User> optionalUser = userRepository.findByEmail(user.getEmail());
         assertTrue(optionalUser.isPresent(), "User should be present");
@@ -86,29 +86,29 @@ public class AddressRepositoryTests
         user.setRole("USER");
         userRepository.save(user);
 
-        AddressRequestDto addressRequestDto = new AddressRequestDto();
-        addressRequestDto.setStreetName("123 Main St");
-        addressRequestDto.setCity("Test City");
-        addressRequestDto.setState("Test State");
-        addressRequestDto.setPinCode(12345);
+        AddressRequest addressRequest = new AddressRequest();
+        addressRequest.setStreetName("123 Main St");
+        addressRequest.setCity("Test City");
+        addressRequest.setState("Test State");
+        addressRequest.setPinCode(12345);
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.addAddress(user.getEmail(), addressRequestDto);
+        ResponseEntity<ResponseStructure<AddressResponse>> response=addressService.addAddress(user.getEmail(), addressRequest);
 
-        AddressResponseDto responseDto=response.getBody().getData();
+        AddressResponse responseDto=response.getBody().getData();
 
         // Updating the address
 
-        AddressRequestDto addressRequestDto2 = new AddressRequestDto();
-        addressRequestDto2.setStreetName("1234 Main St");
-        addressRequestDto2.setCity("Test1 City");
-        addressRequestDto2.setState("Test1 State");
-        addressRequestDto2.setPinCode(123456);
+        AddressRequest addressRequest2 = new AddressRequest();
+        addressRequest2.setStreetName("1234 Main St");
+        addressRequest2.setCity("Test1 City");
+        addressRequest2.setState("Test1 State");
+        addressRequest2.setPinCode(123456);
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> response2=addressService.updateAddress("test@example.com", responseDto.getAddressId(), addressRequestDto2);
+        ResponseEntity<ResponseStructure<AddressResponse>> response2=addressService.updateAddress("test@example.com", responseDto.getAddressId(), addressRequest2);
         assertEquals(HttpStatus.OK,response2.getStatusCode());
         assertEquals(200,response2.getBody().getStatus());
 
-        AddressResponseDto result=response2.getBody().getData();
+        AddressResponse result=response2.getBody().getData();
         assertEquals("Test1 City",result.getCity());
         assertEquals("Test1 State",result.getState());
         assertEquals(123456,result.getPinCode());
@@ -133,22 +133,22 @@ public class AddressRepositoryTests
         user.setRole("USER");
         userRepository.save(user);
 
-        AddressRequestDto addressRequestDto = new AddressRequestDto();
-        addressRequestDto.setStreetName("123 Main St");
-        addressRequestDto.setCity("Test City");
-        addressRequestDto.setState("Test State");
-        addressRequestDto.setPinCode(12345);
+        AddressRequest addressRequest = new AddressRequest();
+        addressRequest.setStreetName("123 Main St");
+        addressRequest.setCity("Test City");
+        addressRequest.setState("Test State");
+        addressRequest.setPinCode(12345);
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> responseEntity=addressService.addAddress(user.getEmail(),addressRequestDto);
+        ResponseEntity<ResponseStructure<AddressResponse>> responseEntity=addressService.addAddress(user.getEmail(), addressRequest);
 
-        AddressResponseDto responseDto=responseEntity.getBody().getData();
+        AddressResponse responseDto=responseEntity.getBody().getData();
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.getAddressById(user.getEmail(),responseDto.getAddressId());
+        ResponseEntity<ResponseStructure<AddressResponse>> response=addressService.getAddressById(user.getEmail(),responseDto.getAddressId());
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(200,response.getBody().getStatus());
-        assertEquals(addressRequestDto.getCity(),response.getBody().getData().getCity());
-        assertEquals(addressRequestDto.getPinCode(),response.getBody().getData().getPinCode());
+        assertEquals(addressRequest.getCity(),response.getBody().getData().getCity());
+        assertEquals(addressRequest.getPinCode(),response.getBody().getData().getPinCode());
     }
 
 
@@ -166,15 +166,15 @@ public class AddressRepositoryTests
         user.setRole("USER");
         userRepository.save(user);
 
-        AddressRequestDto addressRequestDto = new AddressRequestDto();
-        addressRequestDto.setStreetName("123 Main St");
-        addressRequestDto.setCity("Test City");
-        addressRequestDto.setState("Test State");
-        addressRequestDto.setPinCode(12345);
+        AddressRequest addressRequest = new AddressRequest();
+        addressRequest.setStreetName("123 Main St");
+        addressRequest.setCity("Test City");
+        addressRequest.setState("Test State");
+        addressRequest.setPinCode(12345);
 
-        addressService.addAddress(user.getEmail(),addressRequestDto);
+        addressService.addAddress(user.getEmail(), addressRequest);
 
-        ResponseEntity<ResponseStructure<List<AddressResponseDto>>> response=addressService.getAllAddress(user.getEmail());
+        ResponseEntity<ResponseStructure<List<AddressResponse>>> response=addressService.getAllAddress(user.getEmail());
 
         User user1=userRepository.findByEmail(user.getEmail()).get();
         Address addressResult=addressRepository.findById(response.getBody().getData().getFirst().getAddressId()).get();
@@ -184,8 +184,8 @@ public class AddressRepositoryTests
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(200,response.getBody().getStatus());
-        assertEquals(addressRequestDto.getCity(),response.getBody().getData().getFirst().getCity());
-        assertEquals(addressRequestDto.getPinCode(),response.getBody().getData().getFirst().getPinCode());
+        assertEquals(addressRequest.getCity(),response.getBody().getData().getFirst().getCity());
+        assertEquals(addressRequest.getPinCode(),response.getBody().getData().getFirst().getPinCode());
     }
 
 
@@ -203,19 +203,19 @@ public class AddressRepositoryTests
         user.setRole("USER");
         userRepository.save(user);
 
-        AddressRequestDto addressRequestDto = new AddressRequestDto();
-        addressRequestDto.setStreetName("123 Main St");
-        addressRequestDto.setCity("Test City");
-        addressRequestDto.setState("Test State");
-        addressRequestDto.setPinCode(12345);
+        AddressRequest addressRequest = new AddressRequest();
+        addressRequest.setStreetName("123 Main St");
+        addressRequest.setCity("Test City");
+        addressRequest.setState("Test State");
+        addressRequest.setPinCode(12345);
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> response=addressService.addAddress(user.getEmail(),addressRequestDto);
+        ResponseEntity<ResponseStructure<AddressResponse>> response=addressService.addAddress(user.getEmail(), addressRequest);
 
-        AddressResponseDto addressResponseDto=response.getBody().getData();
+        AddressResponse addressResponse =response.getBody().getData();
 
-        ResponseEntity<ResponseStructure<AddressResponseDto>> responseEntity=addressService.deleteAddress(user.getEmail(), addressResponseDto.getAddressId());
+        ResponseEntity<ResponseStructure<AddressResponse>> responseEntity=addressService.deleteAddress(user.getEmail(), addressResponse.getAddressId());
 
-        AddressResponseDto addressResponseDto1=responseEntity.getBody().getData();
+        AddressResponse addressResponse1 =responseEntity.getBody().getData();
 
         assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
         assertEquals(200,responseEntity.getBody().getStatus());

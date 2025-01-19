@@ -3,7 +3,7 @@ package com.example.demo;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.BookRepository;
-import com.example.demo.requestdto.BookRequestDto;
+import com.example.demo.requestdto.BookRequest;
 import com.example.demo.service.BookService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,7 +47,7 @@ class BookStoreApplicationFinalApplicationTests {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	private BookRequestDto bookRequestDto;
+	private BookRequest bookRequest;
 	private User user;
 	private UserDetails userDetails;
 	private String token;
@@ -59,7 +57,7 @@ class BookStoreApplicationFinalApplicationTests {
 	{
 		token="Bearer token";
 
-		bookRequestDto=BookRequestDto.builder()
+		bookRequest = BookRequest.builder()
 				.bookName("ABC")
 				.bookPrice(123.3)
 				.bookQuantity(85)
@@ -104,7 +102,7 @@ class BookStoreApplicationFinalApplicationTests {
 				.characterEncoding(StandardCharsets.UTF_8)
 				.header("Authorization",token)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(bookRequestDto)))
+				.content(objectMapper.writeValueAsString(bookRequest)))
 				.andDo(MockMvcResultHandlers.print())
 				.andExpect(MockMvcResultMatchers.status().isCreated());
 	}

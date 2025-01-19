@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class AddressRequestDto
+public class AddressRequest
 {
     @NotNull
     private String streetName;

@@ -10,8 +10,8 @@ import com.example.demo.mapper.CartMapper;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.requestdto.CartRequestDto;
-import com.example.demo.responsedto.CartResponseDto;
+import com.example.demo.requestdto.CartRequest;
+import com.example.demo.responsedto.CartResponse;
 import com.example.demo.service.CartService;
 import com.example.demo.util.ResponseStructure;
 import jakarta.transaction.Transactional;
@@ -34,10 +34,10 @@ public class CartServiceImpl implements CartService
 
     @Transactional
     @Override
-    public ResponseEntity<ResponseStructure<CartResponseDto>> addToCart(String email, CartRequestDto cartRequestDto)
+    public ResponseEntity<ResponseStructure<CartResponse>> addToCart(String email, CartRequest cartRequest)
     {
         User user=getUser(email);
-        Book book=getBook(cartRequestDto.getBookId());
+        Book book=getBook(cartRequest.getBookId());
         if(book.getBookQuantity()<1)
             return cartMapper.mapToBookOutOfStock(book);
         if(user.getCarts()==null)
@@ -48,7 +48,7 @@ public class CartServiceImpl implements CartService
 
     @Transactional
     @Override
-    public ResponseEntity<ResponseStructure<CartResponseDto>> removeFromCart(String email, Long cartId)
+    public ResponseEntity<ResponseStructure<CartResponse>> removeFromCart(String email, Long cartId)
     {
         User user=getUser(email);
         Cart cart=getCart(cartId,user.getUserId());
@@ -60,19 +60,19 @@ public class CartServiceImpl implements CartService
     }
 
     @Override
-    public ResponseEntity<ResponseStructure<List<CartResponseDto>>> getCartItems(String email)
+    public ResponseEntity<ResponseStructure<List<CartResponse>>> getCartItems(String email)
     {
         User user=getUser(email);
         List<Cart> userCarts=user.getCarts();
         if(userCarts.isEmpty())
             return cartMapper.mapToCartIsEmpty();
-        List<CartResponseDto> cartResponseDto=userCarts.stream().map(cartMapper::mapToCartResponse).toList();
-        return cartMapper.mapToSuccessGetCart(cartResponseDto);
+        List<CartResponse> cartResponse =userCarts.stream().map(cartMapper::mapToCartResponse).toList();
+        return cartMapper.mapToSuccessGetCart(cartResponse);
     }
 
     @Transactional
     @Override
-    public ResponseEntity<ResponseStructure<CartResponseDto>> clearCart(String email)
+    public ResponseEntity<ResponseStructure<CartResponse>> clearCart(String email)
     {
         User user=getUser(email);
         List<Cart> userCarts=user.getCarts();
@@ -104,7 +104,7 @@ public class CartServiceImpl implements CartService
     }
 
 
-    private ResponseEntity<ResponseStructure<CartResponseDto>> removeBookFromUserCart(Iterator<Cart> iterator,Cart cart)
+    private ResponseEntity<ResponseStructure<CartResponse>> removeBookFromUserCart(Iterator<Cart> iterator, Cart cart)
     {
         Long bookId = processUserCart(iterator, cart);
         Book book=updateBookQuantity(getBook(bookId));
@@ -141,7 +141,7 @@ public class CartServiceImpl implements CartService
     }
 
 
-    private ResponseEntity<ResponseStructure<CartResponseDto>> addBookToCart(User user,Long bookId)
+    private ResponseEntity<ResponseStructure<CartResponse>> addBookToCart(User user, Long bookId)
     {
         Book book=getBook(bookId);
         book.setBookQuantity(book.getBookQuantity()-1);

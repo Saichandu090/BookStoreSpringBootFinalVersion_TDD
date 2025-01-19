@@ -11,13 +11,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderResponseDto
+public class OrderResponse
 {
     private Long orderId;
     private LocalDate orderDate;
     private Double orderPrice;
     private Integer orderQuantity;
     private Boolean cancelOrder;
-    private AddressResponseDto orderAddress;
-    private List<BookResponseDto> orderBooks;
+    private AddressResponse orderAddress;
+    private List<BookResponse> orderBooks;
 }

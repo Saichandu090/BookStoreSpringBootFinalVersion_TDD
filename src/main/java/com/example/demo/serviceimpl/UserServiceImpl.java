@@ -5,10 +5,10 @@ import com.example.demo.exception.BadCredentialsException;
 import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.requestdto.UserLoginDTO;
-import com.example.demo.requestdto.UserRegisterDTO;
-import com.example.demo.responsedto.LoginResponseDto;
-import com.example.demo.responsedto.RegisterResponseDto;
+import com.example.demo.requestdto.UserLogin;
+import com.example.demo.requestdto.UserRegister;
+import com.example.demo.responsedto.LoginResponse;
+import com.example.demo.responsedto.RegisterResponse;
 import com.example.demo.service.UserService;
 import com.example.demo.util.ResponseStructure;
 import com.example.demo.util.Roles;
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService
     private final BCryptPasswordEncoder encoder=new BCryptPasswordEncoder(12);
 
     @Override
-    public ResponseEntity<ResponseStructure<RegisterResponseDto>> registerUser(UserRegisterDTO registerDTO)
+    public ResponseEntity<ResponseStructure<RegisterResponse>> registerUser(UserRegister registerDTO)
     {
         boolean isUserExist=userRepository.existsByEmail(registerDTO.getEmail());
         if(isUserExist){
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService
     }
 
     @Override
-    public ResponseEntity<ResponseStructure<LoginResponseDto>> login(UserLoginDTO loginDTO)
+    public ResponseEntity<ResponseStructure<LoginResponse>> login(UserLogin loginDTO)
     {
         boolean isUserExists=userRepository.existsByEmail(loginDTO.getEmail());
         if(isUserExists)
@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService
     }
 
 
-    public ResponseEntity<ResponseStructure<LoginResponseDto>> sendToken(UserLoginDTO loginDTO)
+    public ResponseEntity<ResponseStructure<LoginResponse>> sendToken(UserLogin loginDTO)
     {
         String token=jwtService.generateToken(loginDTO.getEmail());
         UserDetails userDetails=context.getBean(MyUserDetailsService.class).loadUserByUsername(loginDTO.getEmail());

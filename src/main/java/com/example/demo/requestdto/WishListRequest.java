@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderRequestDto
+public class WishListRequest
 {
-    @NotNull(message = "Address Id should not be empty")
-    private Long addressId;
+    @NotNull(message = "Book Id must not be null")
+    private Long bookId;
 }

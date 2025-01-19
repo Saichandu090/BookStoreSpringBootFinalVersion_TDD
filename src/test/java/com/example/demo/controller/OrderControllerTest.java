@@ -3,9 +3,9 @@ package com.example.demo.controller;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.mapper.UserMapper;
-import com.example.demo.requestdto.OrderRequestDto;
-import com.example.demo.responsedto.AddressResponseDto;
-import com.example.demo.responsedto.OrderResponseDto;
+import com.example.demo.requestdto.OrderRequest;
+import com.example.demo.responsedto.AddressResponse;
+import com.example.demo.responsedto.OrderResponse;
 import com.example.demo.service.OrderService;
 import com.example.demo.util.ResponseStructure;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,8 +67,8 @@ class OrderControllerTest
     private UserDetails userDetails;
     private User admin;
     private UserDetails adminDetails;
-    private OrderRequestDto orderRequestDto;
-    private OrderResponseDto orderResponseDto;
+    private OrderRequest orderRequest;
+    private OrderResponse orderResponse;
     private String token;
 
     @BeforeEach
@@ -132,33 +132,33 @@ class OrderControllerTest
             }
         };
 
-        orderRequestDto=OrderRequestDto.builder().addressId(1L).build();
-        orderResponseDto=OrderResponseDto.builder()
+        orderRequest = OrderRequest.builder().addressId(1L).build();
+        orderResponse = OrderResponse.builder()
                 .cancelOrder(false)
                 .orderDate(LocalDate.now())
                 .orderId(1L)
                 .orderQuantity(3)
                 .orderPrice(999.99)
-                .orderAddress(new AddressResponseDto(1L,"Baner","Pune","Maharastra",414004))
+                .orderAddress(new AddressResponse(1L,"Baner","Pune","Maharastra",414004))
                 .build();
     }
 
 
     @Test
-    void orderController_PlaceOrder_ValidTest() throws Exception
+    void orderControllerPlaceOrderValidTest() throws Exception
     {
-        ResponseEntity<ResponseStructure<OrderResponseDto>> response=ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<OrderResponseDto>()
-                .setData(orderResponseDto)
+        ResponseEntity<ResponseStructure<OrderResponse>> response=ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<OrderResponse>()
+                .setData(orderResponse)
                 .setMessage("Order placed successfully")
                 .setStatus(HttpStatus.CREATED.value()));
-        when(orderService.placeOrder(anyString(),any(OrderRequestDto.class))).thenReturn(response);
+        when(orderService.placeOrder(anyString(),any(OrderRequest.class))).thenReturn(response);
         when(userMapper.validateUserToken(anyString())).thenReturn(userDetails);
 
         mockMvc.perform(post("/order/placeOrder")
                 .characterEncoding(StandardCharsets.UTF_8)
                 .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
-                .content(objectMapper.writeValueAsString(orderRequestDto)))
+                .content(objectMapper.writeValueAsString(orderRequest)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.orderAddress.addressId").value(1))
@@ -167,26 +167,26 @@ class OrderControllerTest
     }
 
     @Test
-    void orderController_PlaceOrder_IfBodyIsInvalid() throws Exception
+    void orderControllerPlaceOrderIfBodyIsInvalid() throws Exception
     {
-        orderRequestDto=OrderRequestDto.builder().build();
+        orderRequest = OrderRequest.builder().build();
         mockMvc.perform(post("/order/placeOrder")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
-                        .content(objectMapper.writeValueAsString(orderRequestDto)))
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,result.getResolvedException()));
     }
 
     @Test
-    void orderController_PlaceOrder_IfHeaderIsMissing() throws Exception
+    void orderControllerPlaceOrderIfHeaderIsMissing() throws Exception
     {
         mockMvc.perform(post("/order/placeOrder")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequestDto)))
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
@@ -194,7 +194,7 @@ class OrderControllerTest
 
 
     @Test
-    void orderController_CancelOrder_ValidTest() throws Exception
+    void orderControllerCancelOrderValidTest() throws Exception
     {
         ResponseEntity<ResponseStructure<String>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<String>()
                 .setData(null)
@@ -207,7 +207,7 @@ class OrderControllerTest
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
-                        .content(objectMapper.writeValueAsString(orderRequestDto)))
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Order cancelled successfully"))
@@ -216,13 +216,13 @@ class OrderControllerTest
 
 
     @Test
-    void orderController_CancelOrder_IfPathVariableIsMissing() throws Exception
+    void orderControllerCancelOrderIfPathVariableIsMissing() throws Exception
     {
         mockMvc.perform(delete("/order/cancelOrder")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
-                        .content(objectMapper.writeValueAsString(orderRequestDto)))
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()));
@@ -230,12 +230,12 @@ class OrderControllerTest
 
 
     @Test
-    void orderController_CancelOrder_IfHeaderIsMissing() throws Exception
+    void orderControllerCancelOrderIfHeaderIsMissing() throws Exception
     {
         mockMvc.perform(delete("/order/cancelOrder/{orderId}",1)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderRequestDto)))
+                        .content(objectMapper.writeValueAsString(orderRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
@@ -243,10 +243,10 @@ class OrderControllerTest
 
 
     @Test
-    void orderController_GetOrder_ValidTest() throws Exception
+    void orderControllerGetOrderValidTest() throws Exception
     {
-        ResponseEntity<ResponseStructure<OrderResponseDto>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<OrderResponseDto>()
-                .setData(orderResponseDto)
+        ResponseEntity<ResponseStructure<OrderResponse>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<OrderResponse>()
+                .setData(orderResponse)
                 .setMessage("Order fetched successfully")
                 .setStatus(HttpStatus.OK.value()));
         when(orderService.getOrder(anyString(),anyLong())).thenReturn(response);
@@ -266,7 +266,7 @@ class OrderControllerTest
 
 
     @Test
-    void orderController_GetOrder_IfRequestParamIsAbsent() throws Exception
+    void orderControllerGetOrderIfRequestParamIsAbsent() throws Exception
     {
         mockMvc.perform(get("/order/getOrder")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -278,7 +278,7 @@ class OrderControllerTest
     }
 
     @Test
-    void orderController_GetOrder_IfHeaderIsMissing() throws Exception
+    void orderControllerGetOrderIfHeaderIsMissing() throws Exception
     {
         mockMvc.perform(get("/order/getOrder?orderId={orderId}",1)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -290,10 +290,10 @@ class OrderControllerTest
 
 
     @Test
-    void orderController_GetAllOrders_ValidTest() throws Exception
+    void orderControllerGetAllOrdersValidTest() throws Exception
     {
-        ResponseEntity<ResponseStructure<List<OrderResponseDto>>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<OrderResponseDto>>()
-                .setData(List.of(orderResponseDto))
+        ResponseEntity<ResponseStructure<List<OrderResponse>>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<OrderResponse>>()
+                .setData(List.of(orderResponse))
                 .setMessage("Order fetched successfully")
                 .setStatus(HttpStatus.OK.value()));
         when(orderService.getAllOrdersForUser(anyString())).thenReturn(response);
@@ -313,7 +313,7 @@ class OrderControllerTest
 
 
     @Test
-    void orderController_GetAllOrders_IfHeaderIsMissing() throws Exception
+    void orderControllerGetAllOrdersIfHeaderIsMissing() throws Exception
     {
         mockMvc.perform(get("/order/getAllOrders")
                         .characterEncoding(StandardCharsets.UTF_8)

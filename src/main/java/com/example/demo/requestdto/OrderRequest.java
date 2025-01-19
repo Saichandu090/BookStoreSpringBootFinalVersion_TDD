@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class CartRequestDto
+@NoArgsConstructor
+@Builder
+public class OrderRequest
 {
-    @NotNull(message = "Book id should not be empty")
-    private Long bookId;
+    @NotNull(message = "Address Id should not be empty")
+    private Long addressId;
 }

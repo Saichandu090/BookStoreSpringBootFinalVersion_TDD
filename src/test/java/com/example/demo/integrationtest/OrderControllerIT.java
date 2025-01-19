@@ -100,7 +100,7 @@ public class OrderControllerIT
     {
         if (authToken == null)
         {
-            UserRegisterDTO userRegisterDTO=UserRegisterDTO.builder()
+            UserRegister userRegister = UserRegister.builder()
                     .firstName("Soul")
                     .lastName("Dinesh")
                     .dob(LocalDate.of(1992,8,24))
@@ -108,16 +108,16 @@ public class OrderControllerIT
                     .role("USER")
                     .password("dinesh@090").build();
 
-            ResponseEntity<ResponseStructure<RegisterResponseDto>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegisterDTO), new ParameterizedTypeReference<ResponseStructure<RegisterResponseDto>>(){});
+            ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegister), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
             assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
             assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
 
-            UserLoginDTO userLoginDTO=UserLoginDTO.builder()
+            UserLogin userLogin = UserLogin.builder()
                     .email("dinesh@gmail.com")
                     .password("dinesh@090").build();
 
-            ResponseEntity<ResponseStructure<LoginResponseDto>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLoginDTO), new ParameterizedTypeReference<ResponseStructure<LoginResponseDto>>(){});
+            ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLogin), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
             assertEquals(HttpStatus.OK,loginResponse.getStatusCode());
             assertEquals(HttpStatus.OK.value(),loginResponse.getBody().getStatus());
@@ -129,34 +129,34 @@ public class OrderControllerIT
     }
 
     @Test
-    void placeOrder_ValidTest_AlsoTested_IfAddressIsInvalid_IfCartIsEmpty()
+    void placeOrderValidTestAlsoTestedIfAddressIsInvalidIfCartIsEmpty()
     {
         //adding books to cart to place the order
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
-        CartRequestDto cartRequestDto=CartRequestDto.builder().bookId(3L).build();
-        HttpEntity<Object> httpEntity=new HttpEntity<>(cartRequestDto,httpHeaders);
-        ResponseEntity<ResponseStructure<CartResponseDto>> response=restTemplate.exchange(  "http://localhost:"+port+"/cart/addToCart", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponseDto>>() {});
+        CartRequest cartRequest = CartRequest.builder().bookId(3L).build();
+        HttpEntity<Object> httpEntity=new HttpEntity<>(cartRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(  "http://localhost:"+port+"/cart/addToCart", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
         assertEquals(3,response.getBody().getData().getBookId());
         assertEquals(1,response.getBody().getData().getCartQuantity());
 
-        CartRequestDto cartRequestDto2=CartRequestDto.builder().bookId(1L).build();
-        HttpEntity<Object> httpEntity2=new HttpEntity<>(cartRequestDto2,httpHeaders);
-        ResponseEntity<ResponseStructure<CartResponseDto>> response2=restTemplate.exchange("http://localhost:"+port+"/cart/addToCart", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<CartResponseDto>>() {});
+        CartRequest cartRequest2 = CartRequest.builder().bookId(1L).build();
+        HttpEntity<Object> httpEntity2=new HttpEntity<>(cartRequest2,httpHeaders);
+        ResponseEntity<ResponseStructure<CartResponse>> response2=restTemplate.exchange("http://localhost:"+port+"/cart/addToCart", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response2.getStatusCode());
 
         //Adding one address for user
-        AddressRequestDto addressRequestDto=AddressRequestDto.builder()
+        AddressRequest addressRequest = AddressRequest.builder()
                 .streetName("Baner")
                 .city("Pune")
                 .pinCode(414004)
                 .state("Maharastra").build();
-        HttpEntity<Object> httpEntity3 = new HttpEntity<>(addressRequestDto,httpHeaders);
-        ResponseEntity<ResponseStructure<AddressResponseDto>> response3 = restTemplate.exchange( "http://localhost:"+port+"/address/addAddress", HttpMethod.POST, httpEntity3,
-                new ParameterizedTypeReference<ResponseStructure<AddressResponseDto>>() {});
+        HttpEntity<Object> httpEntity3 = new HttpEntity<>(addressRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<AddressResponse>> response3 = restTemplate.exchange( "http://localhost:"+port+"/address/addAddress", HttpMethod.POST, httpEntity3,
+                new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {});
         assertEquals(HttpStatus.CREATED,response3.getStatusCode());
 
 
@@ -167,9 +167,9 @@ public class OrderControllerIT
 
 
         //Placing an order with added address
-        OrderRequestDto orderRequestDto=OrderRequestDto.builder().addressId(1L).build();
-        HttpEntity<Object> httpEntity4=new HttpEntity<>(orderRequestDto,httpHeaders);
-        ResponseEntity<ResponseStructure<OrderResponseDto>> response4=restTemplate.exchange(baseUrl + "/placeOrder", HttpMethod.POST, httpEntity4, new ParameterizedTypeReference<ResponseStructure<OrderResponseDto>>() {});
+        OrderRequest orderRequest = OrderRequest.builder().addressId(1L).build();
+        HttpEntity<Object> httpEntity4=new HttpEntity<>(orderRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<OrderResponse>> response4=restTemplate.exchange(baseUrl + "/placeOrder", HttpMethod.POST, httpEntity4, new ParameterizedTypeReference<ResponseStructure<OrderResponse>>() {});
         assertEquals(HttpStatus.CREATED,response4.getStatusCode());
         assertEquals("Baner",response4.getBody().getData().getOrderAddress().getStreetName());
         assertEquals(false,response4.getBody().getData().getCancelOrder());
@@ -183,16 +183,16 @@ public class OrderControllerIT
 
 
         //Trying again if cart is empty
-        OrderRequestDto orderRequestDto1=OrderRequestDto.builder().addressId(1L).build();
-        HttpEntity<Object> httpEntity5=new HttpEntity<>(orderRequestDto1,httpHeaders);
-        ResponseEntity<ResponseStructure<OrderResponseDto>> response5=restTemplate.exchange(baseUrl + "/placeOrder", HttpMethod.POST, httpEntity5, new ParameterizedTypeReference<ResponseStructure<OrderResponseDto>>() {});
+        OrderRequest orderRequest1 = OrderRequest.builder().addressId(1L).build();
+        HttpEntity<Object> httpEntity5=new HttpEntity<>(orderRequest1,httpHeaders);
+        ResponseEntity<ResponseStructure<OrderResponse>> response5=restTemplate.exchange(baseUrl + "/placeOrder", HttpMethod.POST, httpEntity5, new ParameterizedTypeReference<ResponseStructure<OrderResponse>>() {});
         assertEquals(HttpStatus.NO_CONTENT,response5.getStatusCode(),"Once the order is placed cart should get cleared and cart is empty should be displayed");
 
 
         //Test if address id is invalid
-        OrderRequestDto orderRequestDto2=OrderRequestDto.builder().addressId(10L).build();
-        HttpEntity<Object> httpEntity6=new HttpEntity<>(orderRequestDto2,httpHeaders);
-        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/placeOrder", HttpMethod.POST, httpEntity6, new ParameterizedTypeReference<ResponseStructure<OrderResponseDto>>() {}));
+        OrderRequest orderRequest2 = OrderRequest.builder().addressId(10L).build();
+        HttpEntity<Object> httpEntity6=new HttpEntity<>(orderRequest2,httpHeaders);
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/placeOrder", HttpMethod.POST, httpEntity6, new ParameterizedTypeReference<ResponseStructure<OrderResponse>>() {}));
         assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode(),"If the provided addressId is not found or not related to user");
         String responseBody = exception.getResponseBodyAsString();
         assertTrue(responseBody.contains("\"message\":\"Address not found with Id 10\""));
@@ -200,9 +200,9 @@ public class OrderControllerIT
 
 
     @Test
-    void cancelOrder_ValidTest()
+    void cancelOrderValidTest()
     {
-        placeOrder_ValidTest_AlsoTested_IfAddressIsInvalid_IfCartIsEmpty();
+        placeOrderValidTestAlsoTestedIfAddressIsInvalidIfCartIsEmpty();
 
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
@@ -224,9 +224,9 @@ public class OrderControllerIT
 
 
     @Test
-    void cancelOrder_IfOrderIdIsInvalid()
+    void cancelOrderIfOrderIdIsInvalid()
     {
-        placeOrder_ValidTest_AlsoTested_IfAddressIsInvalid_IfCartIsEmpty();
+        placeOrderValidTestAlsoTestedIfAddressIsInvalidIfCartIsEmpty();
 
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
@@ -240,9 +240,9 @@ public class OrderControllerIT
     }
 
     @Test
-    void cancelOrder_IfTokenIsInvalidInvalid()
+    void cancelOrderIfTokenIsInvalidInvalid()
     {
-        placeOrder_ValidTest_AlsoTested_IfAddressIsInvalid_IfCartIsEmpty();
+        placeOrderValidTestAlsoTestedIfAddressIsInvalidIfCartIsEmpty();
 
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer token");
@@ -254,15 +254,15 @@ public class OrderControllerIT
 
 
     @Test
-    void getOrder_ValidTest()
+    void getOrderValidTest()
     {
-        placeOrder_ValidTest_AlsoTested_IfAddressIsInvalid_IfCartIsEmpty();
+        placeOrderValidTestAlsoTestedIfAddressIsInvalidIfCartIsEmpty();
 
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
-        ResponseEntity<ResponseStructure<OrderResponseDto>> response=restTemplate.exchange(baseUrl + "/getOrder?orderId=1", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<OrderResponseDto>>() {});
+        ResponseEntity<ResponseStructure<OrderResponse>> response=restTemplate.exchange(baseUrl + "/getOrder?orderId=1", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<OrderResponse>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(2,response.getBody().getData().getOrderBooks().size(),"Checking the correct quantity of books and debugging the book details");
         assertEquals(1,response.getBody().getData().getOrderId());
@@ -277,29 +277,29 @@ public class OrderControllerIT
 
 
     @Test
-    void getOrder_IfOrderIdIsInvalid()
+    void getOrderIfOrderIdIsInvalid()
     {
-        placeOrder_ValidTest_AlsoTested_IfAddressIsInvalid_IfCartIsEmpty();
+        placeOrderValidTestAlsoTestedIfAddressIsInvalidIfCartIsEmpty();
 
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
-        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/getOrder?orderId=10", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<OrderResponseDto>>() {}));
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/getOrder?orderId=10", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<OrderResponse>>() {}));
         assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode(),"If order id is not found or order does not belong to user");
     }
 
 
     @Test
-    void getAllOrders_ValidTest()
+    void getAllOrdersValidTest()
     {
-        placeOrder_ValidTest_AlsoTested_IfAddressIsInvalid_IfCartIsEmpty();
+        placeOrderValidTestAlsoTestedIfAddressIsInvalidIfCartIsEmpty();
 
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
-        ResponseEntity<ResponseStructure<List<OrderResponseDto>>> response=restTemplate.exchange(baseUrl + "/getAllOrders", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<List<OrderResponseDto>>>() {});
+        ResponseEntity<ResponseStructure<List<OrderResponse>>> response=restTemplate.exchange(baseUrl + "/getAllOrders", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<List<OrderResponse>>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(2,response.getBody().getData().getFirst().getOrderBooks().size(),"Checking the correct quantity of books and debugging the book details");
         assertEquals(1,response.getBody().getData().getFirst().getOrderId());
@@ -314,7 +314,7 @@ public class OrderControllerIT
 
 
     @Test
-    void getAllOrders_IfOrdersAreEmpty()
+    void getAllOrdersIfOrdersAreEmpty()
     {
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
@@ -322,7 +322,7 @@ public class OrderControllerIT
 
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
 
-        ResponseEntity<ResponseStructure<List<OrderResponseDto>>> response=restTemplate.exchange(baseUrl + "/getAllOrders", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<List<OrderResponseDto>>>() {});
+        ResponseEntity<ResponseStructure<List<OrderResponse>>> response=restTemplate.exchange(baseUrl + "/getAllOrders", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<List<OrderResponse>>>() {});
         assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
 
 

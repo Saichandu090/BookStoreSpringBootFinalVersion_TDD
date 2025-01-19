@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserRegisterDTO
+public class UserRegister
 {
     @NotNull
     @Pattern(regexp = "^[A-Z][A-Za-z .]{2,}$",message = "First Name Should start with Capital and AtLeast contain 3 characters")

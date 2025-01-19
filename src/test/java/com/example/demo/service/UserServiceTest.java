@@ -5,10 +5,10 @@ import com.example.demo.exception.BadCredentialsException;
 import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.requestdto.UserLoginDTO;
-import com.example.demo.requestdto.UserRegisterDTO;
-import com.example.demo.responsedto.LoginResponseDto;
-import com.example.demo.responsedto.RegisterResponseDto;
+import com.example.demo.requestdto.UserLogin;
+import com.example.demo.requestdto.UserRegister;
+import com.example.demo.responsedto.LoginResponse;
+import com.example.demo.responsedto.RegisterResponse;
 import com.example.demo.serviceimpl.JWTService;
 import com.example.demo.serviceimpl.MyUserDetailsService;
 import com.example.demo.serviceimpl.UserServiceImpl;
@@ -64,14 +64,14 @@ class UserServiceTest
     private UserMapper userMapper;
 
     private User user;
-    private UserRegisterDTO registerDTO;
-    private UserLoginDTO userLoginDTO;
+    private UserRegister registerDTO;
+    private UserLogin userLogin;
     private UserDetails userDetails;
 
     @BeforeEach
     public void init()
     {
-        registerDTO=UserRegisterDTO.builder()
+        registerDTO= UserRegister.builder()
                 .firstName("Sai")
                 .lastName("Chandu")
                 .dob(LocalDate.of(2002,8,24))
@@ -88,7 +88,7 @@ class UserServiceTest
                 .password(registerDTO.getPassword())
                 .role(registerDTO.getRole()).build();
 
-        userLoginDTO=UserLoginDTO.builder()
+        userLogin = UserLogin.builder()
                 .email("test@gmail.com")
                 .password("testing").build();
 
@@ -112,12 +112,12 @@ class UserServiceTest
 
 
     @Test
-    public void userService_RegisterUserTest_MustPassWithValidBody()
+    public void userServiceRegisterUserTestMustPassWithValidBody()
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        ResponseEntity<ResponseStructure<RegisterResponseDto>> response=userService.registerUser(registerDTO);
+        ResponseEntity<ResponseStructure<RegisterResponse>> response=userService.registerUser(registerDTO);
 
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),response.getBody().getStatus());
@@ -126,11 +126,11 @@ class UserServiceTest
     }
 
     @Test
-    public void userService_RegisterUserTest_IfUserAlreadyExists()
+    public void userServiceRegisterUserTestIfUserAlreadyExists()
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
-        ResponseEntity<ResponseStructure<RegisterResponseDto>> response=userService.registerUser(registerDTO);
+        ResponseEntity<ResponseStructure<RegisterResponse>> response=userService.registerUser(registerDTO);
 
         assertEquals(HttpStatus.CONFLICT,response.getStatusCode());
         assertEquals(HttpStatus.CONFLICT.value(),response.getBody().getStatus());
@@ -138,57 +138,57 @@ class UserServiceTest
 
 
     @Test
-    public void userService_LoginUser_ValidScene()
+    public void userServiceLoginUserValidScene()
     {
-        when(userRepository.existsByEmail(userLoginDTO.getEmail())).thenReturn(true);
+        when(userRepository.existsByEmail(userLogin.getEmail())).thenReturn(true);
 
-        UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userLoginDTO.getEmail(),userLoginDTO.getPassword());
+        UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userLogin.getEmail(), userLogin.getPassword());
         Authentication authenticationResult= Mockito.mock(Authentication.class);
 
         when(authenticationResult.isAuthenticated()).thenReturn(true);
         when(authenticationManager.authenticate(authenticationToken)).thenReturn(authenticationResult);
 
-        when(jwtService.generateToken(userLoginDTO.getEmail())).thenReturn("jwt-token");
+        when(jwtService.generateToken(userLogin.getEmail())).thenReturn("jwt-token");
 
         when(context.getBean(MyUserDetailsService.class)).thenReturn(myUserDetailsService);
-        when(myUserDetailsService.loadUserByUsername(userLoginDTO.getEmail())).thenReturn(userDetails);
+        when(myUserDetailsService.loadUserByUsername(userLogin.getEmail())).thenReturn(userDetails);
 
-        ResponseEntity<ResponseStructure<LoginResponseDto>> response=userService.login(userLoginDTO);
+        ResponseEntity<ResponseStructure<LoginResponse>> response=userService.login(userLogin);
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
         assertEquals("jwt-token",response.getBody().getMessage());
-        assertEquals(userLoginDTO.getEmail(),response.getBody().getData().getEmail());
+        assertEquals(userLogin.getEmail(),response.getBody().getData().getEmail());
     }
 
 
     @Test
-    public void userService_LoginUser_IfUserNotRegistered()
+    public void userServiceLoginUserIfUserNotRegistered()
     {
-        when(userRepository.existsByEmail(userLoginDTO.getEmail())).thenReturn(false);
+        when(userRepository.existsByEmail(userLogin.getEmail())).thenReturn(false);
 
-        assertThrows(UserNotFoundException.class,()->userService.login(userLoginDTO));
+        assertThrows(UserNotFoundException.class,()->userService.login(userLogin));
 
         verify(userRepository,times(1)).existsByEmail(anyString());
     }
 
     @Test
-    public void userService_LoginUser_IfAuthenticationFails()
+    public void userServiceLoginUserIfAuthenticationFails()
     {
-        when(userRepository.existsByEmail(userLoginDTO.getEmail())).thenReturn(true);
+        when(userRepository.existsByEmail(userLogin.getEmail())).thenReturn(true);
 
-        UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userLoginDTO.getEmail(),userLoginDTO.getPassword());
+        UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userLogin.getEmail(), userLogin.getPassword());
         Authentication authenticationResult= Mockito.mock(Authentication.class);
 
         when(authenticationResult.isAuthenticated()).thenReturn(false);
         when(authenticationManager.authenticate(authenticationToken)).thenReturn(authenticationResult);
 
-        assertThrows(BadCredentialsException.class,()->userService.login(userLoginDTO));
+        assertThrows(BadCredentialsException.class,()->userService.login(userLogin));
     }
 
 
     @Test
-    public void userService_IsUserExists_IfUserExist()
+    public void userServiceIsUserExistsIfUserExist()
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
@@ -200,7 +200,7 @@ class UserServiceTest
 
 
     @Test
-    public void userService_IsUserExists_IfUserNotExist()
+    public void userServiceIsUserExistsIfUserNotExist()
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
 
@@ -211,7 +211,7 @@ class UserServiceTest
     }
 
     @Test
-    public void userService_ForgetPassword_IfUserExist()
+    public void userServiceForgetPasswordIfUserExist()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
@@ -223,7 +223,7 @@ class UserServiceTest
     }
 
     @Test
-    public void userService_ForgetPassword_IfUserNotExists()
+    public void userServiceForgetPasswordIfUserNotExists()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 

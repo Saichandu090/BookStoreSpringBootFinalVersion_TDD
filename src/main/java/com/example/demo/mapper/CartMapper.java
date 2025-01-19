@@ -2,7 +2,7 @@ package com.example.demo.mapper;
 
 import com.example.demo.entity.Book;
 import com.example.demo.entity.Cart;
-import com.example.demo.responsedto.CartResponseDto;
+import com.example.demo.responsedto.CartResponse;
 import com.example.demo.util.ResponseStructure;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,75 +11,75 @@ import java.util.List;
 
 public class CartMapper
 {
-    public ResponseEntity<ResponseStructure<CartResponseDto>> noAuthority()
+    public ResponseEntity<ResponseStructure<CartResponse>> noAuthority()
     {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<CartResponseDto>()
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<CartResponse>()
                 .setMessage("No Authority")
                 .setData(null)
                 .setStatus(HttpStatus.UNAUTHORIZED.value()));
     }
 
-    public ResponseEntity<ResponseStructure<List<CartResponseDto>>> noAuthority(String message)
+    public ResponseEntity<ResponseStructure<List<CartResponse>>> noAuthority(String message)
     {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<List<CartResponseDto>>()
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<List<CartResponse>>()
                 .setMessage(message)
                 .setData(null)
                 .setStatus(HttpStatus.UNAUTHORIZED.value()));
     }
 
-    public ResponseEntity<ResponseStructure<CartResponseDto>> mapToSuccessRemoveFromCart(String bookName)
+    public ResponseEntity<ResponseStructure<CartResponse>> mapToSuccessRemoveFromCart(String bookName)
     {
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<CartResponseDto>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<CartResponse>()
                 .setStatus(HttpStatus.OK.value())
                 .setMessage("Book "+bookName+" has removed from the cart")
                 .setData(null));
     }
 
-    public ResponseEntity<ResponseStructure<CartResponseDto>> mapToBookOutOfStock(Book book)
+    public ResponseEntity<ResponseStructure<CartResponse>> mapToBookOutOfStock(Book book)
     {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<CartResponseDto>()
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<CartResponse>()
                 .setMessage("Book "+book.getBookName()+" is out of stock!!")
                 .setStatus(HttpStatus.NO_CONTENT.value())
                 .setData(null));
     }
 
-    public ResponseEntity<ResponseStructure<CartResponseDto>> mapToSuccessAddToCart(Cart cart)
+    public ResponseEntity<ResponseStructure<CartResponse>> mapToSuccessAddToCart(Cart cart)
     {
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<CartResponseDto>()
-                .setData(new CartResponseDto(cart.getCartId(), cart.getBookId(),cart.getCartQuantity()))
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<CartResponse>()
+                .setData(new CartResponse(cart.getCartId(), cart.getBookId(),cart.getCartQuantity()))
                 .setMessage("Book added to cart successfully")
                 .setStatus(HttpStatus.OK.value()));
     }
 
-    public ResponseEntity<ResponseStructure<List<CartResponseDto>>> mapToCartIsEmpty()
+    public ResponseEntity<ResponseStructure<List<CartResponse>>> mapToCartIsEmpty()
     {
         return ResponseEntity.noContent().build();
     }
 
-    public ResponseEntity<ResponseStructure<List<CartResponseDto>>> mapToSuccessGetCart(List<CartResponseDto> cartResponseDto)
+    public ResponseEntity<ResponseStructure<List<CartResponse>>> mapToSuccessGetCart(List<CartResponse> cartResponse)
     {
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<CartResponseDto>>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<CartResponse>>()
                 .setMessage("User cart fetched successfully")
                 .setStatus(HttpStatus.OK.value())
-                .setData(cartResponseDto));
+                .setData(cartResponse));
     }
 
-    public ResponseEntity<ResponseStructure<CartResponseDto>> mapToSuccessClearCart()
+    public ResponseEntity<ResponseStructure<CartResponse>> mapToSuccessClearCart()
     {
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<CartResponseDto>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<CartResponse>()
                 .setStatus(HttpStatus.OK.value())
                 .setMessage("Cart cleared successfully")
                 .setData(null));
     }
 
-    public ResponseEntity<ResponseStructure<CartResponseDto>> mapToNoContentCartIsEmpty()
+    public ResponseEntity<ResponseStructure<CartResponse>> mapToNoContentCartIsEmpty()
     {
         return ResponseEntity.noContent().build();
     }
 
-    public CartResponseDto mapToCartResponse(Cart cart)
+    public CartResponse mapToCartResponse(Cart cart)
     {
-        return CartResponseDto.builder()
+        return CartResponse.builder()
                 .bookId(cart.getBookId())
                 .cartId(cart.getCartId())
                 .cartQuantity(cart.getCartQuantity()).build();

@@ -7,9 +7,9 @@ import com.example.demo.exception.OrderNotFoundException;
 import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.repository.*;
-import com.example.demo.requestdto.OrderRequestDto;
-import com.example.demo.responsedto.BookResponseDto;
-import com.example.demo.responsedto.OrderResponseDto;
+import com.example.demo.requestdto.OrderRequest;
+import com.example.demo.responsedto.BookResponse;
+import com.example.demo.responsedto.OrderResponse;
 import com.example.demo.service.OrderService;
 import com.example.demo.util.ResponseStructure;
 import jakarta.transaction.Transactional;
@@ -32,16 +32,16 @@ public class OrderServiceImpl implements OrderService
 
     @Transactional
     @Override
-    public ResponseEntity<ResponseStructure<OrderResponseDto>> placeOrder(String email, OrderRequestDto orderRequestDto)
+    public ResponseEntity<ResponseStructure<OrderResponse>> placeOrder(String email, OrderRequest orderRequest)
     {
         User user=getUser(email);
-        Address address=getAddress(orderRequestDto.getAddressId());
+        Address address=getAddress(orderRequest.getAddressId());
         List<Cart> userCarts=user.getCarts();
         if(userCarts.isEmpty())
             return orderMapper.mapToCartIsEmpty();
         Order order=processUserPlaceOrder(userCarts,address,user);
         Order savedOrder=orderRepository.save(order);
-        List<BookResponseDto> books=getBooksResponseFromOrder(order);
+        List<BookResponse> books=getBooksResponseFromOrder(order);
         return orderMapper.mapToSuccessPlaceOrder(savedOrder,address,books);
     }
 
@@ -58,28 +58,28 @@ public class OrderServiceImpl implements OrderService
     }
 
     @Override
-    public ResponseEntity<ResponseStructure<OrderResponseDto>> getOrder(String email, Long orderId)
+    public ResponseEntity<ResponseStructure<OrderResponse>> getOrder(String email, Long orderId)
     {
         User user=getUser(email);
         Order order=getOrder(orderId,user.getUserId());
         Address address=getAddress(order.getAddressId());
-        List<BookResponseDto> books=getBooksResponseFromOrder(order);
+        List<BookResponse> books=getBooksResponseFromOrder(order);
         return orderMapper.mapToSuccessGetOrder(order,address,books);
     }
 
     @Override
-    public ResponseEntity<ResponseStructure<List<OrderResponseDto>>> getAllOrdersForUser(String email)
+    public ResponseEntity<ResponseStructure<List<OrderResponse>>> getAllOrdersForUser(String email)
     {
         User user=getUser(email);
         List<Order> userOrders=user.getOrders();
         if(userOrders.isEmpty())
             return orderMapper.mapToNoContentForGetAllOrders();
-        List<OrderResponseDto> orderResponseDtos = userOrders.stream().map(order -> {
+        List<OrderResponse> orderResponses = userOrders.stream().map(order -> {
                     Address address = getAddress(order.getAddressId());
-                    List<BookResponseDto> bookResponseDtos = getBooksResponseFromOrder(order);
-                    return orderMapper.mapToOrderResponse(order, address, bookResponseDtos);
+                    List<BookResponse> bookResponses = getBooksResponseFromOrder(order);
+                    return orderMapper.mapToOrderResponse(order, address, bookResponses);
         }).toList();
-        return orderMapper.mapToSuccessGetAllOrders(orderResponseDtos);
+        return orderMapper.mapToSuccessGetAllOrders(orderResponses);
     }
 
 
@@ -115,12 +115,12 @@ public class OrderServiceImpl implements OrderService
     }
 
 
-    private List<BookResponseDto> getBooksResponseFromOrder(Order order)
+    private List<BookResponse> getBooksResponseFromOrder(Order order)
     {
         List<Cart> carts=order.getCarts();
         List<Book> books=carts.stream().map(cart ->getBook(cart.getBookId())).toList();
         return books.stream()
-                .map(book ->BookResponseDto.builder()
+                .map(book -> BookResponse.builder()
                         .bookId(book.getBookId())
                         .bookAuthor(book.getBookAuthor())
                         .bookDescription(book.getBookDescription())
