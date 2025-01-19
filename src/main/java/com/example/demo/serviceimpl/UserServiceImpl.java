@@ -1,6 +1,8 @@
 package com.example.demo.serviceimpl;
 
 import com.example.demo.entity.User;
+import com.example.demo.exception.BadCredentialsException;
+import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.requestdto.UserLoginDTO;
@@ -21,6 +23,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService
@@ -29,7 +34,6 @@ public class UserServiceImpl implements UserService
     private JWTService jwtService;
     private ApplicationContext context;
     private AuthenticationManager authenticationManager;
-
     private final UserMapper userMapper=new UserMapper();
     private final BCryptPasswordEncoder encoder=new BCryptPasswordEncoder(12);
 
@@ -56,9 +60,32 @@ public class UserServiceImpl implements UserService
             if(authentication.isAuthenticated())
                 return sendToken(loginDTO);
             else
-                return userMapper.badCredentials();
-        }
-        return userMapper.userNotExists();
+                throw new BadCredentialsException("Bad Credentials");
+        }else
+            throw new UserNotFoundException("User not Found");
+    }
+
+    @Override
+    public ResponseEntity<ResponseStructure<Boolean>> isUserExists(String email)
+    {
+        boolean exists=userRepository.existsByEmail(email);
+        if(exists)
+            return userMapper.mapToSuccessUserExists();
+        else
+            return userMapper.mapToFailureUserNotExist();
+    }
+
+    @Override
+    public ResponseEntity<ResponseStructure<Boolean>> forgetPassword(String email,String newPassword)
+    {
+        Optional<User> user=userRepository.findByEmail(email);
+        if(user.isEmpty())
+            throw new UserNotFoundException("User not found with email "+email);
+        User realUser=user.get();
+        realUser.setPassword(encoder.encode(newPassword));
+        realUser.setUpdatedDate(LocalDate.now());
+        User updatedUser=userRepository.save(realUser);
+        return userMapper.mapToSuccessPasswordUpdated(updatedUser);
     }
 
 

@@ -140,6 +140,31 @@ public class BookControllerIT
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     }
 
+
+    @Test
+    public void addBookTest_IfBookQuantityIsLessThan16()
+    {
+        authToken=getAuthToken();
+
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+authToken);
+
+        BookRequestDto bookRequestDto=BookRequestDto.builder()
+                .bookName("Something")
+                .bookId(3245L)
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(8)
+                .bookLogo("URL").build();
+
+        HttpEntity<Object> entity = new HttpEntity<>(bookRequestDto,httpHeaders);
+
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()-> restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<BookResponseDto>>() {}));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode(),"If ADMIN tries to add a book with less than 16 quantity");
+    }
+
     @Test
     public void addBookTest_IfTokenIsInvalidOrMissing()
     {

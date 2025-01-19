@@ -83,19 +83,27 @@ public class UserMapper
                 .setData(LoginResponseDto.builder().role(role).email(email).build()));
     }
 
-    public ResponseEntity<ResponseStructure<LoginResponseDto>> userNotExists()
+    public ResponseEntity<ResponseStructure<Boolean>> mapToFailureUserNotExist()
     {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<LoginResponseDto>()
-                .setStatus(HttpStatus.NOT_FOUND.value())
-                .setMessage("User not found")
-                .setData(null));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<Boolean>()
+                .setData(false)
+                .setMessage("User not exists")
+                .setStatus(HttpStatus.NOT_FOUND.value()));
     }
 
-    public ResponseEntity<ResponseStructure<LoginResponseDto>> badCredentials()
+    public ResponseEntity<ResponseStructure<Boolean>> mapToSuccessUserExists()
     {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<LoginResponseDto>()
-                .setMessage("Bad Credentials")
-                .setStatus(HttpStatus.UNAUTHORIZED.value())
-                .setData(null));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<Boolean>()
+                .setStatus(HttpStatus.OK.value())
+                .setMessage("User exists")
+                .setData(true));
+    }
+
+    public ResponseEntity<ResponseStructure<Boolean>> mapToSuccessPasswordUpdated(User updatedUser)
+    {
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<Boolean>()
+                .setData(true)
+                .setStatus(HttpStatus.OK.value())
+                .setMessage(updatedUser.getEmail()+" password updated successfully"));
     }
 }

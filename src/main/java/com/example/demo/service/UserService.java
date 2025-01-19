@@ -5,7 +5,6 @@ import com.example.demo.requestdto.UserRegisterDTO;
 import com.example.demo.responsedto.LoginResponseDto;
 import com.example.demo.responsedto.RegisterResponseDto;
 import com.example.demo.util.ResponseStructure;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 
 public interface UserService
@@ -13,4 +12,8 @@ public interface UserService
     ResponseEntity<ResponseStructure<RegisterResponseDto>> registerUser(UserRegisterDTO registerDTO);
 
     ResponseEntity<ResponseStructure<LoginResponseDto>> login(UserLoginDTO loginDTO);
+
+    ResponseEntity<ResponseStructure<Boolean>> isUserExists(String email);
+
+    ResponseEntity<ResponseStructure<Boolean>> forgetPassword(String email,String newPassword);
 }

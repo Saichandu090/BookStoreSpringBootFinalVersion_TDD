@@ -17,14 +17,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -91,5 +94,80 @@ class UserControllerTest
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,result.getResolvedException()));
+    }
+
+
+    @Test
+    public void userController_IsUserExists_IfExists() throws Exception
+    {
+        ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.OK.value()).setMessage("User exists").setData(true));
+        when(userService.isUserExists(anyString())).thenReturn(response);
+
+        mockMvc.perform(get("/isUserExists/{email}","sai@gmail.com")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value(true))
+                .andExpect(jsonPath("$.message").value("User exists"));
+    }
+
+
+    @Test
+    public void userController_IsUserExists_IfNotExists() throws Exception
+    {
+        ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.NOT_FOUND.value()).setMessage("User not exists").setData(false));
+        when(userService.isUserExists(anyString())).thenReturn(response);
+
+        mockMvc.perform(get("/isUserExists/{email}","sai@gmail.com")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.data").value(false))
+                .andExpect(jsonPath("$.message").value("User not exists"));
+    }
+
+
+    @Test
+    public void userController_ForgetPassword_IfUserExists() throws Exception
+    {
+        ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.OK.value()).setMessage("User password updated successfully").setData(true));
+        when(userService.forgetPassword(anyString(),anyString())).thenReturn(response);
+
+        mockMvc.perform(put("/forgetPassword/{email}","sai@gmail.com")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("newPassword","chandu@090")
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value(true))
+                .andExpect(jsonPath("$.message").value("User password updated successfully"));
+    }
+
+
+    @Test
+    public void userController_ForgetPassword_IfUserNotExists() throws Exception
+    {
+        ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.NOT_FOUND.value()).setMessage("User not found with email").setData(false));
+        when(userService.forgetPassword(anyString(),anyString())).thenReturn(response);
+
+        mockMvc.perform(put("/forgetPassword/{email}","sai@gmail.com")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("newPassword","chandu@090")
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void userController_ForgetPassword_IfParamIsMissing() throws Exception
+    {
+        mockMvc.perform(put("/forgetPassword/{email}","sai@gmail.com")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MissingServletRequestParameterException.class,result.getResolvedException()));
     }
 }

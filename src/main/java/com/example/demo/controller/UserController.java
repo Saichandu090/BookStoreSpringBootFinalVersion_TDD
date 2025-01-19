@@ -9,10 +9,7 @@ import com.example.demo.util.ResponseStructure;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(allowedHeaders = "*",origins = "*")
 @AllArgsConstructor
@@ -31,5 +28,17 @@ public class UserController
     public ResponseEntity<ResponseStructure<LoginResponseDto>> login(@Valid @RequestBody UserLoginDTO loginDTO)
     {
         return userService.login(loginDTO);
+    }
+
+    @GetMapping("/isUserExists/{email}")
+    public ResponseEntity<ResponseStructure<Boolean>> isUserExists(@PathVariable String email)
+    {
+        return userService.isUserExists(email);
+    }
+
+    @PutMapping("/forgetPassword/{email}")
+    public ResponseEntity<ResponseStructure<Boolean>> forgetPassword(@PathVariable String email,@RequestParam String newPassword)
+    {
+        return userService.forgetPassword(email,newPassword);
     }
 }

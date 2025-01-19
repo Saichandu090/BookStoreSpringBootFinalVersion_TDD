@@ -74,4 +74,13 @@ public class GlobalExceptionHandler
                 .setData(null)
                 .setStatus(HttpStatus.NOT_FOUND.value()));
     }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ResponseStructure<String>> badCredentials(BadCredentialsException exception)
+    {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<String>()
+                .setMessage(exception.getMessage())
+                .setData(null)
+                .setStatus(HttpStatus.UNAUTHORIZED.value()));
+    }
 }

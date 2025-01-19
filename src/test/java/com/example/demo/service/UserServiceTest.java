@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.User;
+import com.example.demo.exception.BadCredentialsException;
+import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.requestdto.UserLoginDTO;
@@ -31,11 +33,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest
@@ -165,11 +167,9 @@ class UserServiceTest
     {
         when(userRepository.existsByEmail(userLoginDTO.getEmail())).thenReturn(false);
 
-        ResponseEntity<ResponseStructure<LoginResponseDto>> response=userService.login(userLoginDTO);
+        assertThrows(UserNotFoundException.class,()->userService.login(userLoginDTO));
 
-        assertEquals(HttpStatus.NOT_FOUND,response.getStatusCode());
-        assertEquals(HttpStatus.NOT_FOUND.value(),response.getBody().getStatus());
-        assertEquals("User not found",response.getBody().getMessage());
+        verify(userRepository,times(1)).existsByEmail(anyString());
     }
 
     @Test
@@ -183,10 +183,52 @@ class UserServiceTest
         when(authenticationResult.isAuthenticated()).thenReturn(false);
         when(authenticationManager.authenticate(authenticationToken)).thenReturn(authenticationResult);
 
-        ResponseEntity<ResponseStructure<LoginResponseDto>> response=userService.login(userLoginDTO);
+        assertThrows(BadCredentialsException.class,()->userService.login(userLoginDTO));
+    }
 
-        assertEquals(HttpStatus.UNAUTHORIZED,response.getStatusCode());
-        assertEquals(HttpStatus.UNAUTHORIZED.value(),response.getBody().getStatus());
-        assertEquals("Bad Credentials",response.getBody().getMessage());
+
+    @Test
+    public void userService_IsUserExists_IfUserExist()
+    {
+        when(userRepository.existsByEmail(anyString())).thenReturn(true);
+
+        ResponseEntity<ResponseStructure<Boolean>> response=userService.isUserExists("marrisaichandu143@gmail.com");
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals("User exists",response.getBody().getMessage());
+        assertTrue(response.getBody().getData());
+    }
+
+
+    @Test
+    public void userService_IsUserExists_IfUserNotExist()
+    {
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
+
+        ResponseEntity<ResponseStructure<Boolean>> response=userService.isUserExists("marrisaichandu143@gmail.com");
+        assertEquals(HttpStatus.NOT_FOUND,response.getStatusCode());
+        assertEquals("User not exists",response.getBody().getMessage());
+        assertFalse(response.getBody().getData());
+    }
+
+    @Test
+    public void userService_ForgetPassword_IfUserExist()
+    {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        ResponseEntity<ResponseStructure<Boolean>> response=userService.forgetPassword(user.getEmail(),"chandu@090");
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(user.getEmail()+" password updated successfully",response.getBody().getMessage());
+        assertTrue(response.getBody().getData());
+    }
+
+    @Test
+    public void userService_ForgetPassword_IfUserNotExists()
+    {
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class,()->userService.forgetPassword(user.getEmail(),"chandu@090"));
+
+        verify(userRepository,times(1)).findByEmail(anyString());
     }
 }
