@@ -84,7 +84,7 @@ class AddressServiceTest
 
 
     @Test
-    public void addressServiceAddAddressMustReturnOKStatus()
+    public void addAddressMustReturnOKStatus()
     {
         when(userRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(user));
         when(addressRepository.save(Mockito.any(Address.class))).thenReturn(address);
@@ -104,7 +104,7 @@ class AddressServiceTest
 
 
     @Test
-    public void addressServiceAddAddressMustReturnNotFoundStatus()
+    public void addAddressMustReturnNotFoundStatus()
     {
         when(userRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.empty());
 
@@ -117,7 +117,7 @@ class AddressServiceTest
 
 
     @Test
-    public void addressServiceUpdateAddressMustReturnOKStatusCode()
+    public void updateAddressMustReturnOKStatusCode()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findByAddressIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.of(address));
@@ -137,7 +137,7 @@ class AddressServiceTest
 
 
     @Test
-    public void addressServiceUpdateAddressMustReturnNotFoundStatusCodeIfUserNotFound()
+    public void updateAddressMustReturnNotFoundStatusCodeIfUserNotFound()
     {
         when(userRepository.findByEmail("chandu@gmail.com")).thenReturn(Optional.empty());
 
@@ -146,7 +146,7 @@ class AddressServiceTest
     }
 
     @Test
-    public void addressServiceUpdateAddressMustReturnNotFoundStatusCodeIfAddressNotFound()
+    public void updateAddressMustReturnNotFoundStatusCodeIfAddressNotFound()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findByAddressIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.empty());
@@ -159,7 +159,7 @@ class AddressServiceTest
 
 
     @Test
-    public void addressServiceGetAddressByIdMustReturnOkStatusCode()
+    public void getAddressByIdMustReturnOkStatusCode()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findByAddressIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.of(address));
@@ -174,7 +174,7 @@ class AddressServiceTest
 
 
     @Test
-    public void addressServiceGetAddressByIdMustThrowException()
+    public void getAddressByIdMustThrowException()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findByAddressIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.empty());
@@ -187,7 +187,7 @@ class AddressServiceTest
 
 
     @Test
-    public void addressServiceGetAllAddressMustReturnOkStatusCode()
+    public void getAllAddressMustReturnOkStatusCode()
     {
         when(addressRepository.findByUserId(anyLong())).thenReturn(List.of(address));
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
@@ -202,7 +202,7 @@ class AddressServiceTest
     }
 
     @Test
-    public void addressServiceGetAllAddressMustThrowException()
+    public void getAllAddressMustThrowException()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findByUserId(anyLong())).thenReturn(List.of());
@@ -215,7 +215,7 @@ class AddressServiceTest
 
 
     @Test
-    public void addressServiceDeleteAddressByIdMustReturnOkStatusCode()
+    public void deleteAddressByIdMustReturnOkStatusCode()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findByAddressIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.of(address));
@@ -232,7 +232,7 @@ class AddressServiceTest
 
 
     @Test
-    public void addressServiceDeleteAddressByIdMustThrowUserNotFoundException()
+    public void deleteAddressByIdMustThrowUserNotFoundException()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
@@ -243,7 +243,7 @@ class AddressServiceTest
 
 
     @Test
-    public void addressServiceDeleteAddressByIdMustThrowAddressNotFoundException()
+    public void deleteAddressByIdMustThrowAddressNotFoundException()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findByAddressIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.empty());

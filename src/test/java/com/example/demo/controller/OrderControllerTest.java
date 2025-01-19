@@ -145,7 +145,7 @@ class OrderControllerTest
 
 
     @Test
-    void orderControllerPlaceOrderValidTest() throws Exception
+    void placeOrderValidTest() throws Exception
     {
         ResponseEntity<ResponseStructure<OrderResponse>> response=ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<OrderResponse>()
                 .setData(orderResponse)
@@ -167,7 +167,7 @@ class OrderControllerTest
     }
 
     @Test
-    void orderControllerPlaceOrderIfBodyIsInvalid() throws Exception
+    void placeOrderIfBodyIsInvalid() throws Exception
     {
         orderRequest = OrderRequest.builder().build();
         mockMvc.perform(post("/order/placeOrder")
@@ -181,7 +181,7 @@ class OrderControllerTest
     }
 
     @Test
-    void orderControllerPlaceOrderIfHeaderIsMissing() throws Exception
+    void placeOrderIfHeaderIsMissing() throws Exception
     {
         mockMvc.perform(post("/order/placeOrder")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -194,7 +194,7 @@ class OrderControllerTest
 
 
     @Test
-    void orderControllerCancelOrderValidTest() throws Exception
+    void cancelOrderValidTest() throws Exception
     {
         ResponseEntity<ResponseStructure<String>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<String>()
                 .setData(null)
@@ -216,7 +216,7 @@ class OrderControllerTest
 
 
     @Test
-    void orderControllerCancelOrderIfPathVariableIsMissing() throws Exception
+    void cancelOrderIfPathVariableIsMissing() throws Exception
     {
         mockMvc.perform(delete("/order/cancelOrder")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -230,7 +230,7 @@ class OrderControllerTest
 
 
     @Test
-    void orderControllerCancelOrderIfHeaderIsMissing() throws Exception
+    void cancelOrderIfHeaderIsMissing() throws Exception
     {
         mockMvc.perform(delete("/order/cancelOrder/{orderId}",1)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -243,7 +243,7 @@ class OrderControllerTest
 
 
     @Test
-    void orderControllerGetOrderValidTest() throws Exception
+    void getOrderValidTest() throws Exception
     {
         ResponseEntity<ResponseStructure<OrderResponse>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<OrderResponse>()
                 .setData(orderResponse)
@@ -266,7 +266,7 @@ class OrderControllerTest
 
 
     @Test
-    void orderControllerGetOrderIfRequestParamIsAbsent() throws Exception
+    void getOrderIfRequestParamIsAbsent() throws Exception
     {
         mockMvc.perform(get("/order/getOrder")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -278,7 +278,7 @@ class OrderControllerTest
     }
 
     @Test
-    void orderControllerGetOrderIfHeaderIsMissing() throws Exception
+    void getOrderIfHeaderIsMissing() throws Exception
     {
         mockMvc.perform(get("/order/getOrder?orderId={orderId}",1)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -290,7 +290,7 @@ class OrderControllerTest
 
 
     @Test
-    void orderControllerGetAllOrdersValidTest() throws Exception
+    void getAllOrdersValidTest() throws Exception
     {
         ResponseEntity<ResponseStructure<List<OrderResponse>>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<OrderResponse>>()
                 .setData(List.of(orderResponse))
@@ -313,7 +313,7 @@ class OrderControllerTest
 
 
     @Test
-    void orderControllerGetAllOrdersIfHeaderIsMissing() throws Exception
+    void getAllOrdersIfHeaderIsMissing() throws Exception
     {
         mockMvc.perform(get("/order/getAllOrders")
                         .characterEncoding(StandardCharsets.UTF_8)

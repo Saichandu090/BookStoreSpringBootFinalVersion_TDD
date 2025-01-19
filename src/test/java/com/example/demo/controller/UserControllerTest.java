@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.requestdto.UserRegister;
+import com.example.demo.requestdto.UserRegisterEntity;
 import com.example.demo.responsedto.RegisterResponse;
 import com.example.demo.service.UserService;
 import com.example.demo.util.ResponseStructure;
@@ -47,9 +47,9 @@ class UserControllerTest
     private UserService userService;
 
     @Test
-    public void userControllerRegisterUserMustReturnCreatedStatusCode() throws Exception
+    public void registerUserMustReturnCreatedStatusCode() throws Exception
     {
-        UserRegister registerDTO= UserRegister.builder()
+        UserRegisterEntity registerDTO= UserRegisterEntity.builder()
                 .email("test@gmail.com")
                 .password("saichandu@090")
                 .dob(LocalDate.of(2002,8,24))
@@ -63,7 +63,7 @@ class UserControllerTest
                 .email(registerDTO.getEmail()).build();
 
         ResponseEntity<ResponseStructure<RegisterResponse>> response=ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<RegisterResponse>().setStatus(HttpStatus.CREATED.value()).setMessage("User registered successfully").setData(registerResponse));
-        given(userService.registerUser(any(UserRegister.class))).willReturn(response);
+        given(userService.registerUser(any(UserRegisterEntity.class))).willReturn(response);
 
         mockMvc.perform(post("/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -77,9 +77,9 @@ class UserControllerTest
 
 
     @Test
-    public void userControllerRegisterUserMustReturnBadRequestStatusCodeForInvalidBody() throws Exception
+    public void registerUserMustReturnBadRequestStatusCodeForInvalidBody() throws Exception
     {
-        UserRegister registerDTO= UserRegister.builder()
+        UserRegisterEntity registerDTO= UserRegisterEntity.builder()
                 .email("test@gmail.com")
                 .password("saichandu@090")
                 .dob(LocalDate.of(2032,8,24))
@@ -98,7 +98,7 @@ class UserControllerTest
 
 
     @Test
-    public void userControllerIsUserExistsIfExists() throws Exception
+    public void isUserExistsIfExists() throws Exception
     {
         ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.OK.value()).setMessage("User exists").setData(true));
         when(userService.isUserExists(anyString())).thenReturn(response);
@@ -114,7 +114,7 @@ class UserControllerTest
 
 
     @Test
-    public void userControllerIsUserExistsIfNotExists() throws Exception
+    public void isUserExistsIfNotExists() throws Exception
     {
         ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.NOT_FOUND.value()).setMessage("User not exists").setData(false));
         when(userService.isUserExists(anyString())).thenReturn(response);
@@ -130,7 +130,7 @@ class UserControllerTest
 
 
     @Test
-    public void userControllerForgetPasswordIfUserExists() throws Exception
+    public void forgetPasswordIfUserExists() throws Exception
     {
         ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.OK.value()).setMessage("User password updated successfully").setData(true));
         when(userService.forgetPassword(anyString(),anyString())).thenReturn(response);
@@ -147,7 +147,7 @@ class UserControllerTest
 
 
     @Test
-    public void userControllerForgetPasswordIfUserNotExists() throws Exception
+    public void forgetPasswordIfUserNotExists() throws Exception
     {
         ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.NOT_FOUND.value()).setMessage("User not found with email").setData(false));
         when(userService.forgetPassword(anyString(),anyString())).thenReturn(response);
@@ -161,7 +161,7 @@ class UserControllerTest
     }
 
     @Test
-    public void userControllerForgetPasswordIfParamIsMissing() throws Exception
+    public void forgetPasswordIfParamIsMissing() throws Exception
     {
         mockMvc.perform(put("/forgetPassword/{email}","sai@gmail.com")
                         .contentType(MediaType.APPLICATION_JSON)

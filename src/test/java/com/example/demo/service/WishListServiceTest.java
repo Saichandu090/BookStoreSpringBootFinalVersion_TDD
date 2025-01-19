@@ -79,7 +79,7 @@ class WishListServiceTest
     }
 
     @Test
-    public void wishListServiceAddToWishListMustReturnCreatedStatusCode()
+    public void addToWishListMustReturnCreatedStatusCode()
     {
         when(wishListRepository.save(any(WishList.class))).thenReturn(wishList);
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
@@ -97,7 +97,7 @@ class WishListServiceTest
     }
 
     @Test
-    public void wishListServiceAddToWishListTestWhenBookIdIsWrong()
+    public void addToWishListTestWhenBookIdIsWrong()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(bookRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -109,7 +109,7 @@ class WishListServiceTest
     }
 
     @Test
-    public void wishListServiceAddToWishListTestWhenUserEmailIsWrong()
+    public void addToWishListTestWhenUserEmailIsWrong()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class,()->wishListService.addToWishList(user.getEmail(), wishListRequest));
@@ -117,7 +117,7 @@ class WishListServiceTest
     }
 
     @Test
-    public void wishListServiceAddToWishListIfBookIsAlreadyPresent()
+    public void addToWishListIfBookIsAlreadyPresent()
     {
         WishList dummy=WishList.builder().userId(12L).bookId(book.getBookId()).wishListId(1L).build();
         List<WishList> wishLists=new ArrayList<>();
@@ -147,7 +147,7 @@ class WishListServiceTest
 
 
     @Test
-    public void wishListServiceGetWishListValidTest()
+    public void getWishListValidTest()
     {
         WishList dummy=WishList.builder().userId(12L).bookId(book.getBookId()).wishListId(1L).build();
         List<WishList> wishLists=new ArrayList<>();
@@ -172,7 +172,7 @@ class WishListServiceTest
 
 
     @Test
-    public void wishListServiceGetWishListIfWishListIsEmpty()
+    public void getWishListIfWishListIsEmpty()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 

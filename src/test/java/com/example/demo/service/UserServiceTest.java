@@ -5,8 +5,8 @@ import com.example.demo.exception.BadCredentialsException;
 import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.requestdto.UserLogin;
-import com.example.demo.requestdto.UserRegister;
+import com.example.demo.requestdto.UserLoginEntity;
+import com.example.demo.requestdto.UserRegisterEntity;
 import com.example.demo.responsedto.LoginResponse;
 import com.example.demo.responsedto.RegisterResponse;
 import com.example.demo.serviceimpl.JWTService;
@@ -64,14 +64,14 @@ class UserServiceTest
     private UserMapper userMapper;
 
     private User user;
-    private UserRegister registerDTO;
-    private UserLogin userLogin;
+    private UserRegisterEntity registerDTO;
+    private UserLoginEntity userLoginEntity;
     private UserDetails userDetails;
 
     @BeforeEach
     public void init()
     {
-        registerDTO= UserRegister.builder()
+        registerDTO= UserRegisterEntity.builder()
                 .firstName("Sai")
                 .lastName("Chandu")
                 .dob(LocalDate.of(2002,8,24))
@@ -88,7 +88,7 @@ class UserServiceTest
                 .password(registerDTO.getPassword())
                 .role(registerDTO.getRole()).build();
 
-        userLogin = UserLogin.builder()
+        userLoginEntity = UserLoginEntity.builder()
                 .email("test@gmail.com")
                 .password("testing").build();
 
@@ -112,7 +112,7 @@ class UserServiceTest
 
 
     @Test
-    public void userServiceRegisterUserTestMustPassWithValidBody()
+    public void registerUserTestMustPassWithValidBody()
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(user);
@@ -126,7 +126,7 @@ class UserServiceTest
     }
 
     @Test
-    public void userServiceRegisterUserTestIfUserAlreadyExists()
+    public void registerUserTestIfUserAlreadyExists()
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
@@ -138,57 +138,57 @@ class UserServiceTest
 
 
     @Test
-    public void userServiceLoginUserValidScene()
+    public void loginUserValidScene()
     {
-        when(userRepository.existsByEmail(userLogin.getEmail())).thenReturn(true);
+        when(userRepository.existsByEmail(userLoginEntity.getEmail())).thenReturn(true);
 
-        UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userLogin.getEmail(), userLogin.getPassword());
+        UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userLoginEntity.getEmail(), userLoginEntity.getPassword());
         Authentication authenticationResult= Mockito.mock(Authentication.class);
 
         when(authenticationResult.isAuthenticated()).thenReturn(true);
         when(authenticationManager.authenticate(authenticationToken)).thenReturn(authenticationResult);
 
-        when(jwtService.generateToken(userLogin.getEmail())).thenReturn("jwt-token");
+        when(jwtService.generateToken(userLoginEntity.getEmail())).thenReturn("jwt-token");
 
         when(context.getBean(MyUserDetailsService.class)).thenReturn(myUserDetailsService);
-        when(myUserDetailsService.loadUserByUsername(userLogin.getEmail())).thenReturn(userDetails);
+        when(myUserDetailsService.loadUserByUsername(userLoginEntity.getEmail())).thenReturn(userDetails);
 
-        ResponseEntity<ResponseStructure<LoginResponse>> response=userService.login(userLogin);
+        ResponseEntity<ResponseStructure<LoginResponse>> response=userService.login(userLoginEntity);
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
         assertEquals("jwt-token",response.getBody().getMessage());
-        assertEquals(userLogin.getEmail(),response.getBody().getData().getEmail());
+        assertEquals(userLoginEntity.getEmail(),response.getBody().getData().getEmail());
     }
 
 
     @Test
-    public void userServiceLoginUserIfUserNotRegistered()
+    public void loginUserIfUserNotRegistered()
     {
-        when(userRepository.existsByEmail(userLogin.getEmail())).thenReturn(false);
+        when(userRepository.existsByEmail(userLoginEntity.getEmail())).thenReturn(false);
 
-        assertThrows(UserNotFoundException.class,()->userService.login(userLogin));
+        assertThrows(UserNotFoundException.class,()->userService.login(userLoginEntity));
 
         verify(userRepository,times(1)).existsByEmail(anyString());
     }
 
     @Test
-    public void userServiceLoginUserIfAuthenticationFails()
+    public void loginUserIfAuthenticationFails()
     {
-        when(userRepository.existsByEmail(userLogin.getEmail())).thenReturn(true);
+        when(userRepository.existsByEmail(userLoginEntity.getEmail())).thenReturn(true);
 
-        UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userLogin.getEmail(), userLogin.getPassword());
+        UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userLoginEntity.getEmail(), userLoginEntity.getPassword());
         Authentication authenticationResult= Mockito.mock(Authentication.class);
 
         when(authenticationResult.isAuthenticated()).thenReturn(false);
         when(authenticationManager.authenticate(authenticationToken)).thenReturn(authenticationResult);
 
-        assertThrows(BadCredentialsException.class,()->userService.login(userLogin));
+        assertThrows(BadCredentialsException.class,()->userService.login(userLoginEntity));
     }
 
 
     @Test
-    public void userServiceIsUserExistsIfUserExist()
+    public void isUserExistsIfUserExist()
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
@@ -200,7 +200,7 @@ class UserServiceTest
 
 
     @Test
-    public void userServiceIsUserExistsIfUserNotExist()
+    public void isUserExistsIfUserNotExist()
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
 
@@ -211,7 +211,7 @@ class UserServiceTest
     }
 
     @Test
-    public void userServiceForgetPasswordIfUserExist()
+    public void forgetPasswordIfUserExist()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
@@ -223,7 +223,7 @@ class UserServiceTest
     }
 
     @Test
-    public void userServiceForgetPasswordIfUserNotExists()
+    public void forgetPasswordIfUserNotExists()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 

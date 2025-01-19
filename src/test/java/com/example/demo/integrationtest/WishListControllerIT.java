@@ -3,11 +3,11 @@ package com.example.demo.integrationtest;
 import com.example.demo.entity.Book;
 import com.example.demo.entity.User;
 import com.example.demo.entity.WishList;
-import com.example.demo.integrationtest.repo.BookH2Repository;
-import com.example.demo.integrationtest.repo.UserH2Repository;
-import com.example.demo.integrationtest.repo.WishListH2Repository;
-import com.example.demo.requestdto.UserLogin;
-import com.example.demo.requestdto.UserRegister;
+import com.example.demo.integrationtest.h2repo.BookH2Repository;
+import com.example.demo.integrationtest.h2repo.UserH2Repository;
+import com.example.demo.integrationtest.h2repo.WishListH2Repository;
+import com.example.demo.requestdto.UserLoginEntity;
+import com.example.demo.requestdto.UserRegisterEntity;
 import com.example.demo.requestdto.WishListRequest;
 import com.example.demo.responsedto.LoginResponse;
 import com.example.demo.responsedto.RegisterResponse;
@@ -89,7 +89,7 @@ public class WishListControllerIT
     {
         if (userAuthToken == null)
         {
-            UserRegister userRegister = UserRegister.builder()
+            UserRegisterEntity userRegisterEntity = UserRegisterEntity.builder()
                     .firstName("Ganesh")
                     .lastName("Chatterge")
                     .dob(LocalDate.of(1995,8,24))
@@ -97,16 +97,16 @@ public class WishListControllerIT
                     .role("USER")
                     .password("ganesh@090").build();
 
-            ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegister), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
+            ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
             assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
             assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
 
-            UserLogin userLogin = UserLogin.builder()
+            UserLoginEntity userLoginEntity = UserLoginEntity.builder()
                     .email("ganesh@gmail.com")
                     .password("ganesh@090").build();
 
-            ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLogin), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
+            ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
             assertEquals(HttpStatus.OK,loginResponse.getStatusCode());
             assertEquals(HttpStatus.OK.value(),loginResponse.getBody().getStatus());

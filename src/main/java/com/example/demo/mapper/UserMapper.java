@@ -1,7 +1,7 @@
 package com.example.demo.mapper;
 
 import com.example.demo.entity.User;
-import com.example.demo.requestdto.UserRegister;
+import com.example.demo.requestdto.UserRegisterEntity;
 import com.example.demo.responsedto.LoginResponse;
 import com.example.demo.responsedto.RegisterResponse;
 import com.example.demo.serviceimpl.JWTService;
@@ -52,7 +52,7 @@ public class UserMapper
                 .setData(null));
     }
 
-    public User convertFromRegisterDTO(UserRegister registerDTO)
+    public User convertFromRegisterDTO(UserRegisterEntity registerDTO)
     {
         return User.builder()
                 .email(registerDTO.getEmail())

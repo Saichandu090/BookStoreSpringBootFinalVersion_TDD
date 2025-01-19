@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.requestdto.UserLogin;
-import com.example.demo.requestdto.UserRegister;
+import com.example.demo.requestdto.UserLoginEntity;
+import com.example.demo.requestdto.UserRegisterEntity;
 import com.example.demo.responsedto.LoginResponse;
 import com.example.demo.responsedto.RegisterResponse;
 import com.example.demo.service.UserService;
@@ -19,13 +19,13 @@ public class UserController
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<ResponseStructure<RegisterResponse>> registerUser(@Valid @RequestBody UserRegister registerDTO)
+    public ResponseEntity<ResponseStructure<RegisterResponse>> registerUser(@Valid @RequestBody UserRegisterEntity registerDTO)
     {
         return userService.registerUser(registerDTO);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseStructure<LoginResponse>> login(@Valid @RequestBody UserLogin loginDTO)
+    public ResponseEntity<ResponseStructure<LoginResponse>> login(@Valid @RequestBody UserLoginEntity loginDTO)
     {
         return userService.login(loginDTO);
     }

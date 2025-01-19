@@ -1,9 +1,9 @@
 package com.example.demo.integrationtest;
 
 import com.example.demo.entity.User;
-import com.example.demo.integrationtest.repo.UserH2Repository;
-import com.example.demo.requestdto.UserLogin;
-import com.example.demo.requestdto.UserRegister;
+import com.example.demo.integrationtest.h2repo.UserH2Repository;
+import com.example.demo.requestdto.UserLoginEntity;
+import com.example.demo.requestdto.UserRegisterEntity;
 import com.example.demo.responsedto.LoginResponse;
 import com.example.demo.responsedto.RegisterResponse;
 import com.example.demo.util.ResponseStructure;
@@ -50,7 +50,7 @@ public class UserControllerIT
     @Test
     void registerUserTest()
     {
-        UserRegister userRegister = UserRegister.builder()
+        UserRegisterEntity userRegisterEntity = UserRegisterEntity.builder()
                 .firstName("Test")
                 .lastName("Chandu")
                 .dob(LocalDate.of(2002,8,24))
@@ -58,10 +58,10 @@ public class UserControllerIT
                 .role("ADMIN")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegister), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
-        assertEquals(userRegister.getEmail(),registerResponse.getBody().getData().getEmail());
-        assertEquals(userRegister.getRole(),registerResponse.getBody().getData().getRole());
+        assertEquals(userRegisterEntity.getEmail(),registerResponse.getBody().getData().getEmail());
+        assertEquals(userRegisterEntity.getRole(),registerResponse.getBody().getData().getRole());
         assertEquals(1, userH2Repository.findAll().size());
     }
 
@@ -69,7 +69,7 @@ public class UserControllerIT
     @Test
     public void registerUserTestWithInvalidBody()
     {
-        UserRegister requestDTO = new UserRegister();
+        UserRegisterEntity requestDTO = new UserRegisterEntity();
         requestDTO.setLastName("Chandu");
         requestDTO.setDob(LocalDate.of(2012, 8, 24));
         requestDTO.setPassword("saichandu@090");
@@ -88,7 +88,7 @@ public class UserControllerIT
     public void loginTestValidTest()
     {
         //Register test
-        UserRegister userRegister = UserRegister.builder()
+        UserRegisterEntity userRegisterEntity = UserRegisterEntity.builder()
                 .firstName("Test")
                 .lastName("Chandu")
                 .dob(LocalDate.of(2002,8,24))
@@ -96,21 +96,21 @@ public class UserControllerIT
                 .role("ADMIN")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegister), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
         assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
-        assertEquals(userRegister.getEmail(),registerResponse.getBody().getData().getEmail());
-        assertEquals(userRegister.getRole(),registerResponse.getBody().getData().getRole());
+        assertEquals(userRegisterEntity.getEmail(),registerResponse.getBody().getData().getEmail());
+        assertEquals(userRegisterEntity.getRole(),registerResponse.getBody().getData().getRole());
         assertEquals(1, userH2Repository.findAll().size());
 
 
         //Login test
-        UserLogin userLogin = UserLogin.builder()
+        UserLoginEntity userLoginEntity = UserLoginEntity.builder()
                 .email("test@gmail.com")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLogin), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
+        ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
         assertEquals(HttpStatus.OK,loginResponse.getStatusCode());
         assertEquals(HttpStatus.OK.value(),loginResponse.getBody().getStatus());
@@ -119,10 +119,10 @@ public class UserControllerIT
     }
 
     @Test
-    public void loginTestWithInvalidUserEmail()
+    void loginTestWithInvalidUserEmail()
     {
         //Register test
-        UserRegister userRegister = UserRegister.builder()
+        UserRegisterEntity userRegisterEntity = UserRegisterEntity.builder()
                 .firstName("Test")
                 .lastName("Chandu")
                 .dob(LocalDate.of(2002,8,24))
@@ -130,31 +130,31 @@ public class UserControllerIT
                 .role("ADMIN")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegister), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
         assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
-        assertEquals(userRegister.getEmail(),registerResponse.getBody().getData().getEmail());
-        assertEquals(userRegister.getRole(),registerResponse.getBody().getData().getRole());
+        assertEquals(userRegisterEntity.getEmail(),registerResponse.getBody().getData().getEmail());
+        assertEquals(userRegisterEntity.getRole(),registerResponse.getBody().getData().getRole());
         assertEquals(1, userH2Repository.findAll().size());
 
 
         //Login test
-        UserLogin userLogin = UserLogin.builder()
+        UserLoginEntity userLoginEntity = UserLoginEntity.builder()
                 .email("tes@gmail.com")
                 .password("saichandu@090").build();
 
-        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()-> restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLogin), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>() {
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()-> restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>() {
         }));
         assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
     }
 
 
     @Test
-    public void loginTestWithInvalidUserPassword()
+    void loginTestWithInvalidUserPassword()
     {
         //Register test
-        UserRegister userRegister = UserRegister.builder()
+        UserRegisterEntity userRegisterEntity = UserRegisterEntity.builder()
                 .firstName("Test")
                 .lastName("Chandu")
                 .dob(LocalDate.of(2002,8,24))
@@ -162,28 +162,28 @@ public class UserControllerIT
                 .role("ADMIN")
                 .password("saichandu@090").build();
 
-        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegister), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
         assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
-        assertEquals(userRegister.getEmail(),registerResponse.getBody().getData().getEmail());
-        assertEquals(userRegister.getRole(),registerResponse.getBody().getData().getRole());
+        assertEquals(userRegisterEntity.getEmail(),registerResponse.getBody().getData().getEmail());
+        assertEquals(userRegisterEntity.getRole(),registerResponse.getBody().getData().getRole());
         assertEquals(1, userH2Repository.findAll().size());
 
 
         //Login test
-        UserLogin userLogin = UserLogin.builder()
+        UserLoginEntity userLoginEntity = UserLoginEntity.builder()
                 .email("test@gmail.com")
                 .password("sai@090").build();
 
-        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLogin), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>() {
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>() {
         }));
         assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
     }
 
 
     @Test
-    public void isUserExistsValidTestIfUserExists()
+    void isUserExistsValidTestIfUserExists()
     {
         User user= User.builder()
                 .email("chandu@gmail.com").build();
@@ -200,7 +200,7 @@ public class UserControllerIT
     }
 
     @Test
-    public void isUserExistsIfUserNotExists()
+    void isUserExistsIfUserNotExists()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
@@ -211,7 +211,7 @@ public class UserControllerIT
 
 
     @Test
-    public void forgetPasswordValidTestIfUserExists()
+    void forgetPasswordValidTestIfUserExists()
     {
         loginTestValidTest();
         HttpHeaders httpHeaders=new HttpHeaders();
@@ -228,7 +228,7 @@ public class UserControllerIT
 
 
         //Trying to login with old password
-        UserLogin fail= UserLogin.builder()
+        UserLoginEntity fail= UserLoginEntity.builder()
                 .email("test@gmail.com")
                 .password("saichandu@090").build();
 
@@ -238,11 +238,11 @@ public class UserControllerIT
 
 
         //Trying to login after changing the password with updated password
-        UserLogin userLogin = UserLogin.builder()
+        UserLoginEntity userLoginEntity = UserLoginEntity.builder()
                 .email("test@gmail.com")
                 .password("testing@090").build();
 
-        ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLogin), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
+        ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
         assertEquals(HttpStatus.OK,loginResponse.getStatusCode(),"login should succeed as user have provided the updated password");
         assertEquals(HttpStatus.OK.value(),loginResponse.getBody().getStatus());
@@ -252,7 +252,7 @@ public class UserControllerIT
 
 
     @Test
-    public void forgetPasswordIfUserNotExists()
+    void forgetPasswordIfUserNotExists()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);

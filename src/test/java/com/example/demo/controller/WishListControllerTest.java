@@ -105,7 +105,7 @@ class WishListControllerTest
 
 
     @Test
-    public void wishListControllerAddToWishListMustReturnCreatedStatusCode() throws Exception
+    public void addToWishListMustReturnCreatedStatusCode() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<WishListResponse> responseStructure=new ResponseStructure<>(HttpStatus.CREATED.value(),"Book added to wishlist successfully", wishListResponse);
@@ -125,7 +125,7 @@ class WishListControllerTest
     }
 
     @Test
-    public void wishListControllerAddToWishListTestForMissingHeader() throws Exception
+    public void addToWishListTestForMissingHeader() throws Exception
     {
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
@@ -139,7 +139,7 @@ class WishListControllerTest
     }
 
     @Test
-    public void wishListControllerAddToWishListTestForInvalidBody() throws Exception
+    public void addToWishListTestForInvalidBody() throws Exception
     {
         WishListRequest wishListRequest1 = WishListRequest.builder().build();
         String token="Bearer-token";
@@ -156,7 +156,7 @@ class WishListControllerTest
     }
 
     @Test
-    public void wishListControllerAddToWishListIfBookAlreadyPresent() throws Exception
+    public void addToWishListIfBookAlreadyPresent() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<WishListResponse> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book removed from wishlist successfully",null);
@@ -176,7 +176,7 @@ class WishListControllerTest
 
 
     @Test
-    public void wishListControllerGetWishListValidTest() throws Exception
+    public void getWishListValidTest() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<List<WishListResponse>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"User wishlist fetched successfully",List.of(wishListResponse));
@@ -195,7 +195,7 @@ class WishListControllerTest
 
 
     @Test
-    public void wishListControllerGetWishListIfTokenIsInvalidOrMissing() throws Exception
+    public void getWishListIfTokenIsInvalidOrMissing() throws Exception
     {
         mockMvc.perform(get("/wishlist/getWishList")
                         .characterEncoding(StandardCharsets.UTF_8))

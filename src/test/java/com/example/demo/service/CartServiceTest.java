@@ -77,7 +77,7 @@ class CartServiceTest
 
 
     @Test
-    void cartServiceAddToCartValidTest()
+    void addToCartValidTest()
     {
         when(bookRepository.findByIdForUpdate(anyLong())).thenReturn(Optional.of(book));
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
@@ -93,7 +93,7 @@ class CartServiceTest
 
 
     @Test
-    void cartServiceAddToCartIfBookIsOutOfStock()
+    void addToCartIfBookIsOutOfStock()
     {
         book=Book.builder().bookId(1L).bookName("Atom").bookQuantity(0).build();
         when(bookRepository.findByIdForUpdate(anyLong())).thenReturn(Optional.of(book));
@@ -107,7 +107,7 @@ class CartServiceTest
     }
 
     @Test
-    void cartServiceAddToCartIfBookNotFound()
+    void addToCartIfBookNotFound()
     {
         when(bookRepository.findByIdForUpdate(anyLong())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
@@ -119,7 +119,7 @@ class CartServiceTest
 
 
     @Test
-    void cartServiceRemoveFromCartValidTest()
+    void removeFromCartValidTest()
     {
         when(cartRepository.findByCartIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.of(cart));
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
@@ -137,7 +137,7 @@ class CartServiceTest
 
 
     @Test
-    void cartServiceRemoveFromCartIfCartIdNotFound()
+    void removeFromCartIfCartIdNotFound()
     {
         when(cartRepository.findByCartIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
@@ -149,7 +149,7 @@ class CartServiceTest
 
 
     @Test
-    void cartServiceGetCartValidTest()
+    void getCartValidTest()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
@@ -164,7 +164,7 @@ class CartServiceTest
     }
 
     @Test
-    void cartServiceGetCartIfCartIsEmpty()
+    void getCartIfCartIsEmpty()
     {
         User user1=User.builder().email("test@gmail.com").carts(new ArrayList<>()).build();
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));
@@ -177,7 +177,7 @@ class CartServiceTest
 
 
     @Test
-    void cartServiceClearCartValidTest()
+    void clearCartValidTest()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(bookRepository.findByIdForUpdate(anyLong())).thenReturn(Optional.of(book));
@@ -191,7 +191,7 @@ class CartServiceTest
     }
 
     @Test
-    void cartServiceClearCartIfCartIsEmpty()
+    void clearCartIfCartIsEmpty()
     {
         User user1=User.builder().email("test@gmail.com").carts(new ArrayList<>()).build();
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));

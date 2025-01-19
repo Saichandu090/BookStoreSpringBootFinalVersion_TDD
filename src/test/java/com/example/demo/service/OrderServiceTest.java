@@ -106,7 +106,7 @@ class OrderServiceTest
 
 
     @Test
-    public void orderServicePlaceOrderValidTest()
+    public void placeOrderValidTest()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
@@ -118,7 +118,7 @@ class OrderServiceTest
     }
 
     @Test
-    public void orderServicePlaceOrderIfAddressIdIsNotValid()
+    public void placeOrderIfAddressIdIsNotValid()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -130,7 +130,7 @@ class OrderServiceTest
 
 
     @Test
-    public void orderServiceCancelOrderValidTest()
+    public void cancelOrderValidTest()
     {
         Order cancelledOrder=Order.builder().cancelOrder(true).orderId(1L).build();
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
@@ -144,7 +144,7 @@ class OrderServiceTest
 
 
     @Test
-    public void orderServiceCancelOrderIfOrderIdNotFound()
+    public void cancelOrderIfOrderIdNotFound()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(orderRepository.findByOrderIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.empty());
@@ -156,7 +156,7 @@ class OrderServiceTest
 
 
     @Test
-    public void orderServiceGetOrderValidTest()
+    public void getOrderValidTest()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
@@ -169,7 +169,7 @@ class OrderServiceTest
     }
 
     @Test
-    public void orderServiceGetOrderIfOrderIdIsInvalid()
+    public void getOrderIfOrderIdIsInvalid()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(orderRepository.findByOrderIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.empty());
@@ -181,7 +181,7 @@ class OrderServiceTest
 
 
     @Test
-    public void orderServiceGetAllOrdersValidTest()
+    public void getAllOrdersValidTest()
     {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
@@ -197,7 +197,7 @@ class OrderServiceTest
 
 
     @Test
-    public void orderServiceGetAllOrdersIfOrdersAreEmpty()
+    public void getAllOrdersIfOrdersAreEmpty()
     {
         User user1=User.builder().userId(1L).email("something@gmail.com").orders(new ArrayList<>()).build();
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));
