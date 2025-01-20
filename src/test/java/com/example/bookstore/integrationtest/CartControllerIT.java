@@ -174,8 +174,9 @@ class CartControllerIT
         CartRequest cartRequest3 = CartRequest.builder().bookId(3L).build();
         HttpEntity<Object> httpEntity3=new HttpEntity<>(cartRequest3,httpHeaders);
 
-        ResponseEntity<ResponseStructure<CartResponse>> response3=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity3, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
-        assertEquals(HttpStatus.NO_CONTENT,response3.getStatusCode(),"user wont be able to add the book to cart if its out of quantity");
+
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity3, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {}));
+        assertEquals(HttpStatus.CONFLICT,exception.getStatusCode(),"user wont be able to add the book to cart if its out of quantity");
 
         Book book3=bookH2Repository.findById(3L).get();
         assertEquals(0,book3.getBookQuantity(),"If user cant add the book to cart ,it should be 0");
