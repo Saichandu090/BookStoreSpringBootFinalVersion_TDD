@@ -455,6 +455,11 @@ public class BookControllerIT
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
+        ResponseEntity<ResponseStructure<List<BookResponse>>> ifEmpty = restTemplate.exchange(baseUrl + "/getBooks", HttpMethod.GET, new HttpEntity<>(httpHeaders),
+                new ParameterizedTypeReference<ResponseStructure<List<BookResponse>>>() {});
+
+        assertEquals(HttpStatus.NO_CONTENT,ifEmpty.getStatusCode());
+
         addBookTestValidScene();
         addBookTestValidSceneSecondBook();
 

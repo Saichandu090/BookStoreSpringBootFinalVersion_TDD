@@ -14,6 +14,7 @@ public class BookResponse
     private Long bookId;
     private String bookName;
     private String bookAuthor;
+    private Integer bookQuantity;
     private String bookDescription;
     private Double bookPrice;
     private String bookLogo;
