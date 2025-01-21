@@ -1,5 +1,6 @@
 package com.example.bookstore.mapper;
 
+import com.example.bookstore.entity.Book;
 import com.example.bookstore.entity.WishList;
 import com.example.bookstore.responsedto.WishListResponse;
 import com.example.bookstore.util.ResponseStructure;
@@ -40,11 +41,11 @@ public class WishListMapper
                 .userId(userId).build();
     }
 
-    public ResponseEntity<ResponseStructure<WishListResponse>> mapWishListSuccessResponseCREATED(WishList saved)
+    public ResponseEntity<ResponseStructure<WishListResponse>> mapWishListSuccessResponseCREATED(WishList saved, Book book)
     {
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseStructure<WishListResponse>()
                 .setStatus(HttpStatus.CREATED.value())
-                .setMessage("Book added to wishlist successfully")
+                .setMessage("Book "+book.getBookName()+" has added to wishlist successfully")
                 .setData(mapWishListToResponse(saved)));
     }
 
@@ -70,6 +71,31 @@ public class WishListMapper
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<WishListResponse>>()
                 .setMessage("Wishlist fetched successfully")
                 .setData(wishListResponse)
+                .setStatus(HttpStatus.OK.value()));
+    }
+
+    public ResponseEntity<ResponseStructure<Boolean>> noAuthorityForUser()
+    {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<Boolean>()
+                .setStatus(HttpStatus.UNAUTHORIZED.value())
+                .setData(null)
+                .setMessage("Token Error"));
+    }
+
+
+    public ResponseEntity<ResponseStructure<Boolean>> mapToNotInWishList()
+    {
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<Boolean>()
+                .setMessage("Book is not in wishlist")
+                .setData(false)
+                .setStatus(HttpStatus.OK.value()));
+    }
+
+    public ResponseEntity<ResponseStructure<Boolean>> mapToIsInWishList()
+    {
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<Boolean>()
+                .setMessage("Book is in wishlist")
+                .setData(true)
                 .setStatus(HttpStatus.OK.value()));
     }
 }

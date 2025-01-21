@@ -264,4 +264,39 @@ public class WishListControllerIT
         assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
     }
 
+
+    @Test
+    void isInWishListTest()
+    {
+        userAuthToken=getUSERAuthToken();
+        HttpHeaders httpHeaders=new HttpHeaders();
+        httpHeaders.set("Authorization","Bearer "+userAuthToken);
+        WishListRequest requestDto= WishListRequest.builder().bookId(1233L).build();
+
+        HttpEntity<Object> httpEntity=new HttpEntity<>(requestDto,httpHeaders);
+        ResponseEntity<ResponseStructure<WishListResponse>> response=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<WishListResponse>>() {});
+        assertEquals(HttpStatus.CREATED,response.getStatusCode());
+        assertEquals(1233,response.getBody().getData().getBookId());
+        User user1=userH2Repository.findByEmail("ganesh@gmail.com").get();
+        List<WishList> wishLists1=user1.getWishList();
+        assertEquals(1,wishLists1.size());
+
+        WishListRequest requestDto2= WishListRequest.builder().bookId(1234L).build();
+
+        HttpEntity<Object> httpEntity2=new HttpEntity<>(requestDto2,httpHeaders);
+
+        ResponseEntity<ResponseStructure<WishListResponse>> response2=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<WishListResponse>>() {});
+        assertEquals(HttpStatus.CREATED,response2.getStatusCode());
+        assertEquals(1234,response2.getBody().getData().getBookId());
+        User user2=userH2Repository.findByEmail("ganesh@gmail.com").get();
+        List<WishList> wishLists2=user2.getWishList();
+        assertEquals(2,wishLists2.size());
+
+
+        //Checking the wishlist
+        HttpEntity<Object> httpEntity3=new HttpEntity<>(httpHeaders);
+        ResponseEntity<ResponseStructure<Boolean>> response3=restTemplate.exchange(baseUrl + "/isInWishList/12", HttpMethod.GET, httpEntity3, new ParameterizedTypeReference<ResponseStructure<Boolean>>() {});
+        assertEquals(HttpStatus.OK,response3.getStatusCode());
+    }
+
 }
