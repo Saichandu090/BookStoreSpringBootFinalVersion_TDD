@@ -208,8 +208,9 @@ public class OrderControllerIT
         httpHeaders.set("Authorization","Bearer "+authToken);
 
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
-        ResponseEntity<ResponseStructure<String>> response=restTemplate.exchange(baseUrl + "/cancelOrder/1", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<String>>() {});
+        ResponseEntity<ResponseStructure<OrderResponse>> response=restTemplate.exchange(baseUrl + "/cancelOrder/1", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<OrderResponse>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertTrue(response.getBody().getData().getCancelOrder());
 
         User user1=userH2Repository.findByEmail("dinesh@gmail.com").get();
         assertEquals(0,user1.getCarts().size(),"user cart should get cleared after placing an order successfully");
@@ -218,7 +219,7 @@ public class OrderControllerIT
 
 
         //Testing to cancel order which is already cancelled
-        ResponseEntity<ResponseStructure<String>> response2=restTemplate.exchange(baseUrl + "/cancelOrder/1", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<String>>() {});
+        ResponseEntity<ResponseStructure<OrderResponse>> response2=restTemplate.exchange(baseUrl + "/cancelOrder/1", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<OrderResponse>>() {});
         assertEquals(HttpStatus.NO_CONTENT,response2.getStatusCode(),"If request is successful but the order is already cancelled");
     }
 

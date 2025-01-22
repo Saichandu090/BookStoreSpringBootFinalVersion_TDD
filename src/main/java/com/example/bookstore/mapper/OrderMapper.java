@@ -17,11 +17,6 @@ public class OrderMapper
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    public ResponseEntity<ResponseStructure<String>> noAuthorityForMethod()
-    {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
     public ResponseEntity<ResponseStructure<OrderResponse>> mapToCartIsEmpty()
     {
         return ResponseEntity.noContent().build();
@@ -71,17 +66,17 @@ public class OrderMapper
 
     }
 
-    public ResponseEntity<ResponseStructure<String>> mapToSuccessCancelOrder(Order savedOrder)
+    public ResponseEntity<ResponseStructure<OrderResponse>> mapToSuccessCancelOrder(Order savedOrder,Address address, List<BookResponse> bookResponse)
     {
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<String>()
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<OrderResponse>()
                 .setMessage("Order with id "+savedOrder.getOrderId()+" cancelled successfully")
-                .setData(null)
+                .setData(mapToOrderResponse(savedOrder,address,bookResponse))
                 .setStatus(HttpStatus.OK.value()));
     }
 
-    public ResponseEntity<ResponseStructure<String>> mapToAlreadyCancelled()
+    public ResponseEntity<ResponseStructure<OrderResponse>> mapToAlreadyCancelled()
     {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<String>()
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<OrderResponse>()
                 .setStatus(HttpStatus.NO_CONTENT.value())
                 .setMessage("Order already cancelled")
                 .setData(null));

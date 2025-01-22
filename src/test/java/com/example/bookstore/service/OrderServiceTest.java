@@ -132,13 +132,13 @@ class OrderServiceTest
     @Test
     public void cancelOrderValidTest()
     {
-        Order cancelledOrder=Order.builder().cancelOrder(true).orderId(1L).build();
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
         when(orderRepository.findByOrderIdAndUserId(anyLong(),anyLong())).thenReturn(Optional.of(order));
         when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
-        when(orderRepository.save(any(Order.class))).thenReturn(cancelledOrder);
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
 
-        ResponseEntity<ResponseStructure<String>> response=orderService.cancelOrder(user.getEmail(),1L);
+        ResponseEntity<ResponseStructure<OrderResponse>> response=orderService.cancelOrder(user.getEmail(),1L);
         assertEquals(HttpStatus.OK,response.getStatusCode());
     }
 

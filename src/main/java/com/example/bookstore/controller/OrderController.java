@@ -41,7 +41,7 @@ public class OrderController
 
 
     @DeleteMapping("/cancelOrder/{orderId}")
-    public ResponseEntity<ResponseStructure<String>> cancelOrder(
+    public ResponseEntity<ResponseStructure<OrderResponse>> cancelOrder(
             @RequestHeader(value = HEADER)String authHeader,
             @PathVariable Long orderId)
     {
@@ -50,7 +50,7 @@ public class OrderController
         {
             return orderService.cancelOrder(userDetails.getUsername(),orderId);
         }
-        return orderMapper.noAuthorityForMethod();
+        return orderMapper.noAuthority();
     }
 
 
