@@ -196,7 +196,7 @@ class OrderControllerTest
     @Test
     void cancelOrderValidTest() throws Exception
     {
-        ResponseEntity<ResponseStructure<String>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<String>()
+        ResponseEntity<ResponseStructure<OrderResponse>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<OrderResponse>()
                 .setData(null)
                 .setMessage("Order cancelled successfully")
                 .setStatus(HttpStatus.OK.value()));

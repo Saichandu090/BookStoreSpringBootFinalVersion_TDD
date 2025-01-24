@@ -47,14 +47,16 @@ public class OrderServiceImpl implements OrderService
 
     @Transactional
     @Override
-    public ResponseEntity<ResponseStructure<String>> cancelOrder(String email, Long orderId)
+    public ResponseEntity<ResponseStructure<OrderResponse>> cancelOrder(String email, Long orderId)
     {
         User user=getUser(email);
         Order userOrder=getOrder(orderId,user.getUserId());
         if(Boolean.TRUE.equals(userOrder.getCancelOrder()))
             return orderMapper.mapToAlreadyCancelled();
         Order savedOrder=processCancelOrder(userOrder);
-        return orderMapper.mapToSuccessCancelOrder(savedOrder);
+        List<BookResponse> books=getBooksResponseFromOrder(savedOrder);
+        Address address=getAddress(savedOrder.getAddressId());
+        return orderMapper.mapToSuccessCancelOrder(savedOrder,address,books);
     }
 
     @Override

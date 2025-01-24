@@ -12,4 +12,6 @@ public interface WishListService
     ResponseEntity<ResponseStructure<WishListResponse>> addToWishList(String email, WishListRequest wishListRequest);
 
     ResponseEntity<ResponseStructure<List<WishListResponse>>> getWishList(String username);
+
+    ResponseEntity<ResponseStructure<Boolean>> isInWishList(String username, Long bookId);
 }

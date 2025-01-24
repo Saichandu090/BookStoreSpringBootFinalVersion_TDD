@@ -52,6 +52,18 @@ public class WishListServiceImpl implements WishListService
     }
 
 
+    @Override
+    public ResponseEntity<ResponseStructure<Boolean>> isInWishList(String username, Long bookId)
+    {
+        User user=getUser(username);
+        List<WishList> userWishList=user.getWishList();
+        Optional<WishList> wishList=userWishList.stream().filter(wishList1 -> wishList1.getBookId().equals(bookId)).findFirst();
+        if(wishList.isEmpty())
+            return wishListMapper.mapToNotInWishList();
+        return wishListMapper.mapToIsInWishList();
+    }
+
+
     //Helper Methods
     public ResponseEntity<ResponseStructure<WishListResponse>> addBookToWishList(User user, Book book)
     {
@@ -60,7 +72,7 @@ public class WishListServiceImpl implements WishListService
         WishList wishList=wishListMapper.mapToWishList(book.getBookId(), user.getUserId());
         user.getWishList().add(wishList);
         WishList saved=wishListRepository.save(wishList);
-        return wishListMapper.mapWishListSuccessResponseCREATED(saved);
+        return wishListMapper.mapWishListSuccessResponseCREATED(saved,book);
     }
 
 

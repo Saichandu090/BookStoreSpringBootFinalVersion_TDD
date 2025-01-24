@@ -50,4 +50,18 @@ public class WishListController
         }
         return wishListService.getWishList(userDetails.getUsername());
     }
+
+
+    @GetMapping("/isInWishList/{bookId}")
+    public ResponseEntity<ResponseStructure<Boolean>> inWishList(
+            @RequestHeader("Authorization")String authHeader,
+            @PathVariable Long bookId)
+    {
+        UserDetails userDetails=userMapper.validateUserToken(authHeader);
+        if(userDetails!=null && userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())))
+        {
+            return wishListService.isInWishList(userDetails.getUsername(), bookId);
+        }
+        return wishListMapper.noAuthorityForUser();
+    }
 }

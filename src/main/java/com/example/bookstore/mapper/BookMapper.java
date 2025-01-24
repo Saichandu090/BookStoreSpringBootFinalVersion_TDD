@@ -7,6 +7,7 @@ import com.example.bookstore.util.ResponseStructure;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BookMapper
@@ -54,6 +55,7 @@ public class BookMapper
         return BookResponse.builder()
                 .bookId(savedBook.getBookId())
                 .bookName(savedBook.getBookName())
+                .bookQuantity(savedBook.getBookQuantity())
                 .bookDescription(savedBook.getBookDescription())
                 .bookPrice(savedBook.getBookPrice())
                 .bookLogo(savedBook.getBookLogo())
@@ -86,8 +88,8 @@ public class BookMapper
     {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseStructure<List<BookResponse>>()
                 .setStatus(HttpStatus.NO_CONTENT.value())
-                .setMessage("Books are empty")
-                .setData(null));
+                .setMessage("No Books Available")
+                .setData(new ArrayList<>()));
     }
 
     public ResponseEntity<ResponseStructure<BookResponse>> mapToSuccessFetchBook(Book book)

@@ -82,7 +82,7 @@ public class BookController
 
 
     @GetMapping("/pagination")
-    public ResponseEntity<ResponseStructure<List<BookResponse>>> sortBYBookName(
+    public ResponseEntity<ResponseStructure<List<BookResponse>>> getBooksByPagination(
             @RequestHeader(value = HEADER) String authHeader
             ,@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber
             ,@RequestParam(value = "pageSize",defaultValue = "10") int pageSize)
