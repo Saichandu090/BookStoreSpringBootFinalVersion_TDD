@@ -5,6 +5,7 @@ import com.example.bookstore.exception.BadCredentialsException;
 import com.example.bookstore.exception.UserNotFoundException;
 import com.example.bookstore.mapper.UserMapper;
 import com.example.bookstore.repository.UserRepository;
+import com.example.bookstore.requestdto.NewPasswordRequest;
 import com.example.bookstore.requestdto.UserLoginEntity;
 import com.example.bookstore.requestdto.UserRegisterEntity;
 import com.example.bookstore.responsedto.LoginResponse;
@@ -76,13 +77,13 @@ public class UserServiceImpl implements UserService
     }
 
     @Override
-    public ResponseEntity<ResponseStructure<Boolean>> forgetPassword(String email,String newPassword)
+    public ResponseEntity<ResponseStructure<Boolean>> forgetPassword(NewPasswordRequest newPasswordRequest)
     {
-        Optional<User> user=userRepository.findByEmail(email);
+        Optional<User> user=userRepository.findByEmail(newPasswordRequest.getEmail());
         if(user.isEmpty())
-            throw new UserNotFoundException("User not found with email "+email);
+            throw new UserNotFoundException("User not found with email "+newPasswordRequest.getEmail());
         User realUser=user.get();
-        realUser.setPassword(encoder.encode(newPassword));
+        realUser.setPassword(encoder.encode(newPasswordRequest.getPassword()));
         realUser.setUpdatedDate(LocalDate.now());
         User updatedUser=userRepository.save(realUser);
         return userMapper.mapToSuccessPasswordUpdated(updatedUser);

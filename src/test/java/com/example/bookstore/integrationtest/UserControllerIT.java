@@ -2,6 +2,7 @@ package com.example.bookstore.integrationtest;
 
 import com.example.bookstore.entity.User;
 import com.example.bookstore.integrationtest.h2repo.UserH2Repository;
+import com.example.bookstore.requestdto.NewPasswordRequest;
 import com.example.bookstore.requestdto.UserLoginEntity;
 import com.example.bookstore.requestdto.UserRegisterEntity;
 import com.example.bookstore.responsedto.LoginResponse;
@@ -214,10 +215,10 @@ public class UserControllerIT
     void forgetPasswordValidTestIfUserExists()
     {
         loginTestValidTest();
-        HttpHeaders httpHeaders=new HttpHeaders();
-        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+        NewPasswordRequest request=NewPasswordRequest.builder().email("test@gmail.com").password("testing@090").build();
+        HttpEntity<Object> httpEntity=new HttpEntity<>(request);
 
-        ResponseEntity<ResponseStructure<Boolean>> response = restTemplate.exchange(baseUrl + "/forgetPassword/test@gmail.com?newPassword=testing@090", HttpMethod.PUT, httpEntity, new ParameterizedTypeReference<ResponseStructure<Boolean>>(){});
+        ResponseEntity<ResponseStructure<Boolean>> response = restTemplate.exchange(baseUrl + "/forgetPassword", HttpMethod.PUT, httpEntity, new ParameterizedTypeReference<ResponseStructure<Boolean>>(){});
 
         assertEquals(HttpStatus.OK,response.getStatusCode(),"200 status shows that user password has been updated");
         assertTrue(response.getBody().getData());
@@ -254,10 +255,9 @@ public class UserControllerIT
     @Test
     void forgetPasswordIfUserNotExists()
     {
-        HttpHeaders httpHeaders=new HttpHeaders();
-        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
-
-        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()-> restTemplate.exchange(baseUrl + "/forgetPassword/test@gmail.com?newPassword=testing@090", HttpMethod.PUT, httpEntity, new ParameterizedTypeReference<ResponseStructure<Boolean>>(){}));
+        NewPasswordRequest request=NewPasswordRequest.builder().email("test@gmail.com").password("testing@090").build();
+        HttpEntity<Object> httpEntity=new HttpEntity<>(request);
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()-> restTemplate.exchange(baseUrl + "/forgetPassword", HttpMethod.PUT, httpEntity, new ParameterizedTypeReference<ResponseStructure<Boolean>>(){}));
         assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
         String responseBody = exception.getResponseBodyAsString();
         assertTrue(responseBody.contains("\"message\":\"User not found with email test@gmail.com\""));

@@ -1,5 +1,6 @@
 package com.example.bookstore.controller;
 
+import com.example.bookstore.requestdto.NewPasswordRequest;
 import com.example.bookstore.requestdto.UserRegisterEntity;
 import com.example.bookstore.responsedto.RegisterResponse;
 import com.example.bookstore.service.UserService;
@@ -132,13 +133,14 @@ class UserControllerTest
     @Test
     public void forgetPasswordIfUserExists() throws Exception
     {
+        NewPasswordRequest request=NewPasswordRequest.builder().email("something@gmail.com").password("new password").build();
         ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.OK.value()).setMessage("User password updated successfully").setData(true));
-        when(userService.forgetPassword(anyString(),anyString())).thenReturn(response);
+        when(userService.forgetPassword(any(NewPasswordRequest.class))).thenReturn(response);
 
-        mockMvc.perform(put("/forgetPassword/{email}","sai@gmail.com")
+        mockMvc.perform(put("/forgetPassword")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("newPassword","chandu@090")
-                        .characterEncoding(StandardCharsets.UTF_8))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value(true))
@@ -149,25 +151,15 @@ class UserControllerTest
     @Test
     public void forgetPasswordIfUserNotExists() throws Exception
     {
+        NewPasswordRequest request=NewPasswordRequest.builder().email("something@gmail.com").password("new password").build();
         ResponseEntity<ResponseStructure<Boolean>> response=ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseStructure<Boolean>().setStatus(HttpStatus.NOT_FOUND.value()).setMessage("User not found with email").setData(false));
-        when(userService.forgetPassword(anyString(),anyString())).thenReturn(response);
+        when(userService.forgetPassword(any(NewPasswordRequest.class))).thenReturn(response);
 
-        mockMvc.perform(put("/forgetPassword/{email}","sai@gmail.com")
+        mockMvc.perform(put("/forgetPassword")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("newPassword","chandu@090")
-                        .characterEncoding(StandardCharsets.UTF_8))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void forgetPasswordIfParamIsMissing() throws Exception
-    {
-        mockMvc.perform(put("/forgetPassword/{email}","sai@gmail.com")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> assertInstanceOf(MissingServletRequestParameterException.class,result.getResolvedException()));
     }
 }

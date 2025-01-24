@@ -1,5 +1,6 @@
 package com.example.bookstore.controller;
 
+import com.example.bookstore.requestdto.NewPasswordRequest;
 import com.example.bookstore.requestdto.UserLoginEntity;
 import com.example.bookstore.requestdto.UserRegisterEntity;
 import com.example.bookstore.responsedto.LoginResponse;
@@ -36,11 +37,10 @@ public class UserController
         return userService.isUserExists(email);
     }
 
-    @PutMapping("/forgetPassword/{email}")
+    @PutMapping("/forgetPassword")
     public ResponseEntity<ResponseStructure<Boolean>> forgetPassword(
-            @PathVariable String email,
-            @RequestParam String newPassword)
+            @RequestBody NewPasswordRequest newPasswordRequest)
     {
-        return userService.forgetPassword(email,newPassword);
+        return userService.forgetPassword(newPasswordRequest);
     }
 }

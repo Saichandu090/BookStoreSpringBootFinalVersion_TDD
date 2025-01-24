@@ -1,5 +1,6 @@
 package com.example.bookstore.service;
 
+import com.example.bookstore.requestdto.NewPasswordRequest;
 import com.example.bookstore.requestdto.UserLoginEntity;
 import com.example.bookstore.requestdto.UserRegisterEntity;
 import com.example.bookstore.responsedto.LoginResponse;
@@ -15,5 +16,5 @@ public interface UserService
 
     ResponseEntity<ResponseStructure<Boolean>> isUserExists(String email);
 
-    ResponseEntity<ResponseStructure<Boolean>> forgetPassword(String email,String newPassword);
+    ResponseEntity<ResponseStructure<Boolean>> forgetPassword(NewPasswordRequest newPasswordRequest);
 }
