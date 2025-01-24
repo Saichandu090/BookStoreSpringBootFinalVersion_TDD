@@ -35,6 +35,7 @@ public class UserRegisterEntity
     @NotNull
     @Email
     private String email;
+
     @NotNull
     private String role;
 }
