@@ -95,7 +95,7 @@ public class WishListControllerIT
                     .dob(LocalDate.of(1995,8,24))
                     .email("ganesh@gmail.com")
                     .role("USER")
-                    .password("ganesh@090").build();
+                    .password("Ganesh@090").build();
 
             ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
@@ -104,7 +104,7 @@ public class WishListControllerIT
 
             UserLoginEntity userLoginEntity = UserLoginEntity.builder()
                     .email("ganesh@gmail.com")
-                    .password("ganesh@090").build();
+                    .password("Ganesh@090").build();
 
             ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
