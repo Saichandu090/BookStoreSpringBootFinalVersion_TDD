@@ -69,7 +69,7 @@ public class AddressControllerIT
                     .dob(LocalDate.of(2002,8,24))
                     .email("test@gmail.com")
                     .role("USER")
-                    .password("saichandu@090").build();
+                    .password("Saichandu@090").build();
 
             ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
@@ -78,7 +78,7 @@ public class AddressControllerIT
 
             UserLoginEntity userLoginEntity = UserLoginEntity.builder()
                     .email("test@gmail.com")
-                    .password("saichandu@090").build();
+                    .password("Saichandu@090").build();
 
             ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
@@ -197,7 +197,7 @@ public class AddressControllerIT
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
-        assertEquals(0,addressH2Repository.findAll().size());
+        assertEquals(1,addressH2Repository.findAll().size());
 
         User user=userH2Repository.findByEmail("test@gmail.com").get();
         List<Address> addresses=user.getAddresses();

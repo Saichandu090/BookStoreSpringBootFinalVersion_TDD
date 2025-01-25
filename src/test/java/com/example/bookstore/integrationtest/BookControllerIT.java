@@ -67,7 +67,7 @@ public class BookControllerIT
                     .dob(LocalDate.of(2002,8,24))
                     .email("test@gmail.com")
                     .role("ADMIN")
-                    .password("saichandu@090").build();
+                    .password("Saichandu@090").build();
 
             ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
@@ -76,7 +76,7 @@ public class BookControllerIT
 
             UserLoginEntity userLoginEntity = UserLoginEntity.builder()
                     .email("test@gmail.com")
-                    .password("saichandu@090").build();
+                    .password("Saichandu@090").build();
 
             ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 

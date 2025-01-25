@@ -134,16 +134,10 @@ public class OrderServiceImpl implements OrderService
 
     private Address getAddress(Long addressId)
     {
-        return addressRepository.findById(addressId).orElse(createFallbackAddress(addressId));
-    }
-
-    private Address createFallbackAddress(Long originalAddressId) {
-        Address fallbackAddress = new Address();
-        fallbackAddress.setAddressId(null);
-        fallbackAddress.setStreetName("Deleted Address (ID: " + originalAddressId + ")");
-        fallbackAddress.setCity("N/A");
-        fallbackAddress.setPinCode(0);
-        return fallbackAddress;
+        Optional<Address> address=addressRepository.findById(addressId);
+        if(address.isEmpty())
+            throw new AddressNotFoundException("Address not found with Id "+addressId);
+        return address.get();
     }
 
     private User getUser(String email)
