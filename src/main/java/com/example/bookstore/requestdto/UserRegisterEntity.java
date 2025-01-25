@@ -15,11 +15,11 @@ import java.time.LocalDate;
 public class UserRegisterEntity
 {
     @NotNull
-    @Pattern(regexp = "^[A-Z][a-zA-Z .,\\'-_=+]{2,}$",message = "First Name Should start with Capital and AtLeast contain 3 characters")
+    @Pattern(regexp = "^[A-Z][a-zA-Z .,'-_=+]{2,}$",message = "First Name Should start with Capital and AtLeast contain 3 characters")
     private String firstName;
 
     @NotNull
-    @Pattern(regexp = "^[A-Z][a-zA-Z .,\\'-_=+]{2,}$",message = "Last Name Should start with Capital and AtLeast contain 3 characters")
+    @Pattern(regexp = "^[A-Z][a-zA-Z .,'-_=+]{2,}$",message = "Last Name Should start with Capital and AtLeast contain 3 characters")
     private String lastName;
 
     @Past

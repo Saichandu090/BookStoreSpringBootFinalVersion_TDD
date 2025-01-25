@@ -57,7 +57,7 @@ public class UserControllerIT
                 .dob(LocalDate.of(2002,8,24))
                 .email("test@gmail.com")
                 .role("ADMIN")
-                .password("saichandu@090").build();
+                .password("Saichandu@090").build();
 
         ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
@@ -95,7 +95,7 @@ public class UserControllerIT
                 .dob(LocalDate.of(2002,8,24))
                 .email("test@gmail.com")
                 .role("ADMIN")
-                .password("saichandu@090").build();
+                .password("Saichandu@090").build();
 
         ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
@@ -109,7 +109,7 @@ public class UserControllerIT
         //Login test
         UserLoginEntity userLoginEntity = UserLoginEntity.builder()
                 .email("test@gmail.com")
-                .password("saichandu@090").build();
+                .password("Saichandu@090").build();
 
         ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
@@ -129,7 +129,7 @@ public class UserControllerIT
                 .dob(LocalDate.of(2002,8,24))
                 .email("test@gmail.com")
                 .role("ADMIN")
-                .password("saichandu@090").build();
+                .password("Saichandu@090").build();
 
         ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
@@ -143,7 +143,7 @@ public class UserControllerIT
         //Login test
         UserLoginEntity userLoginEntity = UserLoginEntity.builder()
                 .email("tes@gmail.com")
-                .password("saichandu@090").build();
+                .password("Saichandu@090").build();
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()-> restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>() {
         }));
@@ -161,7 +161,7 @@ public class UserControllerIT
                 .dob(LocalDate.of(2002,8,24))
                 .email("test@gmail.com")
                 .role("ADMIN")
-                .password("saichandu@090").build();
+                .password("Saichandu@090").build();
 
         ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange(baseUrl + "/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
@@ -215,7 +215,7 @@ public class UserControllerIT
     void forgetPasswordValidTestIfUserExists()
     {
         loginTestValidTest();
-        NewPasswordRequest request=NewPasswordRequest.builder().email("test@gmail.com").password("testing@090").build();
+        NewPasswordRequest request=NewPasswordRequest.builder().email("test@gmail.com").password("Testing@090").build();
         HttpEntity<Object> httpEntity=new HttpEntity<>(request);
 
         ResponseEntity<ResponseStructure<Boolean>> response = restTemplate.exchange(baseUrl + "/forgetPassword", HttpMethod.PUT, httpEntity, new ParameterizedTypeReference<ResponseStructure<Boolean>>(){});
@@ -231,7 +231,7 @@ public class UserControllerIT
         //Trying to login with old password
         UserLoginEntity fail= UserLoginEntity.builder()
                 .email("test@gmail.com")
-                .password("saichandu@090").build();
+                .password("Saichandu@090").build();
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(fail), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>() {
         }));
@@ -241,7 +241,7 @@ public class UserControllerIT
         //Trying to login after changing the password with updated password
         UserLoginEntity userLoginEntity = UserLoginEntity.builder()
                 .email("test@gmail.com")
-                .password("testing@090").build();
+                .password("Testing@090").build();
 
         ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(baseUrl + "/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
