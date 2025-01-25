@@ -106,7 +106,7 @@ public class OrderControllerIT
                     .dob(LocalDate.of(1992,8,24))
                     .email("dinesh@gmail.com")
                     .role("USER")
-                    .password("dinesh@090").build();
+                    .password("Dinesh@090").build();
 
             ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
@@ -115,7 +115,7 @@ public class OrderControllerIT
 
             UserLoginEntity userLoginEntity = UserLoginEntity.builder()
                     .email("dinesh@gmail.com")
-                    .password("dinesh@090").build();
+                    .password("Dinesh@090").build();
 
             ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 

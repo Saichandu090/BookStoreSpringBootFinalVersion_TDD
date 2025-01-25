@@ -4,6 +4,7 @@ import com.example.bookstore.entity.User;
 import com.example.bookstore.exception.BadCredentialsException;
 import com.example.bookstore.exception.UserNotFoundException;
 import com.example.bookstore.repository.UserRepository;
+import com.example.bookstore.requestdto.NewPasswordRequest;
 import com.example.bookstore.requestdto.UserLoginEntity;
 import com.example.bookstore.requestdto.UserRegisterEntity;
 import com.example.bookstore.responsedto.LoginResponse;
@@ -209,10 +210,11 @@ class UserServiceTest
     @Test
     public void forgetPasswordIfUserExist()
     {
+        NewPasswordRequest request=NewPasswordRequest.builder().email("something@gmail.com").password("new password").build();
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        ResponseEntity<ResponseStructure<Boolean>> response=userService.forgetPassword(user.getEmail(),"chandu@090");
+        ResponseEntity<ResponseStructure<Boolean>> response=userService.forgetPassword(request);
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(user.getEmail()+" password updated successfully",response.getBody().getMessage());
         assertTrue(response.getBody().getData());
@@ -221,9 +223,10 @@ class UserServiceTest
     @Test
     public void forgetPasswordIfUserNotExists()
     {
+        NewPasswordRequest request=NewPasswordRequest.builder().email("something@gmail.com").password("new password").build();
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class,()->userService.forgetPassword(user.getEmail(),"chandu@090"));
+        assertThrows(UserNotFoundException.class,()->userService.forgetPassword(request));
 
         verify(userRepository,times(1)).findByEmail(anyString());
     }

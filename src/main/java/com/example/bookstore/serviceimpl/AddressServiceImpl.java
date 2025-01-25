@@ -77,7 +77,8 @@ public class AddressServiceImpl implements AddressService
         User realUser=getUser(email);
         Address realAddress=getAddress(addressId,realUser.getUserId());
         realUser.getAddresses().remove(realAddress);
-        addressRepository.delete(realAddress);
+        realAddress.setUserId(null);
+        addressRepository.save(realAddress);
         return addressMapper.mapToSuccessDeleteAddress();
     }
 
