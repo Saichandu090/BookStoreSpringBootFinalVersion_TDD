@@ -25,11 +25,11 @@ public class UserPrinciple implements UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities()
     {
-        if(user.getRole().equals("USER"))
+        if(user.getRole().equalsIgnoreCase("USER"))
         {
             role = Roles.USER;
         }
-        else if (user.getRole().equals("ADMIN"))
+        else if (user.getRole().equalsIgnoreCase("ADMIN"))
         {
             role=Roles.ADMIN;
         }
