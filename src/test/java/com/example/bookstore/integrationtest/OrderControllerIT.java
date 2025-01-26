@@ -135,6 +135,7 @@ public class OrderControllerIT
         authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
+
         CartRequest cartRequest = CartRequest.builder().bookId(3L).build();
         HttpEntity<Object> httpEntity=new HttpEntity<>(cartRequest,httpHeaders);
         ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(  "http://localhost:"+port+"/cart/addToCart", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});

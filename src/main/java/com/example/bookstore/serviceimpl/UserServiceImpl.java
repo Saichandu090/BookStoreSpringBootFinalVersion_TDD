@@ -21,7 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService
     private ApplicationContext context;
     private AuthenticationManager authenticationManager;
     private final UserMapper userMapper=new UserMapper();
-    private final BCryptPasswordEncoder encoder=new BCryptPasswordEncoder(12);
+    private PasswordEncoder encoder;
 
     @Override
     public ResponseEntity<ResponseStructure<RegisterResponse>> registerUser(UserRegisterEntity registerDTO)
