@@ -85,7 +85,7 @@ public class BookController
     public ResponseEntity<ResponseStructure<List<BookResponse>>> getBooksByPagination(
             @RequestHeader(value = HEADER) String authHeader
             ,@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber
-            ,@RequestParam(value = "pageSize",defaultValue = "10") int pageSize)
+            ,@RequestParam(value = "pageSize",defaultValue = "8") int pageSize)
     {
         UserDetails userDetails = userMapper.validateUserToken(authHeader);
         if (userDetails!=null)

@@ -14,25 +14,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookRequest
 {
-    @NotNull
+    @NotNull(message = "BookId should not be empty")
     private Long bookId;
 
-    @NotNull
+    @NotNull(message = "BookName should not be empty")
     private String bookName;
 
-    @NotNull
+    @NotNull(message = "BookAuthor should not be empty")
     private String bookAuthor;
 
-    @NotNull
+    @NotNull(message = "BookDescription should not be empty")
     private String bookDescription;
 
-    @Min(value = 50)
-    @Max(value = 999)
+    @Min(value = 50,message = "BookPrice minimum should be 50")
+    @Max(value = 999,message = "BookPrice should not exceed 999")
     private Double bookPrice;
 
-    @NotNull
+    @NotNull(message = "BookLogo should not be empty")
     private String bookLogo;
 
-    @Min(value = 16)
+    @Min(value = 16,message = "BookQuantity should be atLeast 16")
     private Integer bookQuantity;
 }

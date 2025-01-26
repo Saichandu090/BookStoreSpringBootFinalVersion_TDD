@@ -9,15 +9,15 @@ import lombok.*;
 @Data
 public class AddressRequest
 {
-    @NotNull
+    @NotNull(message = "StreetName should not be empty")
     private String streetName;
 
-    @NotNull
+    @NotNull(message = "City should not be empty")
     private String city;
 
-    @NotNull
+    @NotNull(message = "State should not be empty")
     private String state;
 
-    @NotNull
+    @NotNull(message = "PinCode should not be empty")
     private Integer pinCode;
 }

@@ -28,11 +28,8 @@ public class SecurityConfiguration
     @Autowired
     private CustomCORSConfiguration customCorsConfiguration;
 
-    @Bean
-    public JWTFilter jwtFilter()
-    {
-        return new JWTFilter();
-    }
+    @Autowired
+    private JWTFilter jwtFilter;
 
     @Bean
     public AuthenticationProvider authenticationProvider()
@@ -52,7 +49,7 @@ public class SecurityConfiguration
                 .cors(custom->custom.configurationSource(customCorsConfiguration))
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

@@ -91,7 +91,7 @@ public class BookControllerIT
 
 
     @Test
-    public void addBookTestValidScene()
+    void addBookTestValidScene()
     {
         authToken=getAuthToken();
 
@@ -119,7 +119,7 @@ public class BookControllerIT
     }
 
     @Test
-    public void addBookTestIfBodyIsInvalid()
+    void addBookTestIfBodyIsInvalid()
     {
         authToken=getAuthToken();
 
@@ -143,7 +143,7 @@ public class BookControllerIT
 
 
     @Test
-    public void addBookTestIfBookQuantityIsLessThan16()
+    void addBookTestIfBookQuantityIsLessThan16()
     {
         authToken=getAuthToken();
 
@@ -152,11 +152,11 @@ public class BookControllerIT
 
         BookRequest bookRequest = BookRequest.builder()
                 .bookName("Something")
-                .bookId(3245L)
+
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
                 .bookDescription("Atom")
-                .bookQuantity(8)
+                .bookQuantity(18)
                 .bookLogo("URL").build();
 
         HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
@@ -167,7 +167,7 @@ public class BookControllerIT
     }
 
     @Test
-    public void addBookTestIfTokenIsInvalidOrMissing()
+    void addBookTestIfTokenIsInvalidOrMissing()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization",authToken);

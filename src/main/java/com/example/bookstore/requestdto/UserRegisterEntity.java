@@ -22,7 +22,7 @@ public class UserRegisterEntity
     @Pattern(regexp = "^[A-Z][a-zA-Z .,'-_=+]{2,}$",message = "Last Name Should start with Capital and AtLeast contain 3 characters")
     private String lastName;
 
-    @Past
+    @Past(message = "Should be a past date")
     private LocalDate dob;
 
     @NotBlank(message = "Password should not be empty")
@@ -36,9 +36,9 @@ public class UserRegisterEntity
     private String password;
 
     @NotNull
-    @Email
+    @Email(message = "Should be a valid email")
     private String email;
 
-    @NotNull
+    @NotNull(message = "Role should not be empty")
     private String role;
 }

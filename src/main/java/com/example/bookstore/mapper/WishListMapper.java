@@ -15,7 +15,7 @@ public class WishListMapper
     {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<WishListResponse>()
                 .setData(null)
-                .setMessage("Token Error")
+                .setMessage("Token error")
                 .setStatus(HttpStatus.UNAUTHORIZED.value()));
     }
 

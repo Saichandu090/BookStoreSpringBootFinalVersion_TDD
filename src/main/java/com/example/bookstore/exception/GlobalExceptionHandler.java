@@ -1,11 +1,14 @@
 package com.example.bookstore.exception;
 
 import com.example.bookstore.util.ResponseStructure;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler
@@ -25,7 +28,7 @@ public class GlobalExceptionHandler
     public ResponseEntity<ResponseStructure<String>> methodArgumentNotValid(MethodArgumentNotValidException exception)
     {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseStructure<String>()
-                .setMessage(exception.getMessage())
+                .setMessage(exception.getBindingResult().getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.joining(",")))
                 .setData(data)
                 .setStatus(HttpStatus.BAD_REQUEST.value()));
     }
