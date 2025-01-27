@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -36,10 +37,11 @@ public class OrderServiceImpl implements OrderService
     {
         User user=getUser(email);
         Address address=getAddress(orderRequest.getAddressId());
-        List<Cart> userCarts=user.getCarts();
-        if(userCarts.isEmpty())
+        List<Cart> availableCarts=getUserCart(user);
+        if(availableCarts.isEmpty())
             return orderMapper.mapToCartIsEmpty();
-        Order order=processUserPlaceOrder(userCarts,address,user);
+        Order order=processUserPlaceOrder(availableCarts,address,user);
+        user.getCarts().clear();
         Order savedOrder=orderRepository.save(order);
         List<BookResponse> books=getBooksResponseFromOrder(order);
         return orderMapper.mapToSuccessPlaceOrder(savedOrder,address,books);
@@ -100,6 +102,12 @@ public class OrderServiceImpl implements OrderService
         return orderRepository.save(userOrder);
     }
 
+    private List<Cart> getUserCart(User user)
+    {
+        List<Cart> userCarts=user.getCarts();
+        return userCarts.parallelStream().filter(cart -> bookRepository.findById(cart.getBookId()).orElseThrow(()->new BookNotFoundException("Book not found")).getStatus()).collect(Collectors.toList());
+    }
+
     private Order processUserPlaceOrder(List<Cart> userCarts, Address address,User user)
     {
         List<Cart> cartsForOrder=new ArrayList<>();
@@ -112,7 +120,6 @@ public class OrderServiceImpl implements OrderService
             totalPrice=totalPrice+(cart.getCartQuantity()*book.getBookPrice());
             cartsForOrder.add(cart);
         }
-        userCarts.clear();
         return orderMapper.createAnOrder(cartsForOrder,totalPrice,totalQuantity,address,user);
     }
 

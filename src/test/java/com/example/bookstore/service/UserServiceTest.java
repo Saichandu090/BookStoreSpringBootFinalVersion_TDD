@@ -29,6 +29,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -53,6 +54,9 @@ class UserServiceTest
 
     @Mock
     private AuthenticationManager authenticationManager;
+
+    @Mock
+    private PasswordEncoder encoder;
 
     @Mock
     private ApplicationContext context;
@@ -113,6 +117,7 @@ class UserServiceTest
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(user);
+        when(encoder.encode(anyString())).thenReturn("new password");
 
         ResponseEntity<ResponseStructure<RegisterResponse>> response=userService.registerUser(registerDTO);
 

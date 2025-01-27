@@ -71,12 +71,14 @@ public class OrderControllerIT
                 .bookAuthor("Chandu")
                 .bookDescription("Atom")
                 .bookQuantity(3)
+                .status(true)
                 .bookLogo("URL").build();
 
         Book book2=Book.builder()
                 .bookId(2L)
                 .bookName("Habits")
                 .bookPrice(249.49)
+                .status(true)
                 .bookAuthor("Zak crawly")
                 .bookDescription("Cricket")
                 .bookQuantity(169)
@@ -87,6 +89,7 @@ public class OrderControllerIT
                 .bookName("Gotye")
                 .bookPrice(789.49)
                 .bookAuthor("Ryan")
+                .status(true)
                 .bookDescription("Deadpool")
                 .bookQuantity(2)
                 .bookLogo("URL").build();

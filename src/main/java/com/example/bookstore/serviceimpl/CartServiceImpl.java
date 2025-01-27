@@ -18,10 +18,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -38,7 +35,7 @@ public class CartServiceImpl implements CartService
     {
         User user=getUser(email);
         Book book=getBook(cartRequest.getBookId());
-        if(book.getBookQuantity()<1)
+        if(book.getBookQuantity()<1 || Boolean.FALSE.equals(book.getStatus()))
             return cartMapper.mapToBookOutOfStock(book);
         if(user.getCarts()==null)
             user.setCarts(new ArrayList<>());

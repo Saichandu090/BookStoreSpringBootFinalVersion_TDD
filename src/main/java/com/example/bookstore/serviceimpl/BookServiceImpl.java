@@ -120,6 +120,8 @@ public class BookServiceImpl implements BookService
     public ResponseEntity<ResponseStructure<String>> deleteBook(Long bookId)
     {
         Book book=getBookByIdFromOptional(bookId);
+        if(Boolean.FALSE.equals(book.getStatus()))
+            throw new BookNotFoundException("Book not found with Id "+bookId);
         book.setStatus(false);
         Book deletedBook=bookRepository.save(book);
         return bookMapper.mapToSuccessDeleteBook("Book with name "+deletedBook.getBookName()+" deleted successfully");
