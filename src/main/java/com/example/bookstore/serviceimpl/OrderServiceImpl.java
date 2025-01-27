@@ -120,7 +120,7 @@ public class OrderServiceImpl implements OrderService
     private List<BookResponse> getBooksResponseFromOrder(Order order)
     {
         List<Cart> carts=order.getCarts();
-        List<Book> books=carts.stream().map(cart ->getBook(cart.getBookId())).toList();
+        List<Book> books=carts.parallelStream().map(cart ->getBook(cart.getBookId())).toList();
         return books.stream().map(orderMapper::mapBookToBookResponse).toList(); // Converting all the books to list of BookResponse using Stream and OrderMapper
     }
 

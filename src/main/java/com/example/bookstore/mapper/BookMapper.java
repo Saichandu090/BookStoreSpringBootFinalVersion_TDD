@@ -47,6 +47,7 @@ public class BookMapper
                 .bookQuantity(requestDTO.getBookQuantity())
                 .bookPrice(requestDTO.getBookPrice())
                 .bookDescription(requestDTO.getBookDescription())
+                .status(true)
                 .cartBookQuantity(0).build();
     }
 
@@ -59,6 +60,7 @@ public class BookMapper
                 .bookDescription(savedBook.getBookDescription())
                 .bookPrice(savedBook.getBookPrice())
                 .bookLogo(savedBook.getBookLogo())
+                .status(savedBook.getStatus())
                 .bookAuthor(savedBook.getBookAuthor()).build();
 
     }
@@ -67,6 +69,7 @@ public class BookMapper
     {
         return Book.builder()
                 .bookId(bookId)
+                .status(true)
                 .bookName(requestDTO.getBookName())
                 .bookLogo(requestDTO.getBookLogo())
                 .bookAuthor(requestDTO.getBookAuthor())

@@ -66,7 +66,7 @@ public class AddressServiceImpl implements AddressService
         List<Address> addresses=addressRepository.findByUserId(realUser.getUserId());
         if(addresses.isEmpty())
             return addressMapper.mapToNoContentForGetAllAddress();
-        List<AddressResponse> responseDtoList=addresses.stream().map(addressMapper::mapAddressToAddressResponse).toList();//Converting addressList into list of AddressResponse using stream and AddressMapper
+        List<AddressResponse> responseDtoList=addresses.parallelStream().map(addressMapper::mapAddressToAddressResponse).toList();//Converting addressList into list of AddressResponse using stream and AddressMapper
         return addressMapper.mapToSuccessGetAllAddress(responseDtoList);
     }
 

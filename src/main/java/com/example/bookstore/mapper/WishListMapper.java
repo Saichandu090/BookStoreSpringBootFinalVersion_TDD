@@ -67,7 +67,7 @@ public class WishListMapper
 
     public ResponseEntity<ResponseStructure<List<WishListResponse>>> mapToSuccessGetWishList(List<WishList> userWishList)
     {
-        List<WishListResponse> wishListResponse =userWishList.stream().map(wishList -> new WishListResponse(wishList.getWishListId(), wishList.getBookId())).toList();
+        List<WishListResponse> wishListResponse =userWishList.parallelStream().map(wishList -> new WishListResponse(wishList.getWishListId(), wishList.getBookId())).toList();
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseStructure<List<WishListResponse>>()
                 .setMessage("Wishlist fetched successfully")
                 .setData(wishListResponse)

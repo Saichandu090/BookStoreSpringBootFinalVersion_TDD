@@ -1,11 +1,13 @@
 package com.example.bookstore.controller;
 
+import com.example.bookstore.config.JWTFilter;
 import com.example.bookstore.entity.User;
 import com.example.bookstore.mapper.BookMapper;
 import com.example.bookstore.mapper.UserMapper;
 import com.example.bookstore.requestdto.BookRequest;
 import com.example.bookstore.responsedto.BookResponse;
 import com.example.bookstore.service.BookService;
+import com.example.bookstore.serviceimpl.JWTService;
 import com.example.bookstore.util.ResponseStructure;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.CoreMatchers;
@@ -54,6 +56,12 @@ class BookControllerTests
     @Autowired
     private MockMvc mockMvc;
 
+    @MockitoBean
+    private JWTService jwtService;
+
+    @MockitoBean
+    private JWTFilter jwtFilter;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -79,7 +87,7 @@ class BookControllerTests
         user=User.builder()
                 .email("test@gmail.com")
                 .userId(100L)
-                .password("test@90909")
+                .password("Test@90909")
                 .dob(LocalDate.of(1999,8,12))
                 .firstName("Mock")
                 .lastName("Testing")
@@ -89,7 +97,7 @@ class BookControllerTests
         admin=User.builder()
                 .email("sai@gmail.com")
                 .userId(1L)
-                .password("saichandu090")
+                .password("Saichandu090")
                 .dob(LocalDate.of(2002,8,24))
                 .firstName("Sai")
                 .lastName("Chandu")

@@ -1,9 +1,11 @@
 package com.example.bookstore.controller;
 
+import com.example.bookstore.config.JWTFilter;
 import com.example.bookstore.requestdto.NewPasswordRequest;
 import com.example.bookstore.requestdto.UserRegisterEntity;
 import com.example.bookstore.responsedto.RegisterResponse;
 import com.example.bookstore.service.UserService;
+import com.example.bookstore.serviceimpl.JWTService;
 import com.example.bookstore.util.ResponseStructure;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -18,11 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
-
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -41,6 +40,12 @@ class UserControllerTest
     @Autowired
     private MockMvc mockMvc;
 
+    @MockitoBean
+    private JWTService jwtService;
+
+    @MockitoBean
+    private JWTFilter jwtFilter;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -48,11 +53,11 @@ class UserControllerTest
     private UserService userService;
 
     @Test
-    public void registerUserMustReturnCreatedStatusCode() throws Exception
+    void registerUserMustReturnCreatedStatusCode() throws Exception
     {
         UserRegisterEntity registerDTO= UserRegisterEntity.builder()
                 .email("test@gmail.com")
-                .password("saichandu@090")
+                .password("Saichandu@090")
                 .dob(LocalDate.of(2002,8,24))
                 .role("ADMIN")
                 .firstName("Sai")

@@ -20,4 +20,5 @@ public class Book
     private String bookLogo;
     private Integer bookQuantity;
     private int cartBookQuantity;
+    private Boolean status;
 }

@@ -381,7 +381,7 @@ public class BookControllerIT
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
-        assertEquals(0,bookH2Repository.findAll().size());
+        assertEquals(1,bookH2Repository.findAll().size());
     }
 
 

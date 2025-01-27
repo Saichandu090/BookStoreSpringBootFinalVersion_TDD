@@ -18,4 +18,5 @@ public class BookResponse
     private String bookDescription;
     private Double bookPrice;
     private String bookLogo;
+    private Boolean status;
 }
