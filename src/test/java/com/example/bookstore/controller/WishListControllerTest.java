@@ -1,11 +1,13 @@
 package com.example.bookstore.controller;
 
+import com.example.bookstore.config.JWTFilter;
 import com.example.bookstore.entity.User;
 import com.example.bookstore.mapper.UserMapper;
 import com.example.bookstore.mapper.WishListMapper;
 import com.example.bookstore.requestdto.WishListRequest;
 import com.example.bookstore.responsedto.WishListResponse;
 import com.example.bookstore.service.WishListService;
+import com.example.bookstore.serviceimpl.JWTService;
 import com.example.bookstore.util.ResponseStructure;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +50,12 @@ class WishListControllerTest
 {
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private JWTService jwtService;
+
+    @MockitoBean
+    private JWTFilter jwtFilter;
 
     @Autowired
     private ObjectMapper objectMapper;

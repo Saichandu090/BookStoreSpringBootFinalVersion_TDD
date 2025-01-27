@@ -29,7 +29,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -67,6 +66,7 @@ class BookServiceTest
                 .bookDescription("Description")
                 .bookPrice(789.49)
                 .cartBookQuantity(0)
+                .status(true)
                 .build();
 
         bookResponse = BookResponse.builder()
@@ -209,6 +209,7 @@ class BookServiceTest
     public void deleteBookMustReturnOKStatusCode()
     {
         when(bookRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(book));
+        when(bookRepository.save(any(Book.class))).thenReturn(book);
 
         ResponseEntity<ResponseStructure<String>> response=bookService.deleteBook(bookRequest.getBookId());
 
@@ -216,7 +217,7 @@ class BookServiceTest
         Assertions.assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
         Assertions.assertThat(response.getBody().getData()).isEqualTo("Success");
 
-        Mockito.verify(bookRepository,times(1)).delete(book);
+        Mockito.verify(bookRepository,times(1)).save(book);
     }
 
 
@@ -242,6 +243,7 @@ class BookServiceTest
                 .bookDescription("Law")
                 .bookPrice(220.99)
                 .cartBookQuantity(0)
+                .status(true)
                 .build();
 
         Book second=Book.builder()
@@ -252,6 +254,7 @@ class BookServiceTest
                 .bookDescription("Family")
                 .bookPrice(225.00)
                 .cartBookQuantity(0)
+                .status(true)
                 .build();
 
         Book third=Book.builder()
@@ -262,6 +265,7 @@ class BookServiceTest
                 .bookDescription("Descript")
                 .bookPrice(99.90)
                 .cartBookQuantity(0)
+                .status(true)
                 .build();
 
         List<Book> books=new ArrayList<>();
@@ -294,7 +298,7 @@ class BookServiceTest
     public void paginationValidTest()
     {
         List<Book> books = IntStream.range(1, 20)
-                .mapToObj(i -> Book.builder().bookId((long) i).build())
+                .mapToObj(i -> Book.builder().bookId((long) i).status(true).build())
                 .collect(Collectors.toList());
 
         Page<Book> bookPage = new PageImpl<>(books.subList(0,10), PageRequest.of(0, 10), books.size());
@@ -313,7 +317,7 @@ class BookServiceTest
     public void paginationSecondPageTest()
     {
         List<Book> books = IntStream.rangeClosed(1, 20)
-                .mapToObj(i -> Book.builder().bookId((long) i).build())
+                .mapToObj(i -> Book.builder().bookId((long) i).status(true).build())
                 .collect(Collectors.toList());
 
         Page<Book> bookPage = new PageImpl<>(books.subList(10, 20), PageRequest.of(1, 10), books.size());
@@ -349,7 +353,7 @@ class BookServiceTest
     public void searchQueryValidTest()
     {
         List<Book> books = IntStream.range(1, 20)
-                .mapToObj(i -> Book.builder().bookId((long) i).build())
+                .mapToObj(i -> Book.builder().bookId((long) i).status(true).build())
                 .collect(Collectors.toList());
 
         when(bookRepository.searchBooksByKeyword(anyString())).thenReturn(books);
@@ -366,7 +370,7 @@ class BookServiceTest
         when(bookRepository.searchBooksByKeyword(anyString())).thenReturn(List.of());
         ResponseEntity<ResponseStructure<List<BookResponse>>> response=bookService.searchBooks("anything");
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertEquals("Books are empty",response.getBody().getMessage());
+        assertEquals("No Books Available",response.getBody().getMessage());
     }
 
     @Test
@@ -374,6 +378,6 @@ class BookServiceTest
     {
         ResponseEntity<ResponseStructure<List<BookResponse>>> response=bookService.searchBooks("");
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertEquals("Books are empty",response.getBody().getMessage());
+        assertEquals("No Books Available",response.getBody().getMessage());
     }
 }

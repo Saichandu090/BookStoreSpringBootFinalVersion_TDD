@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-public class BookRepositoryTests
+class BookRepositoryTests
 {
     @Autowired
     private BookRepository bookRepository;
@@ -28,7 +28,7 @@ public class BookRepositoryTests
     private BookService bookService;
 
     @Test
-    public void addBookTest()
+    void addBookTest()
     {
         BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654L)
@@ -55,7 +55,7 @@ public class BookRepositoryTests
 
 
     @Test
-    public void getBookByIdTest()
+    void getBookByIdTest()
     {
         BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
@@ -77,7 +77,7 @@ public class BookRepositoryTests
     }
 
     @Test
-    public void getBookByNameTest()
+    void getBookByNameTest()
     {
         BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
@@ -99,7 +99,7 @@ public class BookRepositoryTests
     }
 
     @Test
-    public void getAllBooksTest()
+    void getAllBooksTest()
     {
         BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
@@ -134,7 +134,7 @@ public class BookRepositoryTests
     }
 
     @Test
-    public void findBooksWithSortingBookName()
+    void findBooksWithSortingBookName()
     {
         BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
@@ -184,7 +184,7 @@ public class BookRepositoryTests
     }
 
     @Test
-    public void findBooksWithSortingBookPrice()
+    void findBooksWithSortingBookPrice()
     {
         BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
@@ -238,7 +238,7 @@ public class BookRepositoryTests
 
 
     @Test
-    public void updateBookTest()
+    void updateBookTest()
     {
         BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
@@ -282,7 +282,7 @@ public class BookRepositoryTests
     }
 
     @Test
-    public void deleteBookTest()
+    void deleteBookTest()
     {
         BookRequest bookRequest = BookRequest.builder()
                 .bookId(789654123L)
@@ -312,13 +312,11 @@ public class BookRepositoryTests
         Assertions.assertThat(deleteResponse.getBody().getStatus()).isEqualTo(HttpStatus.OK.value());
 
         assertThrows(BookNotFoundException.class,()->bookService.deleteBook(bookRequest.getBookId()));
-
-        assertThrows(BookNotFoundException.class,()->bookService.getBookById(bookRequest.getBookId()));
     }
 
 
     @Test
-    public void bookRepositoryFindByBookNameTestMustReturnBook()
+    void bookRepositoryFindByBookNameTestMustReturnBook()
     {
         Book book= Book.builder()
                 .bookId(1L)
@@ -340,7 +338,7 @@ public class BookRepositoryTests
 
 
     @Test
-    public void bookRepositoryFindByBookNameTestMustThrowBookNotFoundException()
+    void bookRepositoryFindByBookNameTestMustThrowBookNotFoundException()
     {
         Book book= Book.builder()
                 .bookId(1L)

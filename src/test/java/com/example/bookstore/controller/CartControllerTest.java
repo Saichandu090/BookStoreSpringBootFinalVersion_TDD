@@ -1,11 +1,13 @@
 package com.example.bookstore.controller;
 
+import com.example.bookstore.config.JWTFilter;
 import com.example.bookstore.entity.User;
 import com.example.bookstore.mapper.CartMapper;
 import com.example.bookstore.mapper.UserMapper;
 import com.example.bookstore.requestdto.CartRequest;
 import com.example.bookstore.responsedto.CartResponse;
 import com.example.bookstore.service.CartService;
+import com.example.bookstore.serviceimpl.JWTService;
 import com.example.bookstore.util.ResponseStructure;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,6 +52,12 @@ class CartControllerTest
 {
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private JWTService jwtService;
+
+    @MockitoBean
+    private JWTFilter jwtFilter;
 
     @Autowired
     private ObjectMapper objectMapper;

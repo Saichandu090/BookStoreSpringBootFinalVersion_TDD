@@ -59,7 +59,8 @@ public class BookServiceImpl implements BookService
         List<Book> sortedBooks=bookRepository.findAll(Sort.by(Sort.Direction.ASC,field));
         if(sortedBooks.isEmpty())
             return bookMapper.noContent();
-        List<BookResponse> responseDTOs= sortedBooks.stream().map(bookMapper::mapBookToBookResponse).toList();//Converting sorted books into list of BookResponse with stream and BookMapper
+        List<Book> activeBooks=sortedBooks.parallelStream().filter(Book::getStatus).toList();
+        List<BookResponse> responseDTOs= activeBooks.parallelStream().map(bookMapper::mapBookToBookResponse).toList();//Converting sorted books into list of BookResponse with stream and BookMapper
         return bookMapper.mapToSuccessGetAllBooks("Books sorted successfully based on "+field,responseDTOs);
     }
 
@@ -72,7 +73,8 @@ public class BookServiceImpl implements BookService
         List<Book> foundBooks = bookRepository.searchBooksByKeyword(query);
         if (foundBooks.isEmpty())
             return bookMapper.noContent();
-        List<BookResponse> responseDTOs = foundBooks.stream().map(bookMapper::mapBookToBookResponse).toList();//Converting found books to list of bookResponse using stream and BookMapper
+        List<Book> activeBooks=foundBooks.parallelStream().filter(Book::getStatus).toList();
+        List<BookResponse> responseDTOs = activeBooks.parallelStream().map(bookMapper::mapBookToBookResponse).toList();//Converting found books to list of bookResponse using stream and BookMapper
         return bookMapper.mapToSuccessGetAllBooks("Books matching the query: " + query, responseDTOs);
     }
 
@@ -86,7 +88,8 @@ public class BookServiceImpl implements BookService
         List<Book> bookList=books.getContent();
         if(bookList.isEmpty())
             return bookMapper.noContent();
-        List<BookResponse> responseDTOs= bookList.stream().map(bookMapper::mapBookToBookResponse).toList();//Converting bookList into list of BookResponse using stream and BookMapper
+        List<Book> activeBooks=bookList.parallelStream().filter(Book::getStatus).toList();
+        List<BookResponse> responseDTOs= activeBooks.stream().map(bookMapper::mapBookToBookResponse).toList();//Converting bookList into list of BookResponse using stream and BookMapper
         return bookMapper.mapToSuccessGetAllBooks("Books fetched successfully",responseDTOs);
     }
 
@@ -97,7 +100,8 @@ public class BookServiceImpl implements BookService
         List<Book> books=bookRepository.findAll();
         if(books.isEmpty())
             return bookMapper.noContent();
-        List<BookResponse> bookResponse =books.stream().map(bookMapper::mapBookToBookResponse).toList();//Converting books into List of BookResponse using Stream and BookMapper
+        List<Book> activeBooks=books.stream().filter(Book::getStatus).toList();
+        List<BookResponse> bookResponse =activeBooks.parallelStream().map(bookMapper::mapBookToBookResponse).toList();//Converting books into List of BookResponse using Stream and BookMapper
         return bookMapper.mapToSuccessGetAllBooks("Books fetched successfully", bookResponse);
     }
 
@@ -116,8 +120,11 @@ public class BookServiceImpl implements BookService
     public ResponseEntity<ResponseStructure<String>> deleteBook(Long bookId)
     {
         Book book=getBookByIdFromOptional(bookId);
-        bookRepository.delete(book);
-        return bookMapper.mapToSuccessDeleteBook("Book with name "+book.getBookName()+" deleted successfully");
+        if(Boolean.FALSE.equals(book.getStatus()))
+            throw new BookNotFoundException("Book not found with Id "+bookId);
+        book.setStatus(false);
+        Book deletedBook=bookRepository.save(book);
+        return bookMapper.mapToSuccessDeleteBook("Book with name "+deletedBook.getBookName()+" deleted successfully");
     }
 
 
