@@ -101,7 +101,6 @@ class OrderServiceTest
                 .streetName("Baner")
                 .city("Pune")
                 .state("Maharastra")
-                .order(new ArrayList<>())
                 .userId(user.getUserId()).build();
     }
 

@@ -25,15 +25,8 @@ public class UserPrinciple implements UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities()
     {
-        if(user.getRole().equalsIgnoreCase("USER"))
-        {
-            role = Roles.USER;
-        }
-        else if (user.getRole().equalsIgnoreCase("ADMIN"))
-        {
-            role=Roles.ADMIN;
-        }
-        return Collections.singletonList(new SimpleGrantedAuthority(role.name()));
+        String userRole = (user != null && user.getRole() != null) ? user.getRole().toUpperCase() : Roles.USER.name();
+        return Collections.singletonList(new SimpleGrantedAuthority( Roles.ADMIN.name().equals(userRole) ? Roles.ADMIN.name() : Roles.USER.name()));
     }
 
     @Override
