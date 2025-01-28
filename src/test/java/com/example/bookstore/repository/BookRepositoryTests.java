@@ -238,6 +238,47 @@ class BookRepositoryTests
 
 
     @Test
+    void findBooksWithSearch()
+    {
+        BookRequest bookRequest = BookRequest.builder()
+                .bookId(789654123L)
+                .bookName("Chille")
+                .bookPrice(789.0)
+                .bookLogo("URL")
+                .bookAuthor("XYZ")
+                .bookDescription("Descript")
+                .bookQuantity(85).build();
+
+        BookRequest bookRequest1 = BookRequest.builder()
+                .bookId(789654121L)
+                .bookName("Chill")
+                .bookPrice(789.0)
+                .bookLogo("URL")
+                .bookAuthor("XYZ")
+                .bookDescription("Descript")
+                .bookQuantity(85).build();
+
+        BookRequest bookRequest2 = BookRequest.builder()
+                .bookId(789654126L)
+                .bookName("Zing")
+                .bookPrice(989.0)
+                .bookLogo("URL")
+                .bookAuthor("XYZ")
+                .bookDescription("Making Chilli")
+                .bookQuantity(85).build();
+
+        bookService.addBook(bookRequest1);
+        bookService.addBook(bookRequest);
+        bookService.addBook(bookRequest2);
+
+        ResponseEntity<ResponseStructure<List<BookResponse>>> response=bookService.searchBooks("Chill");
+
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(3,response.getBody().getData().size());
+    }
+
+
+    @Test
     void updateBookTest()
     {
         BookRequest bookRequest = BookRequest.builder()

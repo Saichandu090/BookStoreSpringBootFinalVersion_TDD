@@ -2,6 +2,7 @@ package com.example.bookstore.integrationtest;
 
 import com.example.bookstore.entity.Book;
 import com.example.bookstore.integrationtest.h2repo.BookH2Repository;
+import com.example.bookstore.integrationtest.h2repo.UserH2Repository;
 import com.example.bookstore.requestdto.BookRequest;
 import com.example.bookstore.requestdto.UserLoginEntity;
 import com.example.bookstore.requestdto.UserRegisterEntity;
@@ -9,10 +10,7 @@ import com.example.bookstore.responsedto.BookResponse;
 import com.example.bookstore.responsedto.LoginResponse;
 import com.example.bookstore.responsedto.RegisterResponse;
 import com.example.bookstore.util.ResponseStructure;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -28,7 +26,6 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 public class BookControllerIT
@@ -36,14 +33,15 @@ public class BookControllerIT
     @LocalServerPort
     private int port;
 
-    private String authToken;
-
     private String baseUrl="http://localhost";
 
     private static RestTemplate restTemplate;
 
     @Autowired
     private BookH2Repository bookH2Repository;
+
+    @Autowired
+    private UserH2Repository userH2Repository;
 
     @BeforeAll
     public static void init()
@@ -55,45 +53,50 @@ public class BookControllerIT
     public void setUp()
     {
         baseUrl=baseUrl.concat(":").concat(port+"").concat("/book");
+        bookH2Repository.deleteAll();
+        userH2Repository.deleteAll();
+    }
+
+    @AfterEach
+    public void tearDown()
+    {
+        bookH2Repository.deleteAll();
+        userH2Repository.deleteAll();
     }
 
     protected String getAuthToken()
     {
-        if (authToken == null)
-        {
-            UserRegisterEntity userRegisterEntity = UserRegisterEntity.builder()
-                    .firstName("Test")
-                    .lastName("Chandu")
-                    .dob(LocalDate.of(2002,8,24))
-                    .email("test@gmail.com")
-                    .role("ADMIN")
-                    .password("Saichandu@090").build();
+        UserRegisterEntity userRegisterEntity = UserRegisterEntity.builder()
+                .firstName("Test")
+                .lastName("Chandu")
+                .dob(LocalDate.of(2002,8,24))
+                .email("test@gmail.com")
+                .role("ADMIN")
+                .password("Saichandu@090").build();
 
-            ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
-            assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
-            assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
+        assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
+        assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
 
-            UserLoginEntity userLoginEntity = UserLoginEntity.builder()
-                    .email("test@gmail.com")
-                    .password("Saichandu@090").build();
+        UserLoginEntity userLoginEntity = UserLoginEntity.builder()
+                .email("test@gmail.com")
+                .password("Saichandu@090").build();
 
-            ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
+        ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
-            assertEquals(HttpStatus.OK,loginResponse.getStatusCode());
-            assertEquals(HttpStatus.OK.value(),loginResponse.getBody().getStatus());
-            assertEquals("test@gmail.com",loginResponse.getBody().getData().getEmail());
-            assertEquals("ADMIN",loginResponse.getBody().getData().getRole());
-            authToken = loginResponse.getBody().getMessage();
-        }
-        return authToken;
+        assertEquals(HttpStatus.OK,loginResponse.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),loginResponse.getBody().getStatus());
+        assertEquals("test@gmail.com",loginResponse.getBody().getData().getEmail());
+        assertEquals("ADMIN",loginResponse.getBody().getData().getRole());
+        return loginResponse.getBody().getMessage();
     }
 
 
     @Test
     void addBookTestValidScene()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
 
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
@@ -121,7 +124,7 @@ public class BookControllerIT
     @Test
     void addBookTestIfBodyIsInvalid()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
 
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
@@ -145,7 +148,7 @@ public class BookControllerIT
     @Test
     void addBookTestIfBookQuantityIsLessThan16()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
 
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
@@ -170,7 +173,7 @@ public class BookControllerIT
     void addBookTestIfTokenIsInvalidOrMissing()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
-        httpHeaders.set("Authorization",authToken);
+        httpHeaders.set("Authorization","authToken");
 
         BookRequest bookRequest = BookRequest.builder()
                 .bookId(3245L)
@@ -189,13 +192,24 @@ public class BookControllerIT
 
 
     @Test
-    public void getBookByNameValidScene()
+    void getBookByNameValidScene()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addBookTestValidScene();
+        BookRequest bookRequest = BookRequest.builder()
+                .bookId(3245L)
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<BookResponse>> response = restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
+        assertEquals(HttpStatus.CREATED,response.getStatusCode());
 
         HttpEntity<Object> getEntity = new HttpEntity<>(httpHeaders);
         ResponseEntity<ResponseStructure<BookResponse>> getResponse = restTemplate.exchange(baseUrl + "/getBookByName/TEST", HttpMethod.GET, getEntity,
@@ -209,13 +223,27 @@ public class BookControllerIT
     }
 
     @Test
-    public void getBookByNameIfWrongBookNameGiven()
+    void getBookByNameIfWrongBookNameGiven()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addBookTestValidScene();
+        //adding a book
+        BookRequest bookRequest = BookRequest.builder()
+                .bookId(3245L)
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<BookResponse>> response = restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
+        assertEquals(HttpStatus.CREATED,response.getStatusCode());
+
+        //This test
         HttpEntity<Object> getEntity = new HttpEntity<>(httpHeaders);
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/getBookByName/TESTING", HttpMethod.GET, getEntity,
@@ -225,14 +253,27 @@ public class BookControllerIT
 
 
     @Test
-    public void getBookByIdValidScene()
+    void getBookByIdValidScene()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addBookTestValidScene();
+        //adding a book
+        BookRequest bookRequest = BookRequest.builder()
+                .bookId(3245L)
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<BookResponse>> response = restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
+        assertEquals(HttpStatus.CREATED,response.getStatusCode());
 
+        //This test
         HttpEntity<Object> getEntity = new HttpEntity<>(httpHeaders);
         ResponseEntity<ResponseStructure<BookResponse>> getResponse = restTemplate.exchange(baseUrl + "/getBookById/3245", HttpMethod.GET, getEntity,
                 new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
@@ -246,14 +287,27 @@ public class BookControllerIT
 
 
     @Test
-    public void getBookByIdIfBookIdNotFound()
+    void getBookByIdIfBookIdNotFound()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addBookTestValidScene();
+        //adding a book
+        BookRequest bookRequest = BookRequest.builder()
+                .bookId(3245L)
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<BookResponse>> response = restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
+        assertEquals(HttpStatus.CREATED,response.getStatusCode());
 
+        //This test
         HttpEntity<Object> getEntity = new HttpEntity<>(httpHeaders);
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/getBookById/32451", HttpMethod.GET, getEntity,
                 new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {}));
@@ -262,15 +316,28 @@ public class BookControllerIT
 
 
     @Test
-    public void updateBookValidScene()
+    void updateBookValidScene()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addBookTestValidScene();
-
+        //Adding a book
         BookRequest bookRequest = BookRequest.builder()
+                .bookId(3245L)
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<BookResponse>> response = restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
+        assertEquals(HttpStatus.CREATED,response.getStatusCode());
+
+        //Editing the book
+        BookRequest bookEditRequest = BookRequest.builder()
                 .bookId(3245L)
                 .bookName("TESTING")
                 .bookPrice(399.3)
@@ -279,28 +346,41 @@ public class BookControllerIT
                 .bookQuantity(145)
                 .bookLogo("URL").build();
 
-        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
-        ResponseEntity<ResponseStructure<BookResponse>> response = restTemplate.exchange(baseUrl + "/updateBook/3245", HttpMethod.PUT, entity,
+        HttpEntity<Object> entity2 = new HttpEntity<>(bookEditRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<BookResponse>> response2 = restTemplate.exchange(baseUrl + "/updateBook/3245", HttpMethod.PUT, entity2,
                 new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
-
-        assertEquals(HttpStatus.OK,response.getStatusCode());
-        assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
-        assertEquals(3245,response.getBody().getData().getBookId());
-        assertEquals("TESTING",response.getBody().getData().getBookName());
-        assertEquals(399.3,response.getBody().getData().getBookPrice());
-        assertEquals("Manual Test",response.getBody().getData().getBookAuthor());
+        assertEquals(HttpStatus.OK,response2.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response2.getBody().getStatus());
+        assertEquals(3245,response2.getBody().getData().getBookId());
+        assertEquals("TESTING",response2.getBody().getData().getBookName());
+        assertEquals(399.3,response2.getBody().getData().getBookPrice());
+        assertEquals("Manual Test",response2.getBody().getData().getBookAuthor());
     }
 
 
     @Test
-    public void updateBookIfBookIdIsInvalid()
+    void updateBookIfBookIdIsInvalid()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addBookTestValidScene();
+        //Adding a book
         BookRequest bookRequest = BookRequest.builder()
+                .bookId(3245L)
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<BookResponse>> response = restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
+        assertEquals(HttpStatus.CREATED,response.getStatusCode());
+
+        //Editing the book
+        BookRequest bookEditRequest = BookRequest.builder()
                 .bookId(32455L)
                 .bookName("TESTING")
                 .bookPrice(399.3)
@@ -309,9 +389,8 @@ public class BookControllerIT
                 .bookQuantity(145)
                 .bookLogo("URL").build();
 
-        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
-
-        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/updateBook/32455", HttpMethod.PUT, entity,
+        HttpEntity<Object> entity2 = new HttpEntity<>(bookEditRequest,httpHeaders);
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/updateBook/32455", HttpMethod.PUT, entity2,
                 new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {
                 }));
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -319,23 +398,36 @@ public class BookControllerIT
 
 
     @Test
-    public void updateBookIfBookBodyIsNotValid()
+    void updateBookIfBookBodyIsNotValid()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addBookTestValidScene();
+        //Adding a book
         BookRequest bookRequest = BookRequest.builder()
+                .bookId(3245L)
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<BookResponse>> response = restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
+        assertEquals(HttpStatus.CREATED,response.getStatusCode());
+
+        //Updating book
+        BookRequest bookEditRequest = BookRequest.builder()
                 .bookPrice(399.3)
                 .bookAuthor("Manual Test")
                 .bookDescription("Atom Bom")
                 .bookQuantity(145)
                 .bookLogo("URL").build();
 
-        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
-
-        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/updateBook/3245", HttpMethod.PUT, entity,
+        HttpEntity<Object> entity2 = new HttpEntity<>(bookEditRequest,httpHeaders);
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/updateBook/3245", HttpMethod.PUT, entity2,
                 new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {
                 }));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
@@ -343,12 +435,10 @@ public class BookControllerIT
 
 
     @Test
-    public void updateBookIfTokenIsNotValid()
+    void updateBookIfTokenIsNotValid()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
-        httpHeaders.set("Authorization",authToken);
-
-        addBookTestValidScene();
+        httpHeaders.set("Authorization","authToken");
         BookRequest bookRequest = BookRequest.builder()
                 .bookName("Testing")
                 .bookPrice(399.3)
@@ -356,9 +446,7 @@ public class BookControllerIT
                 .bookDescription("Atom Bom")
                 .bookQuantity(145)
                 .bookLogo("URL").build();
-
         HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
-
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> restTemplate.exchange(baseUrl + "/updateBook/3245", HttpMethod.PUT, entity,
                 new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {
                 }));
@@ -367,37 +455,63 @@ public class BookControllerIT
 
 
     @Test
-    public void deleteBookValidScene()
+    void deleteBookValidScene()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addBookTestValidScene();
+        //Adding a book
+        BookRequest bookRequest = BookRequest.builder()
+                .bookId(3245L)
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<BookResponse>> response = restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
+        assertEquals(HttpStatus.CREATED,response.getStatusCode());
+        Long bookId=response.getBody().getData().getBookId();
 
-        HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
-        ResponseEntity<ResponseStructure<String>> response = restTemplate.exchange(baseUrl + "/deleteBook/3245", HttpMethod.DELETE, entity,
+        //deleting the book
+        HttpEntity<Object> entity2 = new HttpEntity<>(httpHeaders);
+        ResponseEntity<ResponseStructure<String>> response2 = restTemplate.exchange(baseUrl + "/deleteBook/"+bookId, HttpMethod.DELETE, entity2,
                 new ParameterizedTypeReference<ResponseStructure<String>>() {});
 
-        assertEquals(HttpStatus.OK,response.getStatusCode());
-        assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
+        assertEquals(HttpStatus.OK,response2.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response2.getBody().getStatus());
         assertEquals(1,bookH2Repository.findAll().size());
     }
 
 
     @Test
-    public void deleteBookIfBookIdIsInvalid()
+    void deleteBookIfBookIdIsInvalid()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        addBookTestValidScene();
+        //Adding a book
+        BookRequest bookRequest = BookRequest.builder()
+                .bookId(3245L)
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<BookResponse>> response = restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
+        assertEquals(HttpStatus.CREATED,response.getStatusCode());
 
-        HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
-
+        //deleting the book
+        HttpEntity<Object> entity2 = new HttpEntity<>(httpHeaders);
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> {
-            restTemplate.exchange(baseUrl + "/deleteBook/" + 1234, HttpMethod.DELETE, entity,
+            restTemplate.exchange(baseUrl + "/deleteBook/" + 1234, HttpMethod.DELETE, entity2,
                     new ParameterizedTypeReference<ResponseStructure<String>>() {});
         });
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
@@ -405,15 +519,11 @@ public class BookControllerIT
 
 
     @Test
-    public void deleteBookIfTokenIsInvalid()
+    void deleteBookIfTokenIsInvalid()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
-        httpHeaders.set("Authorization",authToken);
-
-        addBookTestValidScene();
-
+        httpHeaders.set("Authorization","authToken");
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
-
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> {
             restTemplate.exchange(baseUrl + "/deleteBook/" + 3245, HttpMethod.DELETE, entity,
                     new ParameterizedTypeReference<ResponseStructure<String>>() {});
@@ -422,9 +532,9 @@ public class BookControllerIT
     }
 
 
-    public void addBookTestValidSceneSecondBook()
+    void addBookTestValidSceneSecondBook(String authToken)
     {
-        authToken=getAuthToken();
+
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
@@ -449,9 +559,9 @@ public class BookControllerIT
 
 
     @Test
-    public void getAllBooksTest()
+    void getAllBooksTest()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
@@ -460,8 +570,21 @@ public class BookControllerIT
 
         assertEquals(HttpStatus.NO_CONTENT,ifEmpty.getStatusCode());
 
-        addBookTestValidScene();
-        addBookTestValidSceneSecondBook();
+        //Adding a book
+        BookRequest bookRequest = BookRequest.builder()
+                .bookId(3245L)
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+        HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<BookResponse>> response7 = restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
+                new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
+        assertEquals(HttpStatus.CREATED,response7.getStatusCode());
+
+        addBookTestValidSceneSecondBook(authToken);
 
         ResponseEntity<ResponseStructure<List<BookResponse>>> response = restTemplate.exchange(baseUrl + "/getBooks", HttpMethod.GET, new HttpEntity<>(httpHeaders),
                 new ParameterizedTypeReference<ResponseStructure<List<BookResponse>>>() {});
@@ -475,14 +598,10 @@ public class BookControllerIT
     }
 
     @Test
-    public void getAllBooksTestIfTokenIsInvalid()
+    void getAllBooksTestIfTokenIsInvalid()
     {
         HttpHeaders httpHeaders=new HttpHeaders();
-        httpHeaders.set("Authorization",authToken);
-
-        addBookTestValidScene();
-        addBookTestValidSceneSecondBook();
-
+        httpHeaders.set("Authorization","authToken");
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/getBooks", HttpMethod.GET, new HttpEntity<>(httpHeaders),
                 new ParameterizedTypeReference<ResponseStructure<List<BookResponse>>>() {}));
         assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
@@ -490,9 +609,9 @@ public class BookControllerIT
 
 
     @Test
-    public void findBooksWithSortingBookNameBookPriceValidTest()
+    void findBooksWithSortingBookNameBookPriceValidTest()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
         Book first=Book.builder()
@@ -500,6 +619,7 @@ public class BookControllerIT
                 .bookName("Lawsuit")
                 .bookAuthor("Carley")
                 .bookPrice(220.99)
+                .status(true)
                 .build();
 
         Book second=Book.builder()
@@ -507,6 +627,7 @@ public class BookControllerIT
                 .bookName("Zak Crawly")
                 .bookAuthor("Brother")
                 .bookPrice(225.00)
+                .status(true)
                 .build();
 
         Book third=Book.builder()
@@ -514,6 +635,7 @@ public class BookControllerIT
                 .bookName("James miggel")
                 .bookAuthor("Chuck")
                 .bookPrice(99.90)
+                .status(true)
                 .build();
         bookH2Repository.save(first);
         bookH2Repository.save(second);
@@ -560,9 +682,9 @@ public class BookControllerIT
 
 
     @Test
-    public void sortByFieldWithInvalidField()
+    void sortByFieldWithInvalidField()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
@@ -573,9 +695,9 @@ public class BookControllerIT
 
 
     @Test
-    public void paginationValidTest()
+    void paginationValidTest()
     {
-        authToken = getAuthToken();
+        String authToken = getAuthToken();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("Authorization", "Bearer " + authToken);
 
@@ -585,6 +707,7 @@ public class BookControllerIT
                     .bookName("Book " + i)
                     .bookAuthor("Author " + i)
                     .bookPrice(1 + i * 10.7)
+                    .status(true)
                     .build();
             bookH2Repository.save(book);
         });
@@ -594,7 +717,7 @@ public class BookControllerIT
                 new ParameterizedTypeReference<ResponseStructure<List<BookResponse>>>() {});
         assertEquals(HttpStatus.OK, defaultResponse.getStatusCode());
         assertEquals(HttpStatus.OK.value(), defaultResponse.getBody().getStatus());
-        assertEquals(10,defaultResponse.getBody().getData().size(),"Checking the number of books equals to page size");
+        assertEquals(8,defaultResponse.getBody().getData().size(),"Checking the number of books equals to page size");
         assertEquals(15, bookH2Repository.findAll().size());
 
         //First page Test
@@ -621,9 +744,9 @@ public class BookControllerIT
 
 
     @Test
-    public void paginationIfPageNumberIsInvalidPageNumberExceedsBooksSize()
+    void paginationIfPageNumberIsInvalidPageNumberExceedsBooksSize()
     {
-        authToken = getAuthToken();
+        String authToken = getAuthToken();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("Authorization", "Bearer " + authToken);
 
@@ -649,17 +772,18 @@ public class BookControllerIT
 
 
     @Test
-    public void searchQueryCheckingForMatches()
+    void searchQueryCheckingForMatches()
     {
-        authToken = getAuthToken();
+        String authToken = getAuthToken();
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("Authorization", "Bearer " + authToken);
+        httpHeaders.set("Authorization", "Bearer "+authToken);
         Book first = Book.builder()
                 .bookId(92L)
                 .bookName("Lawsuit")
                 .bookDescription("laws")
                 .bookAuthor("Carley")
                 .bookPrice(220.99)
+                .status(true)
                 .build();
 
         Book second = Book.builder()
@@ -668,6 +792,7 @@ public class BookControllerIT
                 .bookDescription("study of laws")
                 .bookAuthor("Brother")
                 .bookPrice(225.00)
+                .status(true)
                 .build();
 
         Book third = Book.builder()
@@ -676,6 +801,7 @@ public class BookControllerIT
                 .bookDescription("gaming")
                 .bookAuthor("Chuck")
                 .bookPrice(99.90)
+                .status(true)
                 .build();
         bookH2Repository.save(first);
         bookH2Repository.save(second);

@@ -29,13 +29,10 @@ public class ExecutionTimeAspect
     public Object aroundMethod(ProceedingJoinPoint joinPoint) throws Throwable
     {
         long startTime = System.currentTimeMillis();
-        log.info("Method {} is about to be executed",
-                joinPoint.getSignature().getName());
+        log.info("Method {} is about to be executed",joinPoint.getSignature().getName());
         Object result = joinPoint.proceed();
         long endTime = System.currentTimeMillis();
-        log.info("Method {} executed in {}ms",
-                joinPoint.getSignature().getName(),
-                (endTime - startTime));
+        log.info("Method {} executed in {}ms",joinPoint.getSignature().getName(),(endTime - startTime));
         return result;
     }
 

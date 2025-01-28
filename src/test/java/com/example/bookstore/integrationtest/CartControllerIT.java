@@ -13,6 +13,7 @@ import com.example.bookstore.responsedto.LoginResponse;
 import com.example.bookstore.responsedto.RegisterResponse;
 import com.example.bookstore.service.CartService;
 import com.example.bookstore.util.ResponseStructure;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,8 +53,6 @@ class CartControllerIT
 
     private static RestTemplate restTemplate;
 
-    private String authToken;
-
     @BeforeAll
     static void init()
     {
@@ -64,6 +63,16 @@ class CartControllerIT
     void setUp()
     {
         baseUrl=baseUrl.concat(":").concat(port+"").concat("/cart");
+        userH2Repository.deleteAll();
+        cartH2Repository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown()
+    {
+        userH2Repository.deleteAll();
+        bookH2Repository.deleteAll();
+        cartH2Repository.deleteAll();
     }
 
     @BeforeEach
@@ -107,46 +116,42 @@ class CartControllerIT
 
     protected String getAuthToken()
     {
-        if (authToken == null)
-        {
-            UserRegisterEntity userRegisterEntity = UserRegisterEntity.builder()
-                    .firstName("Soul")
-                    .lastName("Dinesh")
-                    .dob(LocalDate.of(1992,8,24))
-                    .email("dinesh@gmail.com")
-                    .role("USER")
-                    .password("Dinesh@090").build();
+        UserRegisterEntity userRegisterEntity = UserRegisterEntity.builder()
+                .firstName("Soul")
+                .lastName("Dinesh")
+                .dob(LocalDate.of(1992,8,24))
+                .email("dinesh@gmail.com")
+                .role("USER")
+                .password("Dinesh@090").build();
 
-            ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
+        ResponseEntity<ResponseStructure<RegisterResponse>> registerResponse = restTemplate.exchange( "http://localhost:"+port+"/register", HttpMethod.POST, new HttpEntity<>(userRegisterEntity), new ParameterizedTypeReference<ResponseStructure<RegisterResponse>>(){});
 
-            assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
-            assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
+        assertEquals(HttpStatus.CREATED,registerResponse.getStatusCode());
+        assertEquals(HttpStatus.CREATED.value(),registerResponse.getBody().getStatus());
 
-            UserLoginEntity userLoginEntity = UserLoginEntity.builder()
-                    .email("dinesh@gmail.com")
-                    .password("Dinesh@090").build();
+        UserLoginEntity userLoginEntity = UserLoginEntity.builder()
+                .email("dinesh@gmail.com")
+                .password("Dinesh@090").build();
 
-            ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
+        ResponseEntity<ResponseStructure<LoginResponse>> loginResponse = restTemplate.exchange(  "http://localhost:"+port+"/login", HttpMethod.POST, new HttpEntity<>(userLoginEntity), new ParameterizedTypeReference<ResponseStructure<LoginResponse>>(){});
 
-            assertEquals(HttpStatus.OK,loginResponse.getStatusCode());
-            assertEquals(HttpStatus.OK.value(),loginResponse.getBody().getStatus());
-            assertEquals("dinesh@gmail.com",loginResponse.getBody().getData().getEmail());
-            assertEquals("USER",loginResponse.getBody().getData().getRole());
-            authToken = loginResponse.getBody().getMessage();
-        }
-        return authToken;
+        assertEquals(HttpStatus.OK,loginResponse.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),loginResponse.getBody().getStatus());
+        assertEquals("dinesh@gmail.com",loginResponse.getBody().getData().getEmail());
+        assertEquals("USER",loginResponse.getBody().getData().getRole());
+        return loginResponse.getBody().getMessage();
     }
 
 
     @Test
     void addToCartValidTestMultipleTimesUntilBookOutOfStock()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
+
         CartRequest cartRequest = CartRequest.builder().bookId(3L).build();
         HttpEntity<Object> httpEntity=new HttpEntity<>(cartRequest,httpHeaders);
-
         ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
@@ -261,7 +266,7 @@ class CartControllerIT
     @Test
     void addToCartExampleForCallingMultipleTimes()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
         CartRequest cartRequest = CartRequest.builder().bookId(1L).build();
@@ -276,19 +281,39 @@ class CartControllerIT
     @Test
     void removeFromCartValidTest()
     {
-        addToCartExampleForCallingMultipleTimes();
-        addToCartExampleForCallingMultipleTimes();
-
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
-        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
 
-        ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(baseUrl + "/removeFromCart/1", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
 
+        //Adding to cart 1st time
+        CartRequest cartRequest = CartRequest.builder().bookId(1L).build();
+        HttpEntity<Object> httpEntity=new HttpEntity<>(cartRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
-        assertEquals("Book TEST has removed from the cart",response.getBody().getMessage());
+        assertEquals(1,response.getBody().getData().getBookId(),"checking if the same book is added to cart or not");
+        assertEquals(1,response.getBody().getData().getCartQuantity(),"checking the cart quantity");
+        Long cartId=response.getBody().getData().getCartId();
+
+
+        //Adding to cart 2nd time
+        CartRequest cartRequest2 = CartRequest.builder().bookId(1L).build();
+        HttpEntity<Object> httpEntity2=new HttpEntity<>(cartRequest2,httpHeaders);
+        ResponseEntity<ResponseStructure<CartResponse>> response2=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
+        assertEquals(HttpStatus.OK,response2.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response2.getBody().getStatus());
+        assertEquals(1,response2.getBody().getData().getBookId(),"checking if the same book is added to cart or not");
+        assertEquals(2,response2.getBody().getData().getCartQuantity(),"checking the cart quantity");
+        Long cartId2=response2.getBody().getData().getCartId();
+
+
+        //This actual test
+        HttpEntity<Object> httpEntity3=new HttpEntity<>(httpHeaders);
+        ResponseEntity<ResponseStructure<CartResponse>> response3=restTemplate.exchange(baseUrl + "/removeFromCart/"+cartId, HttpMethod.DELETE, httpEntity3, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
+        assertEquals(HttpStatus.OK,response3.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response3.getBody().getStatus());
+        assertEquals("Book TEST has removed from the cart",response3.getBody().getMessage());
 
         Book book=bookH2Repository.findById(1L).get();
         assertEquals(2,book.getBookQuantity());
@@ -297,11 +322,10 @@ class CartControllerIT
         assertEquals(1,user.getCarts().getFirst().getCartQuantity());
 
 
-        ResponseEntity<ResponseStructure<CartResponse>> response2=restTemplate.exchange(baseUrl + "/removeFromCart/1", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
-
-        assertEquals(HttpStatus.OK,response2.getStatusCode());
-        assertEquals(HttpStatus.OK.value(),response2.getBody().getStatus());
-        assertEquals("Book TEST has removed from the cart",response2.getBody().getMessage());
+        ResponseEntity<ResponseStructure<CartResponse>> response4=restTemplate.exchange(baseUrl + "/removeFromCart/"+cartId2, HttpMethod.DELETE, httpEntity3, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
+        assertEquals(HttpStatus.OK,response4.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response4.getBody().getStatus());
+        assertEquals("Book TEST has removed from the cart",response4.getBody().getMessage());
 
         Book book2=bookH2Repository.findById(1L).get();
         assertEquals(3,book2.getBookQuantity());
@@ -310,7 +334,7 @@ class CartControllerIT
         assertEquals(0,user2.getCarts().size());
 
 
-        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/removeFromCart/1", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {}));
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/removeFromCart/1", HttpMethod.DELETE, httpEntity3, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {}));
         assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
     }
 
@@ -318,14 +342,19 @@ class CartControllerIT
     @Test
     void removeFromCartIfCartNotFound()
     {
-        addToCartExampleForCallingMultipleTimes();
-
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
-        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
 
-        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/removeFromCart/2", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {}));
+        CartRequest cartRequest = CartRequest.builder().bookId(1L).build();
+        HttpEntity<Object> httpEntity=new HttpEntity<>(cartRequest,httpHeaders);
+        ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
+
+        //This actual test
+        HttpEntity<Object> httpEntity2=new HttpEntity<>(httpHeaders);
+        HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/removeFromCart/2", HttpMethod.DELETE, httpEntity2, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {}));
         assertEquals(HttpStatus.NOT_FOUND,exception.getStatusCode());
         exception.printStackTrace();
     }
@@ -335,28 +364,42 @@ class CartControllerIT
     @Test
     void getCartValidTest()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
-        addToCartExampleForCallingMultipleTimes();
-        addToCartExampleForCallingMultipleTimes();
-        addToCartExampleForCallingMultipleTimes();
+
+        CartRequest cartRequest1 = CartRequest.builder().bookId(1L).build();
+        HttpEntity<Object> httpEntity=new HttpEntity<>(cartRequest1,httpHeaders);
+        ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
+
+        CartRequest cartRequest2 = CartRequest.builder().bookId(1L).build();
+        HttpEntity<Object> httpEntity2=new HttpEntity<>(cartRequest2,httpHeaders);
+        ResponseEntity<ResponseStructure<CartResponse>> response2=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
+        assertEquals(HttpStatus.OK,response2.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response2.getBody().getStatus());
+
+        CartRequest cartRequest3 = CartRequest.builder().bookId(1L).build();
+        HttpEntity<Object> httpEntity3=new HttpEntity<>(cartRequest3,httpHeaders);
+        ResponseEntity<ResponseStructure<CartResponse>> response3=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity3, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
+        assertEquals(HttpStatus.OK,response3.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response3.getBody().getStatus());
+
+
 
         CartRequest cartRequest = CartRequest.builder().bookId(2L).build();
         HttpEntity<Object> postHttpEntity=new HttpEntity<>(cartRequest,httpHeaders);
-
         ResponseEntity<ResponseStructure<CartResponse>> response1=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, postHttpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response1.getStatusCode());
 
 
-        HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
-
-        ResponseEntity<ResponseStructure<List<CartResponse>>> response=restTemplate.exchange(baseUrl + "/getCart", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<List<CartResponse>>>() {});
-
+        HttpEntity<Object> httpEntity4=new HttpEntity<>(httpHeaders);
+        ResponseEntity<ResponseStructure<List<CartResponse>>> response4=restTemplate.exchange(baseUrl + "/getCart", HttpMethod.GET, httpEntity4, new ParameterizedTypeReference<ResponseStructure<List<CartResponse>>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
-        assertEquals(3,response.getBody().getData().getFirst().getCartQuantity());
-        assertEquals(1,response.getBody().getData().getFirst().getCartId());
-        assertEquals(1,response.getBody().getData().getFirst().getBookId());
+        assertEquals(3,response4.getBody().getData().getFirst().getCartQuantity());
+        assertEquals(1,response4.getBody().getData().getFirst().getCartId());
+        assertEquals(1,response4.getBody().getData().getFirst().getBookId());
 
         User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
         assertEquals(2,user.getCarts().size());
@@ -366,15 +409,13 @@ class CartControllerIT
     @Test
     void getCartCartIsEmpty()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
 
         ResponseEntity<ResponseStructure<List<CartResponse>>> response=restTemplate.exchange(baseUrl + "/getCart", HttpMethod.GET, httpEntity, new ParameterizedTypeReference<ResponseStructure<List<CartResponse>>>() {});
-
         assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
-
         User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
         assertEquals(0,user.getCarts().size());
     }
@@ -396,13 +437,24 @@ class CartControllerIT
     @Test
     void clearCartValidTest()
     {
-        addToCartExampleForCallingMultipleTimes();
-        addToCartExampleForCallingMultipleTimes();
-
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
+
+        CartRequest cartRequest1 = CartRequest.builder().bookId(1L).build();
+        HttpEntity<Object> httpEntity1=new HttpEntity<>(cartRequest1,httpHeaders);
+        ResponseEntity<ResponseStructure<CartResponse>> response1=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity1, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
+        assertEquals(HttpStatus.OK,response1.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response1.getBody().getStatus());
+
+
+        CartRequest cartRequest2 = CartRequest.builder().bookId(1L).build();
+        HttpEntity<Object> httpEntity2=new HttpEntity<>(cartRequest2,httpHeaders);
+        ResponseEntity<ResponseStructure<CartResponse>> response2=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
+        assertEquals(HttpStatus.OK,response2.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response2.getBody().getStatus());
+
 
         CartRequest cartRequest = CartRequest.builder().bookId(2L).build();
         HttpEntity<Object> postHttpEntity=new HttpEntity<>(cartRequest,httpHeaders);
@@ -419,11 +471,11 @@ class CartControllerIT
         User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
         assertEquals(2,user.getCarts().size());
 
-        ResponseEntity<ResponseStructure<CartResponse>> response2=restTemplate.exchange(baseUrl + "/clearCart", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
+        ResponseEntity<ResponseStructure<CartResponse>> response4=restTemplate.exchange(baseUrl + "/clearCart", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
 
-        assertEquals(HttpStatus.OK,response2.getStatusCode());
-        assertEquals(HttpStatus.OK.value(),response2.getBody().getStatus());
-        assertEquals("Cart cleared successfully",response2.getBody().getMessage());
+        assertEquals(HttpStatus.OK,response4.getStatusCode());
+        assertEquals(HttpStatus.OK.value(),response4.getBody().getStatus());
+        assertEquals("Cart cleared successfully",response4.getBody().getMessage());
 
         Book book2=bookH2Repository.findById(1L).get();
         assertEquals(3,book2.getBookQuantity());
@@ -439,16 +491,14 @@ class CartControllerIT
     @Test
     void clearCartIfCartIsEmpty()
     {
-        authToken=getAuthToken();
+        String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
 
         User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
         assertEquals(0,user.getCarts().size());
-
         ResponseEntity<ResponseStructure<CartResponse>> response2=restTemplate.exchange(baseUrl + "/clearCart", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
-
         assertEquals(HttpStatus.NO_CONTENT,response2.getStatusCode());
     }
 
@@ -458,7 +508,6 @@ class CartControllerIT
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer token");
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
-
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/clearCart", HttpMethod.DELETE, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {}));
         assertEquals(HttpStatus.UNAUTHORIZED,exception.getStatusCode());
     }
