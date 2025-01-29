@@ -102,13 +102,6 @@ class UserServiceTest
     void loginUserValidScene()
     {
         when(userRepository.existsByEmail(userLoginEntity.getEmail())).thenReturn(true);
-//        UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userLoginEntity.getEmail(), userLoginEntity.getPassword());
-//        Authentication authenticationResult= Mockito.mock(Authentication.class);
-//        when(authenticationResult.isAuthenticated()).thenReturn(true);
-//        when(authenticationManager.authenticate(authenticationToken)).thenReturn(authenticationResult);
-//        when(jwtService.generateToken(userLoginEntity.getEmail())).thenReturn("jwt-token");
-        //when(context.getBean(MyUserDetailsService.class)).thenReturn(myUserDetailsService);
-        //when(myUserDetailsService.loadUserByUsername(userLoginEntity.getEmail())).thenReturn(userDetails);
         ResponseEntity<ResponseStructure<LoginResponse>> structureResponseEntity=new ResponseEntity<>(new ResponseStructure<LoginResponse>().setStatus(200).setMessage("jwt-token").setData(new LoginResponse("test@gmail.com","ADMIN")),HttpStatus.OK);
         when(userServiceToGenerateToken.generateToken(any(UserLoginEntity.class))).thenReturn(structureResponseEntity);
 

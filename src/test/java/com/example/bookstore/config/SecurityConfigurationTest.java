@@ -141,7 +141,7 @@ class SecurityConfigurationTest
         verify(httpSecurity, times(1)).httpBasic(any());
         verify(httpSecurity, times(1)).formLogin(any());
         verify(httpSecurity, times(1)).sessionManagement(any());
-        verify(httpSecurity, times(1)).addFilterBefore(eq(jwtFilter), eq(UsernamePasswordAuthenticationFilter.class));
+        verify(httpSecurity, times(1)).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         verify(httpSecurity, times(1)).build();
     }
 }
