@@ -1,7 +1,6 @@
 package com.example.bookstore.service;
 
 import com.example.bookstore.entity.User;
-import com.example.bookstore.exception.BadCredentialsException;
 import com.example.bookstore.exception.UserNotFoundException;
 import com.example.bookstore.repository.UserRepository;
 import com.example.bookstore.requestdto.NewPasswordRequest;
@@ -9,33 +8,20 @@ import com.example.bookstore.requestdto.UserLoginEntity;
 import com.example.bookstore.requestdto.UserRegisterEntity;
 import com.example.bookstore.responsedto.LoginResponse;
 import com.example.bookstore.responsedto.RegisterResponse;
-import com.example.bookstore.serviceimpl.JWTService;
-import com.example.bookstore.serviceimpl.MyUserDetailsService;
 import com.example.bookstore.serviceimpl.UserServiceImpl;
+import com.example.bookstore.serviceimpl.UserServiceToGenerateToken;
 import com.example.bookstore.util.ResponseStructure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -50,24 +36,14 @@ class UserServiceTest
     private UserServiceImpl userService;
 
     @Mock
-    private JWTService jwtService;
-
-    @Mock
-    private AuthenticationManager authenticationManager;
+    private UserServiceToGenerateToken userServiceToGenerateToken;
 
     @Mock
     private PasswordEncoder encoder;
 
-    @Mock
-    private ApplicationContext context;
-
-    @Mock
-    private MyUserDetailsService myUserDetailsService;
-
     private User user;
     private UserRegisterEntity registerDTO;
     private UserLoginEntity userLoginEntity;
-    private UserDetails userDetails;
 
     @BeforeEach
     public void init()
@@ -92,28 +68,11 @@ class UserServiceTest
         userLoginEntity = UserLoginEntity.builder()
                 .email("test@gmail.com")
                 .password("testing").build();
-
-        userDetails=new UserDetails() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return Collections.singletonList(new SimpleGrantedAuthority(user.getRole()));
-            }
-
-            @Override
-            public String getPassword() {
-                return user.getPassword();
-            }
-
-            @Override
-            public String getUsername() {
-                return user.getEmail();
-            }
-        };
     }
 
 
     @Test
-    public void registerUserTestMustPassWithValidBody()
+    void registerUserTestMustPassWithValidBody()
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(user);
@@ -128,7 +87,7 @@ class UserServiceTest
     }
 
     @Test
-    public void registerUserTestIfUserAlreadyExists()
+    void registerUserTestIfUserAlreadyExists()
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
@@ -140,23 +99,20 @@ class UserServiceTest
 
 
     @Test
-    public void loginUserValidScene()
+    void loginUserValidScene()
     {
         when(userRepository.existsByEmail(userLoginEntity.getEmail())).thenReturn(true);
-
-        UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userLoginEntity.getEmail(), userLoginEntity.getPassword());
-        Authentication authenticationResult= Mockito.mock(Authentication.class);
-
-        when(authenticationResult.isAuthenticated()).thenReturn(true);
-        when(authenticationManager.authenticate(authenticationToken)).thenReturn(authenticationResult);
-
-        when(jwtService.generateToken(userLoginEntity.getEmail())).thenReturn("jwt-token");
-
-        when(context.getBean(MyUserDetailsService.class)).thenReturn(myUserDetailsService);
-        when(myUserDetailsService.loadUserByUsername(userLoginEntity.getEmail())).thenReturn(userDetails);
+//        UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userLoginEntity.getEmail(), userLoginEntity.getPassword());
+//        Authentication authenticationResult= Mockito.mock(Authentication.class);
+//        when(authenticationResult.isAuthenticated()).thenReturn(true);
+//        when(authenticationManager.authenticate(authenticationToken)).thenReturn(authenticationResult);
+//        when(jwtService.generateToken(userLoginEntity.getEmail())).thenReturn("jwt-token");
+        //when(context.getBean(MyUserDetailsService.class)).thenReturn(myUserDetailsService);
+        //when(myUserDetailsService.loadUserByUsername(userLoginEntity.getEmail())).thenReturn(userDetails);
+        ResponseEntity<ResponseStructure<LoginResponse>> structureResponseEntity=new ResponseEntity<>(new ResponseStructure<LoginResponse>().setStatus(200).setMessage("jwt-token").setData(new LoginResponse("test@gmail.com","ADMIN")),HttpStatus.OK);
+        when(userServiceToGenerateToken.generateToken(any(UserLoginEntity.class))).thenReturn(structureResponseEntity);
 
         ResponseEntity<ResponseStructure<LoginResponse>> response=userService.login(userLoginEntity);
-
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
         assertEquals("jwt-token",response.getBody().getMessage());
@@ -165,32 +121,16 @@ class UserServiceTest
 
 
     @Test
-    public void loginUserIfUserNotRegistered()
+    void loginUserIfUserNotRegistered()
     {
         when(userRepository.existsByEmail(userLoginEntity.getEmail())).thenReturn(false);
-
         assertThrows(UserNotFoundException.class,()->userService.login(userLoginEntity));
-
         verify(userRepository,times(1)).existsByEmail(anyString());
     }
 
-    @Test
-    public void loginUserIfAuthenticationFails()
-    {
-        when(userRepository.existsByEmail(userLoginEntity.getEmail())).thenReturn(true);
-
-        UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userLoginEntity.getEmail(), userLoginEntity.getPassword());
-        Authentication authenticationResult= Mockito.mock(Authentication.class);
-
-        when(authenticationResult.isAuthenticated()).thenReturn(false);
-        when(authenticationManager.authenticate(authenticationToken)).thenReturn(authenticationResult);
-
-        assertThrows(BadCredentialsException.class,()->userService.login(userLoginEntity));
-    }
-
 
     @Test
-    public void isUserExistsIfUserExist()
+    void isUserExistsIfUserExist()
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
@@ -202,7 +142,7 @@ class UserServiceTest
 
 
     @Test
-    public void isUserExistsIfUserNotExist()
+    void isUserExistsIfUserNotExist()
     {
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
 
@@ -213,7 +153,7 @@ class UserServiceTest
     }
 
     @Test
-    public void forgetPasswordIfUserExist()
+    void forgetPasswordIfUserExist()
     {
         NewPasswordRequest request=NewPasswordRequest.builder().email("something@gmail.com").password("new password").build();
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
@@ -226,7 +166,7 @@ class UserServiceTest
     }
 
     @Test
-    public void forgetPasswordIfUserNotExists()
+    void forgetPasswordIfUserNotExists()
     {
         NewPasswordRequest request=NewPasswordRequest.builder().email("something@gmail.com").password("new password").build();
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());

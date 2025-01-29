@@ -59,6 +59,7 @@ class OrderServiceTest
                 .bookName("Atom")
                 .bookPrice(99.0)
                 .bookQuantity(12)
+                .status(true)
                 .bookId(1L).build();
 
         cart=Cart.builder()
@@ -100,7 +101,6 @@ class OrderServiceTest
                 .streetName("Baner")
                 .city("Pune")
                 .state("Maharastra")
-                .order(new ArrayList<>())
                 .userId(user.getUserId()).build();
     }
 

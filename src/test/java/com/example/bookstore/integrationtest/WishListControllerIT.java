@@ -13,6 +13,7 @@ import com.example.bookstore.responsedto.LoginResponse;
 import com.example.bookstore.responsedto.RegisterResponse;
 import com.example.bookstore.responsedto.WishListResponse;
 import com.example.bookstore.util.ResponseStructure;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +58,17 @@ public class WishListControllerIT
     public void init()
     {
         baseUrl=baseUrl.concat(":").concat(port+"").concat("/wishlist");
+        wishListH2Repository.deleteAll();
+        userH2Repository.deleteAll();
+        bookH2Repository.deleteAll();
+    }
+
+    @AfterEach
+    public void tearDown()
+    {
+        wishListH2Repository.deleteAll();
+        userH2Repository.deleteAll();
+        bookH2Repository.deleteAll();
     }
 
     @BeforeEach
@@ -85,7 +97,7 @@ public class WishListControllerIT
     }
 
 
-    protected String getUSERAuthToken()
+    protected String getUserAuthToken()
     {
         if (userAuthToken == null)
         {
@@ -121,7 +133,7 @@ public class WishListControllerIT
     @Test
     void addToWishListValidTestIfBookIsNotPresentItShouldAddToUserWishList()
     {
-        userAuthToken=getUSERAuthToken();
+        userAuthToken= getUserAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+userAuthToken);
         WishListRequest requestDto= WishListRequest.builder().bookId(1233L).build();
@@ -131,7 +143,6 @@ public class WishListControllerIT
 
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
         assertEquals(1233,response.getBody().getData().getBookId());
-
 
         WishListRequest requestDto2= WishListRequest.builder().bookId(1234L).build();
         HttpEntity<Object> httpEntity2=new HttpEntity<>(requestDto2,httpHeaders);
@@ -150,7 +161,7 @@ public class WishListControllerIT
     @Test
     void addToWishListValidTestIfBookIsAlreadyPresentItShouldRemoveFromUserWishList()
     {
-        userAuthToken=getUSERAuthToken();
+        userAuthToken= getUserAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+userAuthToken);
         WishListRequest requestDto= WishListRequest.builder().bookId(1233L).build();
@@ -195,7 +206,7 @@ public class WishListControllerIT
     @Test
     void getWishListValidTest()
     {
-        userAuthToken=getUSERAuthToken();
+        userAuthToken= getUserAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+userAuthToken);
         WishListRequest requestDto= WishListRequest.builder().bookId(1233L).build();
@@ -255,7 +266,7 @@ public class WishListControllerIT
     @Test
     void getWishListIfWishListIsEmpty()
     {
-        userAuthToken=getUSERAuthToken();
+        userAuthToken= getUserAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+userAuthToken);
 
@@ -268,7 +279,7 @@ public class WishListControllerIT
     @Test
     void isInWishListTest()
     {
-        userAuthToken=getUSERAuthToken();
+        userAuthToken= getUserAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+userAuthToken);
         WishListRequest requestDto= WishListRequest.builder().bookId(1233L).build();

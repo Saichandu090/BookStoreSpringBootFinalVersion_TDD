@@ -2,6 +2,7 @@ package com.example.bookstore.config;
 
 import com.example.bookstore.serviceimpl.MyUserDetailsService;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -40,7 +41,7 @@ public class SecurityConfiguration
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
     {
         return http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request->request.requestMatchers("/register","/login","/isUserExists/*","forgetPassword").permitAll()
+                .authorizeHttpRequests(request->request.requestMatchers("/register","/login","/isUserExists/*","/forgetPassword").permitAll()
                         .anyRequest().authenticated())
                 .cors(custom->custom.configurationSource(customCorsConfiguration))
                 .httpBasic(Customizer.withDefaults())
