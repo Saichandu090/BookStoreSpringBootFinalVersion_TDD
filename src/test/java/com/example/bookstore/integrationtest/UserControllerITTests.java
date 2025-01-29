@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class UserControllerIT
+public class UserControllerITTests
 {
     @LocalServerPort
     private int port;

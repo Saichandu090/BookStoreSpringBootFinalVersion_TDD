@@ -27,7 +27,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class OrderControllerIT
+public class OrderControllerITTests
 {
     @LocalServerPort
     private int port;
