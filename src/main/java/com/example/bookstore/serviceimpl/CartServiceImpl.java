@@ -134,7 +134,6 @@ public class CartServiceImpl implements CartService
     private Book increaseBookQuantity(Book book)
     {
         book.setBookQuantity(book.getBookQuantity()+1);
-        book.setCartBookQuantity(book.getCartBookQuantity()-1);
         return bookRepository.save(book);
     }
 
@@ -143,7 +142,6 @@ public class CartServiceImpl implements CartService
     {
         Book book=getBook(bookId);
         book.setBookQuantity(book.getBookQuantity()-1);
-        book.setCartBookQuantity(book.getCartBookQuantity()+1);
         Cart userCart = user.getCarts().stream().filter(cart -> cart.getBookId().equals(bookId)).findFirst()
                 .orElseGet(() -> Cart.builder().bookId(bookId).cartQuantity(0).userId(user.getUserId()).build());//If user has the book in the cart already then fetching that or else creating a new cart for user with that book
         userCart.setCartQuantity(userCart.getCartQuantity()+1);

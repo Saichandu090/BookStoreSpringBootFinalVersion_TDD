@@ -19,6 +19,5 @@ public class Book
     private Double bookPrice;
     private String bookLogo;
     private Integer bookQuantity;
-    private int cartBookQuantity;
     private Boolean status;
 }

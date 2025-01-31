@@ -1,6 +1,7 @@
 package com.example.bookstore.service;
 
 import com.example.bookstore.entity.Book;
+import com.example.bookstore.exception.BookAlreadyExistsException;
 import com.example.bookstore.exception.BookNotFoundException;
 import com.example.bookstore.exception.InvalidPaginationException;
 import com.example.bookstore.exception.InvalidSortingFieldException;
@@ -65,7 +66,6 @@ class BookServiceTest
                 .bookAuthor("Chandu")
                 .bookDescription("Description")
                 .bookPrice(789.49)
-                .cartBookQuantity(0)
                 .status(true)
                 .build();
 
@@ -82,9 +82,11 @@ class BookServiceTest
 
 
     @Test
-    public void addBookMustReturnCreatedStatus()
+    void addBookMustReturnCreatedStatus()
     {
         when(bookRepository.save(Mockito.any(Book.class))).thenReturn(book);
+        when(bookRepository.existsByBookName(anyString())).thenReturn(false);
+        when(bookRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         ResponseEntity<ResponseStructure<BookResponse>> response=bookService.addBook(bookRequest);
 
@@ -95,9 +97,18 @@ class BookServiceTest
     }
 
 
+    @Test
+    void addBookIfBookAlreadyExists()
+    {
+        when(bookRepository.existsByBookName(anyString())).thenReturn(true);
+
+        assertThrows(BookAlreadyExistsException.class,()->bookService.addBook(bookRequest));
+    }
+
+
 
     @Test
-    public void getBookByNameMustReturnOKStatusCode()
+    void getBookByNameMustReturnOKStatusCode()
     {
         when(bookRepository.findByBookName(Mockito.anyString())).thenReturn(Optional.of(book));
 
@@ -242,7 +253,6 @@ class BookServiceTest
                 .bookAuthor("Carley")
                 .bookDescription("Law")
                 .bookPrice(220.99)
-                .cartBookQuantity(0)
                 .status(true)
                 .build();
 
@@ -253,7 +263,6 @@ class BookServiceTest
                 .bookAuthor("Brother")
                 .bookDescription("Family")
                 .bookPrice(225.00)
-                .cartBookQuantity(0)
                 .status(true)
                 .build();
 
@@ -264,7 +273,6 @@ class BookServiceTest
                 .bookAuthor("Chuck")
                 .bookDescription("Descript")
                 .bookPrice(99.90)
-                .cartBookQuantity(0)
                 .status(true)
                 .build();
 

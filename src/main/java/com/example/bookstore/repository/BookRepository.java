@@ -15,6 +15,8 @@ public interface BookRepository extends JpaRepository<Book,Long>
 {
     Optional<Book> findByBookName(String bookName);
 
+    boolean existsByBookName(String bookName);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT b FROM Book b WHERE b.bookId = :bookId")
     Optional<Book> findByIdForUpdate(@Param("bookId") Long bookId);

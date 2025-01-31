@@ -70,7 +70,6 @@ class WishListServiceTest
                 .bookAuthor("Author")
                 .bookDescription("Descript")
                 .bookPrice(123.12)
-                .cartBookQuantity(0)
                 .build();
 
         wishListRequest = WishListRequest.builder().bookId(book.getBookId()).build();
