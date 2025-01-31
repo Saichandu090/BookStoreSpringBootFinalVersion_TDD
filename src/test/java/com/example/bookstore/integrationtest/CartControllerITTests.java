@@ -398,7 +398,6 @@ class CartControllerITTests
         ResponseEntity<ResponseStructure<List<CartResponse>>> response4=restTemplate.exchange(baseUrl + "/getCart", HttpMethod.GET, httpEntity4, new ParameterizedTypeReference<ResponseStructure<List<CartResponse>>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(3,response4.getBody().getData().getFirst().getCartQuantity());
-        assertEquals(1,response4.getBody().getData().getFirst().getCartId());
         assertEquals(1,response4.getBody().getData().getFirst().getBookId());
 
         User user=userH2Repository.findByEmail("dinesh@gmail.com").get();

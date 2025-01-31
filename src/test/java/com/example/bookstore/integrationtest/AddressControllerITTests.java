@@ -281,9 +281,10 @@ public class AddressControllerITTests
                 new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {});
         assertEquals(HttpStatus.CREATED,response1.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),response1.getBody().getStatus());
+        Long addressId=response1.getBody().getData().getAddressId();
 
         HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
-        ResponseEntity<ResponseStructure<AddressResponse>> response = restTemplate.exchange(baseUrl + "/getAddress/1", HttpMethod.GET, entity,
+        ResponseEntity<ResponseStructure<AddressResponse>> response = restTemplate.exchange(baseUrl + "/getAddress/"+addressId, HttpMethod.GET, entity,
                 new ParameterizedTypeReference<ResponseStructure<AddressResponse>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
