@@ -1,6 +1,7 @@
 package com.example.bookstore.mapper;
 
 import com.example.bookstore.entity.Book;
+import com.example.bookstore.exception.BookUrlLengthException;
 import com.example.bookstore.requestdto.BookRequest;
 import com.example.bookstore.responsedto.BookResponse;
 import com.example.bookstore.util.ResponseStructure;
@@ -39,6 +40,8 @@ public class BookMapper
 
     public Book addBook(BookRequest requestDTO)
     {
+        if(requestDTO.getBookLogo().length()>255)
+            throw new BookUrlLengthException("Book URL should be shorter than 255 characters");
         return Book.builder()
                 .bookId(requestDTO.getBookId())
                 .bookName(requestDTO.getBookName())
@@ -48,7 +51,7 @@ public class BookMapper
                 .bookPrice(requestDTO.getBookPrice())
                 .bookDescription(requestDTO.getBookDescription())
                 .status(true)
-                .cartBookQuantity(0).build();
+                .build();
     }
 
     public BookResponse mapBookToBookResponse(Book savedBook)
@@ -65,10 +68,10 @@ public class BookMapper
 
     }
 
-    public Book updateCurrentBook(Long bookId, BookRequest requestDTO, int cartQuantity)
+    public Book updateCurrentBook(Book book, BookRequest requestDTO)
     {
         return Book.builder()
-                .bookId(bookId)
+                .bookId(book.getBookId())
                 .status(true)
                 .bookName(requestDTO.getBookName())
                 .bookLogo(requestDTO.getBookLogo())
@@ -76,7 +79,7 @@ public class BookMapper
                 .bookQuantity(requestDTO.getBookQuantity())
                 .bookPrice(requestDTO.getBookPrice())
                 .bookDescription(requestDTO.getBookDescription())
-                .cartBookQuantity(cartQuantity).build();
+                .build();
     }
 
     public ResponseEntity<ResponseStructure<List<BookResponse>>> mapToSuccessGetAllBooks(String message, List<BookResponse> bookResponses)

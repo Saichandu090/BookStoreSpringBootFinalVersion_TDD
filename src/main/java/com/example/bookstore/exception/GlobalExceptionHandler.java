@@ -105,6 +105,24 @@ public class GlobalExceptionHandler
                 .setStatus(HttpStatus.BAD_REQUEST.value()));
     }
 
+    @ExceptionHandler(BookUrlLengthException.class)
+    public ResponseEntity<ResponseStructure<String>> bookUrlLength(BookUrlLengthException exception)
+    {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseStructure<String>()
+                .setMessage(exception.getMessage())
+                .setData(data)
+                .setStatus(HttpStatus.BAD_REQUEST.value()));
+    }
+
+    @ExceptionHandler(BookAlreadyExistsException.class)
+    public ResponseEntity<ResponseStructure<String>> bookAlreadyExists(BookAlreadyExistsException exception)
+    {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseStructure<String>()
+                .setMessage(exception.getMessage())
+                .setData(data)
+                .setStatus(HttpStatus.BAD_REQUEST.value()));
+    }
+
     @ExceptionHandler(SecretKeyGenerationException.class)
     public ResponseEntity<ResponseStructure<String>> secretKeyGeneration(SecretKeyGenerationException exception)
     {

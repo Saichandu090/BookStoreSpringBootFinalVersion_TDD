@@ -96,7 +96,6 @@ public class OrderServiceImpl implements OrderService
         {
             Book book=getBook(cart.getBookId());
             book.setBookQuantity(book.getBookQuantity()+cart.getCartQuantity());
-            book.setCartBookQuantity(book.getCartBookQuantity()-cart.getCartQuantity());
             bookRepository.save(book);
         }
         return orderRepository.save(userOrder);
