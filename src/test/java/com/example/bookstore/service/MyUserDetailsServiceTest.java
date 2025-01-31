@@ -34,6 +34,7 @@ class MyUserDetailsServiceTest
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         UserDetails userDetails=myUserDetailsService.loadUserByUsername(user.getEmail());
+
         assertNotNull(userDetails);
         assertTrue(userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())));
         assertEquals(user.getEmail(),userDetails.getUsername());
@@ -48,6 +49,7 @@ class MyUserDetailsServiceTest
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         UserDetails userDetails=myUserDetailsService.loadUserByUsername(user.getEmail());
+
         assertNotNull(userDetails);
         assertTrue(userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.ADMIN.name())));
         assertEquals(user.getEmail(),userDetails.getUsername());
@@ -62,6 +64,7 @@ class MyUserDetailsServiceTest
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         UserDetails userDetails=myUserDetailsService.loadUserByUsername(user.getEmail());
+
         assertNotNull(userDetails);
         assertTrue(userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())));
         assertEquals(user.getEmail(),userDetails.getUsername());
@@ -75,6 +78,7 @@ class MyUserDetailsServiceTest
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         UserDetails userDetails=myUserDetailsService.loadUserByUsername(user.getEmail());
+
         assertNotNull(userDetails);
         assertTrue(userDetails.getAuthorities().contains(new SimpleGrantedAuthority(Roles.USER.name())));
         assertEquals(user.getEmail(),userDetails.getUsername());

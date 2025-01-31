@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,13 +41,8 @@ class SecurityConfigurationTest
     private JWTFilter jwtFilter;
 
     @Mock
-    private HttpSecurity http;
-
-    @Mock
     private AuthenticationConfiguration authenticationConfiguration;
 
-    @Autowired
-    private MockMvc mockMvc;
     private User user;
     private UserDetails userDetails;
 
