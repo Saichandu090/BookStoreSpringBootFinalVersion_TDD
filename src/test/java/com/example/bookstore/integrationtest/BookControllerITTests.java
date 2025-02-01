@@ -102,7 +102,6 @@ public class BookControllerITTests
         httpHeaders.set("Authorization","Bearer "+authToken);
 
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookName("TEST")
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
@@ -117,7 +116,6 @@ public class BookControllerITTests
 
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),response.getBody().getStatus());
-        assertEquals(bookRequest.getBookId(),response.getBody().getData().getBookId());
         assertEquals(bookRequest.getBookName(),response.getBody().getData().getBookName());
     }
 
@@ -130,7 +128,6 @@ public class BookControllerITTests
         httpHeaders.set("Authorization","Bearer "+authToken);
 
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
                 .bookDescription("Atom")
@@ -155,11 +152,10 @@ public class BookControllerITTests
 
         BookRequest bookRequest = BookRequest.builder()
                 .bookName("Something")
-
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
                 .bookDescription("Atom")
-                .bookQuantity(18)
+                .bookQuantity(11)
                 .bookLogo("URL").build();
 
         HttpEntity<Object> entity = new HttpEntity<>(bookRequest,httpHeaders);
@@ -176,7 +172,6 @@ public class BookControllerITTests
         httpHeaders.set("Authorization","authToken");
 
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
                 .bookDescription("Atom")
@@ -199,7 +194,6 @@ public class BookControllerITTests
         httpHeaders.set("Authorization","Bearer "+authToken);
 
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookName("TEST")
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
@@ -217,7 +211,6 @@ public class BookControllerITTests
 
         assertEquals(HttpStatus.OK,getResponse.getStatusCode());
         assertEquals(HttpStatus.OK.value(),getResponse.getBody().getStatus());
-        assertEquals(3245,getResponse.getBody().getData().getBookId());
         assertEquals("TEST",getResponse.getBody().getData().getBookName());
         assertEquals(1,bookH2Repository.findAll().size());
     }
@@ -231,7 +224,6 @@ public class BookControllerITTests
 
         //adding a book
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookName("TEST")
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
@@ -261,7 +253,6 @@ public class BookControllerITTests
 
         //adding a book
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookName("TEST")
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
@@ -272,15 +263,16 @@ public class BookControllerITTests
         ResponseEntity<ResponseStructure<BookResponse>> response = restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
                 new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
+        Long bookId=response.getBody().getData().getBookId();
 
         //This test
         HttpEntity<Object> getEntity = new HttpEntity<>(httpHeaders);
-        ResponseEntity<ResponseStructure<BookResponse>> getResponse = restTemplate.exchange(baseUrl + "/getBookById/3245", HttpMethod.GET, getEntity,
+        ResponseEntity<ResponseStructure<BookResponse>> getResponse = restTemplate.exchange(baseUrl + "/getBookById/"+bookId, HttpMethod.GET, getEntity,
                 new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
 
         assertEquals(HttpStatus.OK,getResponse.getStatusCode());
         assertEquals(HttpStatus.OK.value(),getResponse.getBody().getStatus());
-        assertEquals(3245,getResponse.getBody().getData().getBookId());
+        assertEquals(bookId,getResponse.getBody().getData().getBookId());
         assertEquals("TEST",getResponse.getBody().getData().getBookName());
         assertEquals(1,bookH2Repository.findAll().size());
     }
@@ -295,7 +287,6 @@ public class BookControllerITTests
 
         //adding a book
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookName("TEST")
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
@@ -324,7 +315,6 @@ public class BookControllerITTests
 
         //Adding a book
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookName("TEST")
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
@@ -335,10 +325,10 @@ public class BookControllerITTests
         ResponseEntity<ResponseStructure<BookResponse>> response = restTemplate.exchange(baseUrl + "/addBook", HttpMethod.POST, entity,
                 new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
+        Long bookId=response.getBody().getData().getBookId();
 
         //Editing the book
         BookRequest bookEditRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookName("TESTING")
                 .bookPrice(399.3)
                 .bookAuthor("Manual Test")
@@ -347,11 +337,11 @@ public class BookControllerITTests
                 .bookLogo("URL").build();
 
         HttpEntity<Object> entity2 = new HttpEntity<>(bookEditRequest,httpHeaders);
-        ResponseEntity<ResponseStructure<BookResponse>> response2 = restTemplate.exchange(baseUrl + "/updateBook/3245", HttpMethod.PUT, entity2,
+        ResponseEntity<ResponseStructure<BookResponse>> response2 = restTemplate.exchange(baseUrl + "/updateBook/"+bookId, HttpMethod.PUT, entity2,
                 new ParameterizedTypeReference<ResponseStructure<BookResponse>>() {});
         assertEquals(HttpStatus.OK,response2.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response2.getBody().getStatus());
-        assertEquals(3245,response2.getBody().getData().getBookId());
+        assertEquals(bookId,response2.getBody().getData().getBookId());
         assertEquals("TESTING",response2.getBody().getData().getBookName());
         assertEquals(399.3,response2.getBody().getData().getBookPrice());
         assertEquals("Manual Test",response2.getBody().getData().getBookAuthor());
@@ -367,7 +357,6 @@ public class BookControllerITTests
 
         //Adding a book
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookName("TEST")
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
@@ -381,7 +370,6 @@ public class BookControllerITTests
 
         //Editing the book
         BookRequest bookEditRequest = BookRequest.builder()
-                .bookId(32455L)
                 .bookName("TESTING")
                 .bookPrice(399.3)
                 .bookAuthor("Manual Test")
@@ -406,7 +394,6 @@ public class BookControllerITTests
 
         //Adding a book
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookName("TEST")
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
@@ -463,7 +450,6 @@ public class BookControllerITTests
 
         //Adding a book
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookName("TEST")
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
@@ -496,7 +482,6 @@ public class BookControllerITTests
 
         //Adding a book
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookName("TEST")
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
@@ -539,7 +524,6 @@ public class BookControllerITTests
         httpHeaders.set("Authorization","Bearer "+authToken);
 
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(324L)
                 .bookName("REST")
                 .bookPrice(899.3)
                 .bookAuthor("Sai")
@@ -553,7 +537,6 @@ public class BookControllerITTests
 
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
         assertEquals(HttpStatus.CREATED.value(),response.getBody().getStatus());
-        assertEquals(bookRequest.getBookId(),response.getBody().getData().getBookId());
         assertEquals(bookRequest.getBookName(),response.getBody().getData().getBookName());
     }
 
@@ -572,7 +555,6 @@ public class BookControllerITTests
 
         //Adding a book
         BookRequest bookRequest = BookRequest.builder()
-                .bookId(3245L)
                 .bookName("TEST")
                 .bookPrice(199.3)
                 .bookAuthor("Chandu")
@@ -593,8 +575,6 @@ public class BookControllerITTests
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
         assertEquals(2,bookH2Repository.findAll().size());
         assertEquals(2,response.getBody().getData().size());
-        assertEquals(3245,response.getBody().getData().get(1).getBookId());
-        assertEquals(324,response.getBody().getData().getFirst().getBookId());
     }
 
     @Test
@@ -615,7 +595,6 @@ public class BookControllerITTests
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
         Book first=Book.builder()
-                .bookId(92L)
                 .bookName("Lawsuit")
                 .bookAuthor("Carley")
                 .bookPrice(220.99)
@@ -623,7 +602,6 @@ public class BookControllerITTests
                 .build();
 
         Book second=Book.builder()
-                .bookId(3L)
                 .bookName("Zak Crawly")
                 .bookAuthor("Brother")
                 .bookPrice(225.00)
@@ -631,7 +609,6 @@ public class BookControllerITTests
                 .build();
 
         Book third=Book.builder()
-                .bookId(24L)
                 .bookName("James miggel")
                 .bookAuthor("Chuck")
                 .bookPrice(99.90)
@@ -703,7 +680,6 @@ public class BookControllerITTests
 
         IntStream.range(1, 16).forEach(i -> {
             Book book = Book.builder()
-                    .bookId((long) i)
                     .bookName("Book " + i)
                     .bookAuthor("Author " + i)
                     .bookPrice(1 + i * 10.7)
@@ -752,7 +728,6 @@ public class BookControllerITTests
 
         IntStream.range(1, 16).forEach(i -> {
             Book book = Book.builder()
-                    .bookId((long) i)
                     .bookName("Book " + i)
                     .bookAuthor("Author " + i)
                     .bookPrice(1 + i * 10.7)
@@ -778,7 +753,6 @@ public class BookControllerITTests
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("Authorization", "Bearer "+authToken);
         Book first = Book.builder()
-                .bookId(92L)
                 .bookName("Lawsuit")
                 .bookDescription("laws")
                 .bookAuthor("Carley")
@@ -787,7 +761,6 @@ public class BookControllerITTests
                 .build();
 
         Book second = Book.builder()
-                .bookId(3L)
                 .bookName("James Crawly")
                 .bookDescription("study of laws")
                 .bookAuthor("Brother")
@@ -796,7 +769,6 @@ public class BookControllerITTests
                 .build();
 
         Book third = Book.builder()
-                .bookId(24L)
                 .bookName("James miggel")
                 .bookDescription("gaming")
                 .bookAuthor("Chuck")

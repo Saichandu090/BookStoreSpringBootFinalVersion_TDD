@@ -43,7 +43,6 @@ public class BookMapper
         if(requestDTO.getBookLogo().length()>255)
             throw new BookUrlLengthException("Book URL should be shorter than 255 characters");
         return Book.builder()
-                .bookId(requestDTO.getBookId())
                 .bookName(requestDTO.getBookName())
                 .bookLogo(requestDTO.getBookLogo())
                 .bookAuthor(requestDTO.getBookAuthor())

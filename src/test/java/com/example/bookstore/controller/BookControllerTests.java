@@ -141,7 +141,6 @@ class BookControllerTests
         };
 
         bookRequest = BookRequest.builder()
-                .bookId((long)789654123)
                 .bookName("ABCD")
                 .bookPrice(789.0)
                 .bookLogo("URL")
@@ -150,7 +149,7 @@ class BookControllerTests
                 .bookQuantity(85).build();
 
         bookResponse = BookResponse.builder()
-                .bookId(bookRequest.getBookId())
+                .bookId(789654123L)
                 .bookLogo(bookRequest.getBookLogo())
                 .bookName(bookRequest.getBookName())
                 .bookAuthor(bookRequest.getBookAuthor())
@@ -160,7 +159,7 @@ class BookControllerTests
     }
 
     @Test
-    public void addBookTestMustReturnCreatedStatusCode() throws Exception
+    void addBookTestMustReturnCreatedStatusCode() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<BookResponse> responseStructure=new ResponseStructure<>(HttpStatus.CREATED.value(),"Book added successfully", bookResponse);
@@ -182,7 +181,7 @@ class BookControllerTests
 
 
     @Test
-    public void addBookTestMustReturnFailCauseOfNotValidBody() throws Exception
+    void addBookTestMustReturnFailCauseOfNotValidBody() throws Exception
     {
         BookRequest requestDto= BookRequest.builder().build();
         String token="Bearer-token";
@@ -202,7 +201,7 @@ class BookControllerTests
 
 
     @Test
-    public void addBookTestMustReturnUnauthorizedStatusCode() throws Exception
+    void addBookTestMustReturnUnauthorizedStatusCode() throws Exception
     {
         String token="Bearer-token";
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
@@ -218,7 +217,7 @@ class BookControllerTests
     }
 
     @Test
-    public void addBookTestMustReturnBadRequestForMissingHeaderStatusCode() throws Exception
+    void addBookTestMustReturnBadRequestForMissingHeaderStatusCode() throws Exception
     {
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
@@ -234,7 +233,7 @@ class BookControllerTests
 
 
     @Test
-    public void getBookByNameMustReturnOKStatusCode() throws Exception
+    void getBookByNameMustReturnOKStatusCode() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<BookResponse> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully", bookResponse);
@@ -254,7 +253,7 @@ class BookControllerTests
     }
 
     @Test
-    public void getBookByNameMustReturnBadRequestWithoutHeader() throws Exception
+    void getBookByNameMustReturnBadRequestWithoutHeader() throws Exception
     {
         mockMvc.perform(get("/book/getBookByName/{bookName}", bookRequest.getBookName())
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -265,7 +264,7 @@ class BookControllerTests
     }
 
     @Test
-    public void getBookByNameMissingPathVariable() throws Exception
+    void getBookByNameMissingPathVariable() throws Exception
     {
         String token="Bearer token";
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
@@ -282,14 +281,14 @@ class BookControllerTests
 
 
     @Test
-    public void getBookByIdMustReturnOKStatusCode() throws Exception
+    void getBookByIdMustReturnOKStatusCode() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<BookResponse> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully", bookResponse);
         given(bookService.getBookById(ArgumentMatchers.anyLong())).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
-        mockMvc.perform(get("/book/getBookById/{bookId}", bookRequest.getBookId())
+        mockMvc.perform(get("/book/getBookById/{bookId}", bookResponse.getBookId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .header("Authorization",token))
                 .andExpect(status().isOk())
@@ -301,9 +300,9 @@ class BookControllerTests
     }
 
     @Test
-    public void getBookByIdTestWithoutHeader() throws Exception
+    void getBookByIdTestWithoutHeader() throws Exception
     {
-        mockMvc.perform(get("/book/getBookById/{bookId}", bookRequest.getBookId())
+        mockMvc.perform(get("/book/getBookById/{bookId}", bookResponse.getBookId())
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()))
@@ -311,7 +310,7 @@ class BookControllerTests
     }
 
     @Test
-    public void getBookByIdTestWhenMissingPathVariable() throws Exception
+    void getBookByIdTestWhenMissingPathVariable() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<BookResponse> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully", bookResponse);
@@ -329,7 +328,7 @@ class BookControllerTests
 
 
     @Test
-    public void getAllBooksMustReturnOKStatusCode() throws Exception
+    void getAllBooksMustReturnOKStatusCode() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<List<BookResponse>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully",List.of(bookResponse));
@@ -347,7 +346,7 @@ class BookControllerTests
     }
 
     @Test
-    public void getAllBooksTestWithoutHeader() throws Exception
+    void getAllBooksTestWithoutHeader() throws Exception
     {
         mockMvc.perform(get("/book/getBooks")
                         .characterEncoding(StandardCharsets.UTF_8))
@@ -359,14 +358,14 @@ class BookControllerTests
 
 
     @Test
-    public void updateBookMustReturnOKStatusCode() throws Exception
+    void updateBookMustReturnOKStatusCode() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<BookResponse> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book Updated successfully", bookResponse);
         given(bookService.updateBook(ArgumentMatchers.anyLong(),ArgumentMatchers.any(BookRequest.class))).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
-        mockMvc.perform(put("/book/updateBook/{bookId}", bookRequest.getBookId())
+        mockMvc.perform(put("/book/updateBook/{bookId}", bookResponse.getBookId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
@@ -380,9 +379,9 @@ class BookControllerTests
     }
 
     @Test
-    public void updateBookTestWithoutHeader() throws Exception
+    void updateBookTestWithoutHeader() throws Exception
     {
-        mockMvc.perform(put("/book/updateBook/{bookId}", bookRequest.getBookId())
+        mockMvc.perform(put("/book/updateBook/{bookId}", bookResponse.getBookId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(bookRequest)))
@@ -392,12 +391,12 @@ class BookControllerTests
     }
 
     @Test
-    public void updateBookTestForUserAccess() throws Exception
+    void updateBookTestForUserAccess() throws Exception
     {
         String token="Bearer-token";
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
-        mockMvc.perform(put("/book/updateBook/{bookId}", bookRequest.getBookId())
+        mockMvc.perform(put("/book/updateBook/{bookId}", bookResponse.getBookId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
@@ -409,17 +408,17 @@ class BookControllerTests
 
 
     @Test
-    public void updateBookTestForInvalidRequestBody() throws Exception
+    void updateBookTestForInvalidRequestBody() throws Exception
     {
-        BookRequest bookRequest =new BookRequest();
+        BookRequest bookRequest1 =new BookRequest();
         String token="Bearer-token";
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
-        mockMvc.perform(put("/book/updateBook/{bookId}", this.bookRequest.getBookId())
+        mockMvc.perform(put("/book/updateBook/{bookId}", bookResponse.getBookId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token)
-                        .content(objectMapper.writeValueAsString(bookRequest)))
+                        .content(objectMapper.writeValueAsString(bookRequest1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,result.getResolvedException()))
                 .andDo(MockMvcResultHandlers.print());
@@ -428,14 +427,14 @@ class BookControllerTests
 
 
     @Test
-    public void deleteBookMustReturnOKStatusCode() throws Exception
+    void deleteBookMustReturnOKStatusCode() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<String> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book deleted successfully","Success");
         given(bookService.deleteBook(ArgumentMatchers.anyLong())).willReturn(new ResponseEntity<>(responseStructure,HttpStatus.OK));
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
 
-        mockMvc.perform(delete("/book/deleteBook/{bookId}", bookRequest.getBookId())
+        mockMvc.perform(delete("/book/deleteBook/{bookId}", bookResponse.getBookId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token))
@@ -447,12 +446,12 @@ class BookControllerTests
     }
 
     @Test
-    public void deleteBookTestWhenUserTriesToAccess() throws Exception
+    void deleteBookTestWhenUserTriesToAccess() throws Exception
     {
         String token="Bearer-token";
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
-        mockMvc.perform(delete("/book/deleteBook/{bookId}", bookRequest.getBookId())
+        mockMvc.perform(delete("/book/deleteBook/{bookId}", bookResponse.getBookId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization",token))
@@ -462,7 +461,7 @@ class BookControllerTests
     }
 
     @Test
-    public void deleteBookTestWithoutPathVariable() throws Exception
+    void deleteBookTestWithoutPathVariable() throws Exception
     {
         String token="Bearer-token";
         mockMvc.perform(delete("/book/deleteBook")
@@ -477,7 +476,7 @@ class BookControllerTests
 
 
     @Test
-    public void sortByFieldMustReturnOKStatus() throws Exception
+    void sortByFieldMustReturnOKStatus() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<List<BookResponse>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Books sorted successfully",List.of(bookResponse));
@@ -497,7 +496,7 @@ class BookControllerTests
 
 
     @Test
-    public void sortByFieldIfPathVariableIsMissing() throws Exception
+    void sortByFieldIfPathVariableIsMissing() throws Exception
     {
         String token="Bearer-token";
         mockMvc.perform(get("/book/sortBy")
@@ -509,7 +508,7 @@ class BookControllerTests
     }
 
     @Test
-    public void sortByFieldTestWithoutHeader() throws Exception
+    void sortByFieldTestWithoutHeader() throws Exception
     {
         mockMvc.perform(get("/book/sortBy/{field}","something")
                         .characterEncoding(StandardCharsets.UTF_8))
@@ -520,7 +519,7 @@ class BookControllerTests
 
 
     @Test
-    public void paginationValidTest() throws Exception
+    void paginationValidTest() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<List<BookResponse>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Books fetched successfully",List.of(bookResponse));
@@ -542,7 +541,7 @@ class BookControllerTests
 
 
     @Test
-    public void searchQueryMustReturnOKStatus() throws Exception
+    void searchQueryMustReturnOKStatus() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<List<BookResponse>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book fetched successfully",List.of(bookResponse));
@@ -562,7 +561,7 @@ class BookControllerTests
 
 
     @Test
-    public void searchQueryIfHeaderIsMissing() throws Exception
+    void searchQueryIfHeaderIsMissing() throws Exception
     {
         mockMvc.perform(get("/book/search/{field}","something")
                         .characterEncoding(StandardCharsets.UTF_8))
@@ -573,7 +572,7 @@ class BookControllerTests
 
 
     @Test
-    public void searchQueryIfPathVariableIsMissing() throws Exception
+    void searchQueryIfPathVariableIsMissing() throws Exception
     {
         String token="Bearer-token";
         mockMvc.perform(get("/book/search")
