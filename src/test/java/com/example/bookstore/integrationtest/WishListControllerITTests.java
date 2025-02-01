@@ -60,6 +60,7 @@ public class WishListControllerITTests
         baseUrl=baseUrl.concat(":").concat(port+"").concat("/wishlist");
         wishListH2Repository.deleteAll();
         userH2Repository.deleteAll();
+        bookH2Repository.deleteAll();
     }
 
     @AfterEach
@@ -67,31 +68,8 @@ public class WishListControllerITTests
     {
         wishListH2Repository.deleteAll();
         userH2Repository.deleteAll();
+        bookH2Repository.deleteAll();
     }
-
-    @BeforeEach
-    void addBookByAdmin()
-    {
-        Book book1=Book.builder()
-                .bookName("TEST")
-                .bookPrice(199.3)
-                .bookAuthor("Chandu")
-                .bookDescription("Atom")
-                .bookQuantity(78)
-                .bookLogo("URL").build();
-
-        //Adding 2nd book
-        Book book2=Book.builder()
-                .bookName("Habits")
-                .bookPrice(249.49)
-                .bookAuthor("Zak crawly")
-                .bookDescription("Cricket")
-                .bookQuantity(169)
-                .bookLogo("URL").build();
-        bookH2Repository.save(book1);
-        bookH2Repository.save(book2);
-    }
-
 
     protected String getUserAuthToken()
     {
@@ -129,24 +107,42 @@ public class WishListControllerITTests
     @Test
     void addToWishListValidTestIfBookIsNotPresentItShouldAddToUserWishList()
     {
+        Book book1=Book.builder()
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+
+        Book book2=Book.builder()
+                .bookName("Habits")
+                .bookPrice(249.49)
+                .bookAuthor("Zak crawly")
+                .bookDescription("Cricket")
+                .bookQuantity(169)
+                .bookLogo("URL").build();
+        Book saved1=bookH2Repository.save(book1);
+        Book saved2=bookH2Repository.save(book2);
+
         userAuthToken= getUserAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+userAuthToken);
-        WishListRequest requestDto= WishListRequest.builder().bookId(1L).build();
+        WishListRequest requestDto= WishListRequest.builder().bookId(saved1.getBookId()).build();
         HttpEntity<Object> httpEntity=new HttpEntity<>(requestDto,httpHeaders);
 
         ResponseEntity<ResponseStructure<WishListResponse>> response=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<WishListResponse>>() {});
 
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
-        assertEquals(1L,response.getBody().getData().getBookId());
+        assertEquals(saved1.getBookId(),response.getBody().getData().getBookId());
 
-        WishListRequest requestDto2= WishListRequest.builder().bookId(2L).build();
+        WishListRequest requestDto2= WishListRequest.builder().bookId(saved2.getBookId()).build();
         HttpEntity<Object> httpEntity2=new HttpEntity<>(requestDto2,httpHeaders);
 
         ResponseEntity<ResponseStructure<WishListResponse>> response2=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<WishListResponse>>() {});
 
         assertEquals(HttpStatus.CREATED,response2.getStatusCode());
-        assertEquals(2L,response2.getBody().getData().getBookId());
+        assertEquals(saved2.getBookId(),response2.getBody().getData().getBookId());
 
         User user=userH2Repository.findByEmail("ganesh@gmail.com").get();
         List<WishList> wishLists=user.getWishList();
@@ -157,41 +153,51 @@ public class WishListControllerITTests
     @Test
     void addToWishListValidTestIfBookIsAlreadyPresentItShouldRemoveFromUserWishList()
     {
+        Book book1=Book.builder()
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+
+        Book saved1=bookH2Repository.save(book1);
+
         userAuthToken= getUserAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+userAuthToken);
-        WishListRequest requestDto= WishListRequest.builder().bookId(1L).build();
+        WishListRequest requestDto= WishListRequest.builder().bookId(saved1.getBookId()).build();
         HttpEntity<Object> httpEntity=new HttpEntity<>(requestDto,httpHeaders);
 
         ResponseEntity<ResponseStructure<WishListResponse>> response=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<WishListResponse>>() {});
 
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
-        assertEquals(1L,response.getBody().getData().getBookId());
+        assertEquals(saved1.getBookId(),response.getBody().getData().getBookId());
         User user1=userH2Repository.findByEmail("ganesh@gmail.com").get();
         List<WishList> wishLists1=user1.getWishList();
         assertEquals(1,wishLists1.size());
 
 
-        WishListRequest requestDto2= WishListRequest.builder().bookId(1L).build();
+        WishListRequest requestDto2= WishListRequest.builder().bookId(saved1.getBookId()).build();
         HttpEntity<Object> httpEntity2=new HttpEntity<>(requestDto2,httpHeaders);
 
         ResponseEntity<ResponseStructure<WishListResponse>> response2=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<WishListResponse>>() {});
 
         assertEquals(HttpStatus.OK,response2.getStatusCode());
-        assertEquals("Book TEST has successfully removed from wishlist successfully",response2.getBody().getMessage());
+        assertEquals("Book "+saved1.getBookName()+" has successfully removed from wishlist successfully",response2.getBody().getMessage());
 
         User user=userH2Repository.findByEmail("ganesh@gmail.com").get();
         List<WishList> wishLists=user.getWishList();
         assertEquals(0,wishLists.size());
 
 
-        WishListRequest requestDto3= WishListRequest.builder().bookId(1L).build();
+        WishListRequest requestDto3= WishListRequest.builder().bookId(saved1.getBookId()).build();
         HttpEntity<Object> httpEntity3=new HttpEntity<>(requestDto3,httpHeaders);
 
         ResponseEntity<ResponseStructure<WishListResponse>> response3=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity3, new ParameterizedTypeReference<ResponseStructure<WishListResponse>>() {});
 
         assertEquals(HttpStatus.CREATED,response3.getStatusCode());
-        assertEquals(1,response3.getBody().getData().getBookId());
+        assertEquals(saved1.getBookId(),response3.getBody().getData().getBookId());
         User user3=userH2Repository.findByEmail("ganesh@gmail.com").get();
         List<WishList> wishLists3=user3.getWishList();
         assertEquals(1,wishLists3.size());
@@ -202,26 +208,44 @@ public class WishListControllerITTests
     @Test
     void getWishListValidTest()
     {
+        Book book1=Book.builder()
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+
+        Book book2=Book.builder()
+                .bookName("Habits")
+                .bookPrice(249.49)
+                .bookAuthor("Zak crawly")
+                .bookDescription("Cricket")
+                .bookQuantity(169)
+                .bookLogo("URL").build();
+        Book saved1=bookH2Repository.save(book1);
+        Book saved2=bookH2Repository.save(book2);
+
         userAuthToken= getUserAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+userAuthToken);
-        WishListRequest requestDto= WishListRequest.builder().bookId(1L).build();
+        WishListRequest requestDto= WishListRequest.builder().bookId(saved1.getBookId()).build();
 
         HttpEntity<Object> httpEntity=new HttpEntity<>(requestDto,httpHeaders);
         ResponseEntity<ResponseStructure<WishListResponse>> response=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<WishListResponse>>() {});
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
-        assertEquals(1,response.getBody().getData().getBookId());
+        assertEquals(saved1.getBookId(),response.getBody().getData().getBookId());
         User user1=userH2Repository.findByEmail("ganesh@gmail.com").get();
         List<WishList> wishLists1=user1.getWishList();
         assertEquals(1,wishLists1.size());
 
-        WishListRequest requestDto2= WishListRequest.builder().bookId(2L).build();
+        WishListRequest requestDto2= WishListRequest.builder().bookId(saved2.getBookId()).build();
 
         HttpEntity<Object> httpEntity2=new HttpEntity<>(requestDto2,httpHeaders);
 
         ResponseEntity<ResponseStructure<WishListResponse>> response2=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<WishListResponse>>() {});
         assertEquals(HttpStatus.CREATED,response2.getStatusCode());
-        assertEquals(2,response2.getBody().getData().getBookId());
+        assertEquals(saved2.getBookId(),response2.getBody().getData().getBookId());
         User user2=userH2Repository.findByEmail("ganesh@gmail.com").get();
         List<WishList> wishLists2=user2.getWishList();
         assertEquals(2,wishLists2.size());
@@ -236,12 +260,12 @@ public class WishListControllerITTests
 
 
         // Removing 1 from wishlist
-        WishListRequest requestDto4= WishListRequest.builder().bookId(2L).build();
+        WishListRequest requestDto4= WishListRequest.builder().bookId(saved2.getBookId()).build();
         HttpEntity<Object> httpEntity4=new HttpEntity<>(requestDto4,httpHeaders);
 
         ResponseEntity<ResponseStructure<WishListResponse>> response4=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity4, new ParameterizedTypeReference<ResponseStructure<WishListResponse>>() {});
         assertEquals(HttpStatus.OK,response4.getStatusCode());
-        assertEquals(2,response2.getBody().getData().getBookId());
+        assertEquals(saved2.getBookId(),response2.getBody().getData().getBookId());
         User user4=userH2Repository.findByEmail("ganesh@gmail.com").get();
         List<WishList> wishLists4=user4.getWishList();
         assertEquals(1,wishLists4.size());
@@ -275,26 +299,44 @@ public class WishListControllerITTests
     @Test
     void isInWishListTest()
     {
+        Book book1=Book.builder()
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(78)
+                .bookLogo("URL").build();
+
+        Book book2=Book.builder()
+                .bookName("Habits")
+                .bookPrice(249.49)
+                .bookAuthor("Zak crawly")
+                .bookDescription("Cricket")
+                .bookQuantity(169)
+                .bookLogo("URL").build();
+        Book saved1=bookH2Repository.save(book1);
+        Book saved2=bookH2Repository.save(book2);
+
         userAuthToken= getUserAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+userAuthToken);
-        WishListRequest requestDto= WishListRequest.builder().bookId(1L).build();
+        WishListRequest requestDto= WishListRequest.builder().bookId(saved1.getBookId()).build();
 
         HttpEntity<Object> httpEntity=new HttpEntity<>(requestDto,httpHeaders);
         ResponseEntity<ResponseStructure<WishListResponse>> response=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<WishListResponse>>() {});
         assertEquals(HttpStatus.CREATED,response.getStatusCode());
-        assertEquals(1,response.getBody().getData().getBookId());
+        assertEquals(saved1.getBookId(),response.getBody().getData().getBookId());
         User user1=userH2Repository.findByEmail("ganesh@gmail.com").get();
         List<WishList> wishLists1=user1.getWishList();
         assertEquals(1,wishLists1.size());
 
-        WishListRequest requestDto2= WishListRequest.builder().bookId(2L).build();
+        WishListRequest requestDto2= WishListRequest.builder().bookId(saved2.getBookId()).build();
 
         HttpEntity<Object> httpEntity2=new HttpEntity<>(requestDto2,httpHeaders);
 
         ResponseEntity<ResponseStructure<WishListResponse>> response2=restTemplate.exchange(baseUrl + "/addToWishList", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<WishListResponse>>() {});
         assertEquals(HttpStatus.CREATED,response2.getStatusCode());
-        assertEquals(2,response2.getBody().getData().getBookId());
+        assertEquals(saved2.getBookId(),response2.getBody().getData().getBookId());
         User user2=userH2Repository.findByEmail("ganesh@gmail.com").get();
         List<WishList> wishLists2=user2.getWishList();
         assertEquals(2,wishLists2.size());
