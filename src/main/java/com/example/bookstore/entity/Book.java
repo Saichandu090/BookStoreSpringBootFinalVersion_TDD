@@ -12,6 +12,7 @@ import lombok.*;
 public class Book
 {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long bookId;
     private String bookName;
     private String bookAuthor;

@@ -65,54 +65,16 @@ class CartControllerITTests
         baseUrl=baseUrl.concat(":").concat(port+"").concat("/cart");
         userH2Repository.deleteAll();
         cartH2Repository.deleteAll();
+        bookH2Repository.deleteAll();
     }
 
     @AfterEach
     void tearDown()
     {
         userH2Repository.deleteAll();
-        bookH2Repository.deleteAll();
         cartH2Repository.deleteAll();
+        bookH2Repository.deleteAll();
     }
-
-    @BeforeEach
-    void addBooksToRepository()
-    {
-        Book book1=Book.builder()
-                .bookId(1L)
-                .bookName("TEST")
-                .bookPrice(199.3)
-                .bookAuthor("Chandu")
-                .bookDescription("Atom")
-                .bookQuantity(3)
-                .status(true)
-                .bookLogo("URL").build();
-
-        Book book2=Book.builder()
-                .bookId(2L)
-                .bookName("Habits")
-                .bookPrice(249.49)
-                .status(true)
-                .bookAuthor("Zak crawly")
-                .bookDescription("Cricket")
-                .bookQuantity(169)
-                .bookLogo("URL").build();
-
-        Book book3=Book.builder()
-                .bookId(3L)
-                .bookName("Gotye")
-                .bookPrice(789.49)
-                .status(true)
-                .bookAuthor("Ryan")
-                .bookDescription("Deadpool")
-                .bookQuantity(2)
-                .bookLogo("URL").build();
-
-        bookH2Repository.save(book1);
-        bookH2Repository.save(book2);
-        bookH2Repository.save(book3);
-    }
-
 
     protected String getAuthToken()
     {
@@ -146,47 +108,55 @@ class CartControllerITTests
     @Test
     void addToCartValidTestMultipleTimesUntilBookOutOfStock()
     {
+        Book book12=Book.builder()
+                .bookName("Gotye")
+                .bookPrice(789.49)
+                .status(true)
+                .bookAuthor("Ryan")
+                .bookDescription("Deadpool")
+                .bookQuantity(2)
+                .bookLogo("URL").build();
+
+        Book saved3=bookH2Repository.save(book12);
+
         String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        CartRequest cartRequest = CartRequest.builder().bookId(3L).build();
+        CartRequest cartRequest = CartRequest.builder().bookId(saved3.getBookId()).build();
         HttpEntity<Object> httpEntity=new HttpEntity<>(cartRequest,httpHeaders);
         ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
-        assertEquals(3,response.getBody().getData().getBookId(),"checking if the same book is added to cart or not");
+        assertEquals(saved3.getBookId(),response.getBody().getData().getBookId(),"checking if the same book is added to cart or not");
         assertEquals(1,response.getBody().getData().getCartQuantity(),"checking the cart quantity");
-
-        Book book=bookH2Repository.findById(3L).get();
-        assertEquals(1,book.getBookQuantity(),"checking the book quantity as it should get reduced if user added to cart");
 
         User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
         assertEquals(1,user.getCarts().size());
 
 
-        CartRequest cartRequest2 = CartRequest.builder().bookId(3L).build();
+        CartRequest cartRequest2 = CartRequest.builder().bookId(saved3.getBookId()).build();
         HttpEntity<Object> httpEntity2=new HttpEntity<>(cartRequest2,httpHeaders);
 
         ResponseEntity<ResponseStructure<CartResponse>> response2=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
 
         assertEquals(HttpStatus.OK,response2.getStatusCode());
-        Book book2=bookH2Repository.findById(3L).get();
+        Book book2=bookH2Repository.findById(saved3.getBookId()).get();
         assertEquals(0,book2.getBookQuantity());
 
         User user2=userH2Repository.findByEmail("dinesh@gmail.com").get();
         assertEquals(1,user2.getCarts().size());
 
 
-        CartRequest cartRequest3 = CartRequest.builder().bookId(3L).build();
+        CartRequest cartRequest3 = CartRequest.builder().bookId(saved3.getBookId()).build();
         HttpEntity<Object> httpEntity3=new HttpEntity<>(cartRequest3,httpHeaders);
 
 
         HttpClientErrorException exception=assertThrows(HttpClientErrorException.class,()->restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity3, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {}));
         assertEquals(HttpStatus.CONFLICT,exception.getStatusCode(),"user wont be able to add the book to cart if its out of quantity");
 
-        Book book3=bookH2Repository.findById(3L).get();
+        Book book3=bookH2Repository.findById(saved3.getBookId()).get();
         assertEquals(0,book3.getBookQuantity(),"If user cant add the book to cart ,it should be 0");
     }
 
@@ -194,11 +164,6 @@ class CartControllerITTests
     @Test
     void testAddToCartConcurrencyWhenTwoUsersTryToBuyTheLastBook() throws InterruptedException
     {
-        Long bookId = 123L;
-        CartRequest cartRequest1 = CartRequest.builder()
-                .bookId(bookId)
-                .build();
-
         User user1 = new User();
         user1.setEmail("user1@gmail.com");
         user1.setCarts(new ArrayList<>());
@@ -210,9 +175,12 @@ class CartControllerITTests
         userH2Repository.save(user2);
 
         Book book = new Book();
-        book.setBookId(bookId);
         book.setBookQuantity(1);
-        bookH2Repository.save(book);
+        Book saved=bookH2Repository.save(book);
+
+        CartRequest cartRequest1 = CartRequest.builder()
+                .bookId(saved.getBookId())
+                .build();
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
         CountDownLatch latch = new CountDownLatch(2);
@@ -266,10 +234,20 @@ class CartControllerITTests
     @Test
     void addToCartExampleForCallingMultipleTimes()
     {
+        Book book10=Book.builder()
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(5)
+                .status(true)
+                .bookLogo("URL").build();
+        Book saved=bookH2Repository.save(book10);
+
         String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
-        CartRequest cartRequest = CartRequest.builder().bookId(1L).build();
+        CartRequest cartRequest = CartRequest.builder().bookId(saved.getBookId()).build();
         HttpEntity<Object> httpEntity=new HttpEntity<>(cartRequest,httpHeaders);
 
         ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
@@ -281,29 +259,40 @@ class CartControllerITTests
     @Test
     void removeFromCartValidTest()
     {
+        Book book10=Book.builder()
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(5)
+                .status(true)
+                .bookLogo("URL").build();
+
+        Book saved1=bookH2Repository.save(book10);
+
         String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
 
         //Adding to cart 1st time
-        CartRequest cartRequest = CartRequest.builder().bookId(1L).build();
+        CartRequest cartRequest = CartRequest.builder().bookId(saved1.getBookId()).build();
         HttpEntity<Object> httpEntity=new HttpEntity<>(cartRequest,httpHeaders);
         ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
-        assertEquals(1,response.getBody().getData().getBookId(),"checking if the same book is added to cart or not");
+        assertEquals(saved1.getBookId(),response.getBody().getData().getBookId(),"checking if the same book is added to cart or not");
         assertEquals(1,response.getBody().getData().getCartQuantity(),"checking the cart quantity");
         Long cartId=response.getBody().getData().getCartId();
 
 
         //Adding to cart 2nd time
-        CartRequest cartRequest2 = CartRequest.builder().bookId(1L).build();
+        CartRequest cartRequest2 = CartRequest.builder().bookId(saved1.getBookId()).build();
         HttpEntity<Object> httpEntity2=new HttpEntity<>(cartRequest2,httpHeaders);
         ResponseEntity<ResponseStructure<CartResponse>> response2=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response2.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response2.getBody().getStatus());
-        assertEquals(1,response2.getBody().getData().getBookId(),"checking if the same book is added to cart or not");
+        assertEquals(saved1.getBookId(),response2.getBody().getData().getBookId(),"checking if the same book is added to cart or not");
         assertEquals(2,response2.getBody().getData().getCartQuantity(),"checking the cart quantity");
         Long cartId2=response2.getBody().getData().getCartId();
 
@@ -313,10 +302,10 @@ class CartControllerITTests
         ResponseEntity<ResponseStructure<CartResponse>> response3=restTemplate.exchange(baseUrl + "/removeFromCart/"+cartId, HttpMethod.DELETE, httpEntity3, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response3.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response3.getBody().getStatus());
-        assertEquals("Book TEST has removed from the cart",response3.getBody().getMessage());
+        assertEquals("Book "+saved1.getBookName()+" has removed from the cart",response3.getBody().getMessage());
 
-        Book book=bookH2Repository.findById(1L).get();
-        assertEquals(2,book.getBookQuantity());
+        Book book=bookH2Repository.findById(saved1.getBookId()).get();
+        assertEquals(4,book.getBookQuantity());
 
         User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
         assertEquals(1,user.getCarts().getFirst().getCartQuantity());
@@ -325,10 +314,10 @@ class CartControllerITTests
         ResponseEntity<ResponseStructure<CartResponse>> response4=restTemplate.exchange(baseUrl + "/removeFromCart/"+cartId2, HttpMethod.DELETE, httpEntity3, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response4.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response4.getBody().getStatus());
-        assertEquals("Book TEST has removed from the cart",response4.getBody().getMessage());
+        assertEquals("Book "+saved1.getBookName()+" has removed from the cart",response4.getBody().getMessage());
 
-        Book book2=bookH2Repository.findById(1L).get();
-        assertEquals(3,book2.getBookQuantity());
+        Book book2=bookH2Repository.findById(saved1.getBookId()).get();
+        assertEquals(5,book2.getBookQuantity());
 
         User user2=userH2Repository.findByEmail("dinesh@gmail.com").get();
         assertEquals(0,user2.getCarts().size());
@@ -342,11 +331,22 @@ class CartControllerITTests
     @Test
     void removeFromCartIfCartNotFound()
     {
+        Book book10=Book.builder()
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(5)
+                .status(true)
+                .bookLogo("URL").build();
+
+        Book saved=bookH2Repository.save(book10);
+
         String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        CartRequest cartRequest = CartRequest.builder().bookId(1L).build();
+        CartRequest cartRequest = CartRequest.builder().bookId(saved.getBookId()).build();
         HttpEntity<Object> httpEntity=new HttpEntity<>(cartRequest,httpHeaders);
         ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
@@ -364,23 +364,45 @@ class CartControllerITTests
     @Test
     void getCartValidTest()
     {
+        Book book10=Book.builder()
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(5)
+                .status(true)
+                .bookLogo("URL").build();
+
+        Book book11=Book.builder()
+                .bookName("Habits")
+                .bookPrice(249.49)
+                .status(true)
+                .bookAuthor("Zak crawly")
+                .bookDescription("Cricket")
+                .bookQuantity(169)
+                .bookLogo("URL").build();
+
+        Book saved1=bookH2Repository.save(book10);
+        Book saved2=bookH2Repository.save(book11);
+
+
         String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
 
-        CartRequest cartRequest1 = CartRequest.builder().bookId(1L).build();
+        CartRequest cartRequest1 = CartRequest.builder().bookId(saved1.getBookId()).build();
         HttpEntity<Object> httpEntity=new HttpEntity<>(cartRequest1,httpHeaders);
         ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response.getBody().getStatus());
 
-        CartRequest cartRequest2 = CartRequest.builder().bookId(1L).build();
+        CartRequest cartRequest2 = CartRequest.builder().bookId(saved1.getBookId()).build();
         HttpEntity<Object> httpEntity2=new HttpEntity<>(cartRequest2,httpHeaders);
         ResponseEntity<ResponseStructure<CartResponse>> response2=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response2.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response2.getBody().getStatus());
 
-        CartRequest cartRequest3 = CartRequest.builder().bookId(1L).build();
+        CartRequest cartRequest3 = CartRequest.builder().bookId(saved1.getBookId()).build();
         HttpEntity<Object> httpEntity3=new HttpEntity<>(cartRequest3,httpHeaders);
         ResponseEntity<ResponseStructure<CartResponse>> response3=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity3, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response3.getStatusCode());
@@ -388,7 +410,7 @@ class CartControllerITTests
 
 
 
-        CartRequest cartRequest = CartRequest.builder().bookId(2L).build();
+        CartRequest cartRequest = CartRequest.builder().bookId(saved2.getBookId()).build();
         HttpEntity<Object> postHttpEntity=new HttpEntity<>(cartRequest,httpHeaders);
         ResponseEntity<ResponseStructure<CartResponse>> response1=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, postHttpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response1.getStatusCode());
@@ -398,7 +420,7 @@ class CartControllerITTests
         ResponseEntity<ResponseStructure<List<CartResponse>>> response4=restTemplate.exchange(baseUrl + "/getCart", HttpMethod.GET, httpEntity4, new ParameterizedTypeReference<ResponseStructure<List<CartResponse>>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(3,response4.getBody().getData().getFirst().getCartQuantity());
-        assertEquals(1,response4.getBody().getData().getFirst().getBookId());
+        assertEquals(saved1.getBookId(),response4.getBody().getData().getFirst().getBookId());
 
         User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
         assertEquals(2,user.getCarts().size());
@@ -436,35 +458,56 @@ class CartControllerITTests
     @Test
     void clearCartValidTest()
     {
+        Book book10=Book.builder()
+                .bookName("TEST")
+                .bookPrice(199.3)
+                .bookAuthor("Chandu")
+                .bookDescription("Atom")
+                .bookQuantity(3)
+                .status(true)
+                .bookLogo("URL").build();
+
+        Book book11=Book.builder()
+                .bookName("Habits")
+                .bookPrice(249.49)
+                .status(true)
+                .bookAuthor("Zak crawly")
+                .bookDescription("Cricket")
+                .bookQuantity(169)
+                .bookLogo("URL").build();
+
+        Book saved1=bookH2Repository.save(book10);
+        Book saved2=bookH2Repository.save(book11);
+
         String authToken=getAuthToken();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.set("Authorization","Bearer "+authToken);
         HttpEntity<Object> httpEntity=new HttpEntity<>(httpHeaders);
 
-        CartRequest cartRequest1 = CartRequest.builder().bookId(1L).build();
+        CartRequest cartRequest1 = CartRequest.builder().bookId(saved1.getBookId()).build();
         HttpEntity<Object> httpEntity1=new HttpEntity<>(cartRequest1,httpHeaders);
         ResponseEntity<ResponseStructure<CartResponse>> response1=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity1, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response1.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response1.getBody().getStatus());
 
 
-        CartRequest cartRequest2 = CartRequest.builder().bookId(1L).build();
+        CartRequest cartRequest2 = CartRequest.builder().bookId(saved1.getBookId()).build();
         HttpEntity<Object> httpEntity2=new HttpEntity<>(cartRequest2,httpHeaders);
         ResponseEntity<ResponseStructure<CartResponse>> response2=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, httpEntity2, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response2.getStatusCode());
         assertEquals(HttpStatus.OK.value(),response2.getBody().getStatus());
 
 
-        CartRequest cartRequest = CartRequest.builder().bookId(2L).build();
+        CartRequest cartRequest = CartRequest.builder().bookId(saved2.getBookId()).build();
         HttpEntity<Object> postHttpEntity=new HttpEntity<>(cartRequest,httpHeaders);
 
         ResponseEntity<ResponseStructure<CartResponse>> response=restTemplate.exchange(baseUrl + "/addToCart", HttpMethod.POST, postHttpEntity, new ParameterizedTypeReference<ResponseStructure<CartResponse>>() {});
         assertEquals(HttpStatus.OK,response.getStatusCode());
 
-        Book book=bookH2Repository.findById(1L).get();
+        Book book=bookH2Repository.findById(saved1.getBookId()).get();
         assertEquals(1,book.getBookQuantity());
 
-        Book second=bookH2Repository.findById(2L).get();
+        Book second=bookH2Repository.findById(saved2.getBookId()).get();
         assertEquals(168,second.getBookQuantity());
 
         User user=userH2Repository.findByEmail("dinesh@gmail.com").get();
@@ -476,10 +519,10 @@ class CartControllerITTests
         assertEquals(HttpStatus.OK.value(),response4.getBody().getStatus());
         assertEquals("Cart cleared successfully",response4.getBody().getMessage());
 
-        Book book2=bookH2Repository.findById(1L).get();
+        Book book2=bookH2Repository.findById(saved1.getBookId()).get();
         assertEquals(3,book2.getBookQuantity());
 
-        Book secondBook=bookH2Repository.findById(2L).get();
+        Book secondBook=bookH2Repository.findById(saved2.getBookId()).get();
         assertEquals(169,secondBook.getBookQuantity());
 
         User user2=userH2Repository.findByEmail("dinesh@gmail.com").get();

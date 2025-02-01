@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookRequest
 {
-    @NotNull(message = "BookId should not be empty")
-    private Long bookId;
-
     @NotNull(message = "BookName should not be empty")
     private String bookName;
 

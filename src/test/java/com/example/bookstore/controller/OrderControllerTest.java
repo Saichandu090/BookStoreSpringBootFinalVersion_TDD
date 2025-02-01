@@ -74,7 +74,6 @@ class OrderControllerTest
     private User user;
     private UserDetails userDetails;
     private User admin;
-    private UserDetails adminDetails;
     private OrderRequest orderRequest;
     private OrderResponse orderResponse;
     private String token;
@@ -103,23 +102,6 @@ class OrderControllerTest
                 .lastName("Chandu")
                 .role("ADMIN")
                 .registeredDate(LocalDate.now()).build();
-
-        adminDetails=new UserDetails() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return Collections.singleton(new SimpleGrantedAuthority(admin.getRole()));
-            }
-
-            @Override
-            public String getPassword() {
-                return admin.getPassword();
-            }
-
-            @Override
-            public String getUsername() {
-                return admin.getEmail();
-            }
-        };
 
         userDetails=new UserDetails() {
             @Override

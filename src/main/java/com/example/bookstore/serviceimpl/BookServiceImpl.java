@@ -30,7 +30,7 @@ public class BookServiceImpl implements BookService
     @Override
     public ResponseEntity<ResponseStructure<BookResponse>> addBook(BookRequest bookRequest)
     {
-        checkBook(bookRequest.getBookName(),bookRequest.getBookId());
+        checkBook(bookRequest.getBookName());
         Book book=bookMapper.addBook(bookRequest);
         Book savedBook=bookRepository.save(book);
         return bookMapper.mapToSuccessAddBook(savedBook);
@@ -139,14 +139,11 @@ public class BookServiceImpl implements BookService
         return book.get();
     }
 
-    private void checkBook(String bookName,Long bookId)
+    private void checkBook(String bookName)
     {
         boolean isBookExist=bookRepository.existsByBookName(bookName);
         if(Boolean.TRUE.equals(isBookExist))
             throw new BookAlreadyExistsException("Book with name "+bookName+" already exists.");
-        Optional<Book> book=bookRepository.findById(bookId);
-        if(book.isPresent())
-            throw new BookAlreadyExistsException("Book with id "+bookId+" already exists.");
     }
 
     private Book getBookByIdFromOptional(Long bookId)
