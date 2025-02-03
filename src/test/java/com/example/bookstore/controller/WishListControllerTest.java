@@ -26,6 +26,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -42,6 +43,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = WishListController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -70,7 +72,9 @@ class WishListControllerTest
     private WishListMapper wishListMapper;
 
     private User user;
+    private User admin;
     private UserDetails userDetails;
+    private UserDetails adminDetails;
     private WishListRequest wishListRequest;
     private WishListResponse wishListResponse;
 
@@ -84,6 +88,16 @@ class WishListControllerTest
                 .firstName("Test")
                 .lastName("Testing")
                 .role("USER")
+                .registeredDate(LocalDate.now()).build();
+
+        admin=User.builder()
+                .email("sai@gmail.com")
+                .userId(1L)
+                .password("saichandu090")
+                .dob(LocalDate.of(2002,8,24))
+                .firstName("Sai")
+                .lastName("Chandu")
+                .role("ADMIN")
                 .registeredDate(LocalDate.now()).build();
 
         userDetails = new UserDetails()
@@ -106,6 +120,25 @@ class WishListControllerTest
             }
         };
 
+        adminDetails=new UserDetails() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities()
+            {
+                return Collections.singleton(new SimpleGrantedAuthority(admin.getRole()));
+            }
+
+            @Override
+            public String getPassword()
+            {
+                return admin.getPassword();
+            }
+
+            @Override
+            public String getUsername() {
+                return admin.getEmail();
+            }
+        };
+
         wishListRequest = WishListRequest.builder().bookId(1L).build();
         wishListResponse = WishListResponse.builder().wishListId(1L).bookId(wishListRequest.getBookId()).build();
     }
@@ -113,7 +146,7 @@ class WishListControllerTest
 
 
     @Test
-    public void addToWishListMustReturnCreatedStatusCode() throws Exception
+    void addToWishListMustReturnCreatedStatusCode() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<WishListResponse> responseStructure=new ResponseStructure<>(HttpStatus.CREATED.value(),"Book added to wishlist successfully", wishListResponse);
@@ -133,7 +166,22 @@ class WishListControllerTest
     }
 
     @Test
-    public void addToWishListTestForMissingHeader() throws Exception
+    void addToWishListTestMustReturnUnauthorizedStatusCode() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+
+        mockMvc.perform(post("/wishlist/addToWishList")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token)
+                        .content(objectMapper.writeValueAsString(wishListRequest)))
+                .andExpect(status().isUnauthorized())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    void addToWishListTestForMissingHeader() throws Exception
     {
         when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(userDetails);
 
@@ -147,7 +195,7 @@ class WishListControllerTest
     }
 
     @Test
-    public void addToWishListTestForInvalidBody() throws Exception
+    void addToWishListTestForInvalidBody() throws Exception
     {
         WishListRequest wishListRequest1 = WishListRequest.builder().build();
         String token="Bearer-token";
@@ -164,7 +212,7 @@ class WishListControllerTest
     }
 
     @Test
-    public void addToWishListIfBookAlreadyPresent() throws Exception
+    void addToWishListIfBookAlreadyPresent() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<WishListResponse> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"Book removed from wishlist successfully",null);
@@ -184,7 +232,7 @@ class WishListControllerTest
 
 
     @Test
-    public void getWishListValidTest() throws Exception
+    void getWishListValidTest() throws Exception
     {
         String token="Bearer-token";
         ResponseStructure<List<WishListResponse>> responseStructure=new ResponseStructure<>(HttpStatus.OK.value(),"User wishlist fetched successfully",List.of(wishListResponse));
@@ -201,9 +249,23 @@ class WishListControllerTest
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data[0]").value(wishListResponse));
     }
 
+    @Test
+    void getWishListTestMustReturnUnauthorizedStatusCode() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+
+        mockMvc.perform(get("/wishlist/getWishList")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andExpect(status().isUnauthorized())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
 
     @Test
-    public void getWishListIfTokenIsInvalidOrMissing() throws Exception
+    void getWishListIfTokenIsInvalidOrMissing() throws Exception
     {
         mockMvc.perform(get("/wishlist/getWishList")
                         .characterEncoding(StandardCharsets.UTF_8))

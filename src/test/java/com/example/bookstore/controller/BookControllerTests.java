@@ -264,6 +264,21 @@ class BookControllerTests
     }
 
     @Test
+    void getBookByNameTestMustReturnUnauthorizedStatusCode() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(null);
+
+        mockMvc.perform(get("/book/getBookByName/booking")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
     void getBookByNameMissingPathVariable() throws Exception
     {
         String token="Bearer token";
@@ -325,6 +340,21 @@ class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
+    @Test
+    void getBookByIdTestMustReturnUnauthorizedStatusCode() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(null);
+
+        mockMvc.perform(get("/book/getBookById/1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
 
 
     @Test
@@ -355,6 +385,20 @@ class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
+    @Test
+    void getBooksTestMustReturnUnauthorizedStatusCode() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(null);
+
+        mockMvc.perform(get("/book/getBooks")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                .andDo(MockMvcResultHandlers.print());
+    }
 
 
     @Test
@@ -517,6 +561,21 @@ class BookControllerTests
                 .andDo(MockMvcResultHandlers.print());
     }
 
+    @Test
+    void sortByFieldTestMustReturnUnauthorizedStatusCode() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(null);
+
+        mockMvc.perform(get("/book/sortBy/{field}","something")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
 
     @Test
     void paginationValidTest() throws Exception
@@ -536,6 +595,21 @@ class BookControllerTests
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.size()",CoreMatchers.is(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].bookName",CoreMatchers.is(bookResponse.getBookName())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].bookPrice",CoreMatchers.is(bookResponse.getBookPrice())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    void paginationTestMustReturnUnauthorizedStatusCode() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(null);
+
+        mockMvc.perform(get("/book/pagination")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -580,6 +654,21 @@ class BookControllerTests
                         .header("Authorization",token))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertInstanceOf(NoResourceFoundException.class,result.getResolvedException()))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    void searchQueryTestMustReturnUnauthorizedStatusCode() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(null);
+
+        mockMvc.perform(get("/book/search/{field}","something")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status",CoreMatchers.is(HttpStatus.UNAUTHORIZED.value())))
                 .andDo(MockMvcResultHandlers.print());
     }
 }

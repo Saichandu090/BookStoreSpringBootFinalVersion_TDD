@@ -11,9 +11,11 @@ import com.example.bookstore.service.OrderService;
 import com.example.bookstore.serviceimpl.JWTService;
 import com.example.bookstore.util.ResponseStructure;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,6 +28,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -74,6 +78,7 @@ class OrderControllerTest
     private User user;
     private UserDetails userDetails;
     private User admin;
+    private UserDetails adminDetails;
     private OrderRequest orderRequest;
     private OrderResponse orderResponse;
     private String token;
@@ -122,6 +127,25 @@ class OrderControllerTest
             }
         };
 
+        adminDetails=new UserDetails() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities()
+            {
+                return Collections.singleton(new SimpleGrantedAuthority(admin.getRole()));
+            }
+
+            @Override
+            public String getPassword()
+            {
+                return admin.getPassword();
+            }
+
+            @Override
+            public String getUsername() {
+                return admin.getEmail();
+            }
+        };
+
         orderRequest = OrderRequest.builder().addressId(1L).build();
         orderResponse = OrderResponse.builder()
                 .cancelOrder(false)
@@ -154,6 +178,21 @@ class OrderControllerTest
                 .andExpect(jsonPath("$.data.orderAddress.addressId").value(1))
                 .andExpect(jsonPath("$.data.orderQuantity").value(3))
                 .andExpect(jsonPath("$.data.orderId").value(1));
+    }
+
+    @Test
+    void placeOrderTestMustReturnUnauthorizedStatusCode() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+
+        mockMvc.perform(post("/order/placeOrder")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
+                .andExpect(status().isUnauthorized())
+                .andDo(MockMvcResultHandlers.print());
     }
 
     @Test
@@ -231,6 +270,20 @@ class OrderControllerTest
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
     }
 
+    @Test
+    void cancelOrderTestMustReturnUnauthorizedStatusCode() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+
+        mockMvc.perform(delete("/order/cancelOrder/{orderId}",1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andExpect(status().isUnauthorized())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
 
     @Test
     void getOrderValidTest() throws Exception
@@ -278,6 +331,20 @@ class OrderControllerTest
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
     }
 
+    @Test
+    void getOrderTestMustReturnUnauthorizedStatusCode() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+
+        mockMvc.perform(get("/order/getOrder?orderId={orderId}",1)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andExpect(status().isUnauthorized())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
 
     @Test
     void getAllOrdersValidTest() throws Exception
@@ -311,5 +378,19 @@ class OrderControllerTest
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(MissingRequestHeaderException.class,result.getResolvedException()));
+    }
+
+    @Test
+    void getAllOrderTestMustReturnUnauthorizedStatusCode() throws Exception
+    {
+        String token="Bearer-token";
+        when(userMapper.validateUserToken(Mockito.anyString())).thenReturn(adminDetails);
+
+        mockMvc.perform(get("/order/getAllOrders")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization",token))
+                .andExpect(status().isUnauthorized())
+                .andDo(MockMvcResultHandlers.print());
     }
 }
