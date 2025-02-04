@@ -104,4 +104,12 @@ public class UserMapper
                 .setStatus(HttpStatus.OK.value())
                 .setMessage(updatedUser.getEmail()+" password updated successfully"));
     }
+
+    public ResponseEntity<ResponseStructure<LoginResponse>> mapToBadCredentials()
+    {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseStructure<LoginResponse>()
+                .setMessage("Bad Credentials")
+                .setData(null)
+                .setStatus(HttpStatus.UNAUTHORIZED.value()));
+    }
 }

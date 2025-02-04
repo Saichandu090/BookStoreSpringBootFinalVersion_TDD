@@ -1,6 +1,7 @@
 package com.example.bookstore.service;
 
 import com.example.bookstore.entity.User;
+import com.example.bookstore.exception.BadCredentialsException;
 import com.example.bookstore.requestdto.UserLoginEntity;
 import com.example.bookstore.responsedto.LoginResponse;
 import com.example.bookstore.serviceimpl.JWTService;
@@ -18,7 +19,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -145,7 +145,7 @@ class UserServiceToGenerateTokenTest
     @Test
     void generateTokenWhenInvalidCredentialsShouldThrowException()
     {
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new BadCredentialsException("Bad Credentials"));
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new com.example.bookstore.exception.BadCredentialsException("Bad Credentials"));
         assertThrows(BadCredentialsException.class, () -> userService.generateToken(loginDTO));
     }
 

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -27,11 +28,12 @@ public class UserServiceToGenerateToken
 
     public ResponseEntity<ResponseStructure<LoginResponse>> generateToken(UserLoginEntity loginDTO)
     {
-        Authentication authentication= authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getEmail(),loginDTO.getPassword()));
-        if(authentication.isAuthenticated())
-            return sendToken(loginDTO);
-        else
-            throw new BadCredentialsException("Bad Credentials");
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
+            return authentication.isAuthenticated() ? sendToken(loginDTO) : userMapper.mapToBadCredentials();
+        } catch (AuthenticationException exception) {
+            throw new BadCredentialsException("Invalid password");
+        }
     }
 
     public ResponseEntity<ResponseStructure<LoginResponse>> sendToken(UserLoginEntity loginDTO)
